@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Purity"
         mc:Ignorable="d"
-        Title="Purity" Height="450" Width="800">
+        Title="Purity" Height="450" Width="800"
+        Closing="WindowClosing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100"/>
@@ -25,18 +26,6 @@
                   ScrollViewer.CanContentScroll="False">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <!--<Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding ItemName}"/>
-                        <CheckBox  Grid.Column="1" Visibility="{Binding IsCheckBoxVisible, Converter={StaticResource VisibilityConverter}}"   >
-                            <CheckBox.DataContext>
-                                <local:ItemViewModel/>
-                            </CheckBox.DataContext>
-                        </CheckBox>
-                    </Grid>-->
                     <Border BorderThickness="2" BorderBrush="Red">
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
                             <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -65,23 +54,6 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <!--<ScrollViewer Grid.Row="2" d:DesignHeight="300" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch"/>
-        </ScrollViewer>-->
-
-        <StackPanel Grid.Row="2" Grid.Column="1" Width="600" Orientation="Vertical" HorizontalAlignment="Center">
-            <!--<Border BorderThickness="1" BorderBrush="Red">
-                <StackPanel Margin="5" Width="600" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Margin="25,5,10,0" Height="20" Text="Begin" VerticalAlignment="Center"/>
-                    <DatePicker Height="23" SelectedDate="{Binding SelectedBeginDate}"/>
-                    <TextBlock Margin="25,5,10,0" Height="20" Text="End" VerticalAlignment="Center"/>
-                    <DatePicker Height="23" Text="Begin" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
-                    <Button Margin="25,0,10,0" Height="20" Content="Delete" Command="{Binding DeletePeriodCommand}"/>
-                </StackPanel>
-            </Border>-->
-            <!--<Button Margin="5,0,5,5" Height="30" Content="Add period" Command="{Binding AddPeriodCommand}" IsDefault="True"/>-->
-        </StackPanel>
         <Button Grid.Row="3" Grid.Column="1" Content="Add period" Margin="0,5,0,0" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
-
     </Grid>
 </Window>

@@ -23,7 +23,6 @@ namespace Purity
 		{}
 
 
-
 		public IMvxCommand RemovePeriodCommand { get; private set; }
 		internal void DeletePeriod()
 		{

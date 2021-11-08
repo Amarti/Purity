@@ -75,7 +75,7 @@ namespace Purity
 			return 0;
 		}
 
-		private const string DATA_FILE_NAME = "preData.json";
+		private const string DATA_FILE_NAME = "pureData.json";
 		private const string BACKUP_EXTENSION = ".bck";
 		private const string VERSION_TOKEN = "\"Version\":";
 

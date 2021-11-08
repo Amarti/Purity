@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-
+using System.Text.Json.Serialization;
 
 namespace Purity
 {
@@ -17,12 +17,12 @@ namespace Purity
 	}
 
 
-	public struct PurityEvent
+	public class PurityEvent
 	{
-		public PurityEvent(DateTime tm, PurityEventType typ)
+		public PurityEvent(DateTime stamp, PurityEventType type)
 		{
-			Stamp = tm;
-			Type = typ;
+			Stamp = stamp;
+			Type = type;
 		}
 
 		/// <summary>
@@ -73,9 +73,11 @@ namespace Purity
 		}
 
 
-		public DateTime Stamp;
+		public DateTime Stamp { get; set; }
+		[JsonIgnore]
 		public string StampRepr => Stamp.ToString("dd/MM/yyyy");
-		public PurityEventType Type;
+		public PurityEventType Type { get; set; }
+		[JsonIgnore]
 		public string TypeRepr => Spacify(Type.ToString());
 	}
 
@@ -86,10 +88,10 @@ namespace Purity
 		{
 			SubEvents = new List<PurityEvent>();
 		}
-		public PurityPeriod(DateTime beg, DateTime end)
+		public PurityPeriod(DateTime begin, DateTime end)
 			: this()
 		{
-			Begin = new PurityEvent(beg, PurityEventType.CycleBegin);
+			Begin = new PurityEvent(begin, PurityEventType.CycleBegin);
 			End = new PurityEvent(end, PurityEventType.CycleEnd);
 		}
 
@@ -160,8 +162,8 @@ namespace Purity
 			}
 		}
 
-		public PurityEvent Begin;
-		public PurityEvent End;
-		public List<PurityEvent> SubEvents;
+		public PurityEvent Begin { get; set; }
+		public PurityEvent End { get; set; }
+		public List<PurityEvent> SubEvents { get; set; }
 	}
 }

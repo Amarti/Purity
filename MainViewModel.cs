@@ -16,8 +16,6 @@ namespace Purity
 		{
 			_hec = new HebrewCalendar();
 
-			LoadData();
-
 			// TDOO: tests -> hebrew day starts aligned with greg day from 00:00, so no relation to evening -> if i want to make next hebrew date, i need to add +1 day if time is 12:00
 
 			var culture = CultureInfo.CreateSpecificCulture("he-IL");
@@ -45,31 +43,22 @@ namespace Purity
 		{}
 
 
-		private void LoadData()
-		{
-			var rawData = DataSerializer.Deserialize();
-			BakeData(rawData);
-		}
 		/// <summary>
 		/// Performs consistency calculations on whole raw data set
 		/// </summary>
 		/// <param name="rawData">Raw data set</param>
-		private void BakeData(List<PurityPeriod> rawData)
+		public void BakeData(List<PurityPeriod> rawData)
 		{
-			_data = rawData.OrderBy(el => el.Begin.Stamp).ToList();
+			Data = rawData.OrderBy(el => el.Begin.Stamp).ToList();
 
 			PurityPeriod lastPeriod = null;
 
-			foreach (var period in rawData)
+			foreach (var period in Data)
 			{
 				UpdateRecentPeriodsStreak(lastPeriod, period);
 				if (period.End.Stamp != DateTime.MinValue)
-				{
 					period.ClosePeriod(lastPeriod, _hec, _recentPeriodsStreak);
-					//item.AddVesetHodesh(lastPeriod, _hebrewCalendar);
-					//item.AddVesetAflaga(_recentPeriodsStreak);
-					//item.AddTkufaBeinonit();
-				}
+				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
 				lastPeriod = period;
 			}
 		}
@@ -97,45 +86,38 @@ namespace Purity
 		public void AddPeriod(DateTime beg, DateTime end)
 		{
 			var period = new PurityPeriod(beg, end);
-			_data.Add(period);
+			Data.Add(period);
 			PurityPeriods.Add(new PurityPeriodViewModel(period, this));
 		}
-		public void RemovePeriod(PurityPeriod period/*DateTime beg*/)
+		public void RemovePeriod(PurityPeriod period)
 		{
-			if (_data.Count == 0)
+			if (Data.Count == 0)
 				return;
 
-			//var l = _data.Last();
-			//if (l.Begin.Stamp == beg)
-			if (period == _data.Last())
+			if (period == Data.Last())
 			{
-				_data.Remove(period);
+				Data.Remove(period);
 				PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin.Stamp));
 				if (_recentPeriodsStreak.Count != 0)
 					_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
 				if (_recentPeriodsStreak.Count == 0)
-					BakeData(_data);   // need to recalculate _recentPeriodsStreak
+					BakeData(Data);   // need to recalculate _recentPeriodsStreak
 			}
 		}
-		public void ClosePeriod(PurityPeriod period/*DateTime beg*/)
+		public void ClosePeriod(PurityPeriod period)
 		{
-			//var item = _data.FirstOrDefault(el => el.Begin.Stamp == beg);
 			if (period != null && period.End.Stamp != DateTime.MinValue)
 			{
-				var idx = _data.IndexOf(period);
-				var lastPeriod = idx > 0 ? _data[idx - 1] : null;
+				var idx = Data.IndexOf(period);
+				var lastPeriod = idx > 0 ? Data[idx - 1] : null;
 				period.ClosePeriod(lastPeriod, _hec, _recentPeriodsStreak);
-				//period.AddVesetHodesh(lastPeriod, _hebrewCalendar);
-				//period.AddVesetAflaga(_recentPeriodsStreak);
-				//period.AddTkufaBeinonit();
-				//// todo: calc mikveh const
 			}
 		}
 
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
 
-		private List<PurityPeriod> _data;
+		public List<PurityPeriod> Data;
 		private readonly HebrewCalendar _hec;
 		private readonly List<int> _recentPeriodsStreak = new List<int>();
 	}
