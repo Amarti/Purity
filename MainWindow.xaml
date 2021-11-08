@@ -7,11 +7,17 @@
         mc:Ignorable="d"
         Title="Purity" Height="450" Width="800"
         Closing="WindowClosing">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:Bool2NotConverter x:Key="Bool2NotConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="50"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="50"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -21,7 +27,7 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PurityPeriods}" Width="600" VerticalContentAlignment="Top" HorizontalContentAlignment="Stretch"
+        <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PurityPeriods}" Width="Auto" VerticalContentAlignment="Top" HorizontalContentAlignment="Stretch"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   ScrollViewer.CanContentScroll="False">
             <ListView.ItemTemplate>
@@ -30,11 +36,23 @@
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
                             <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
-                                <DatePicker Margin="10,0,0,0" Height="23" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
-                                <TextBlock Margin="10,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
-                                <DatePicker Margin="10,0,0,0" Height="23" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
-                                <Button Margin="10,0,0,0" Height="23" Content="Close" Command="{Binding ClosePeriodCommand}"/>
-                                <Button Margin="10,0,5,0" Height="23" Content="Remove" Command="{Binding RemovePeriodCommand}"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateAfterNoon, Converter={StaticResource Bool2NotConverter}}">
+                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
+                                </ToggleButton>
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateAfterNoon}">
+                                    <Rectangle Height="10" Width="10" Fill="White"/>
+                                </ToggleButton>
+                                <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateAfterNoon, Converter={StaticResource Bool2NotConverter}}">
+                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
+                                </ToggleButton>
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateAfterNoon}">
+                                    <Rectangle Height="10" Width="10" Fill="White"/>
+                                </ToggleButton>
+                                <Button Margin="15,0,0,0" Height="25" Content="Close" Command="{Binding ClosePeriodCommand}"/>
+                                <Button Margin="15,0,5,0" Height="25" Content="Remove" Command="{Binding RemovePeriodCommand}"/>
                             </StackPanel>
                             <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
                                 <ListView.ItemTemplate>

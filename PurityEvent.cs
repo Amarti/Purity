@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
+
 namespace Purity
 {
 	public enum PurityEventType
@@ -25,10 +26,11 @@ namespace Purity
 			Type = type;
 		}
 
+
 		/// <summary>
-		/// Returns string that contains spaces placed between capital letters / digits and uncapital letters.
+		/// Returns string that contains spaces placed between capital letters / digits and uncapital letters
 		/// </summary>
-		/// <param name="input">Input string to transform.</param>
+		/// <param name="input">Input string to transform</param>
 		public static string Spacify(string input)
 		{
 			var res = string.Empty;
@@ -75,7 +77,7 @@ namespace Purity
 
 		public DateTime Stamp { get; set; }
 		[JsonIgnore]
-		public string StampRepr => Stamp.ToString("dd/MM/yyyy");
+		public string StampRepr => Stamp.ToString("dd MMMM yyyy");
 		public PurityEventType Type { get; set; }
 		[JsonIgnore]
 		public string TypeRepr => Spacify(Type.ToString());
@@ -152,6 +154,7 @@ namespace Purity
 		}
 
 
+		[JsonIgnore]
 		public int Length
 		{
 			get

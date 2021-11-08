@@ -50,6 +50,27 @@ namespace Purity
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
+		public bool SelectedBeginDateAfterNoon
+		{
+			get
+			{
+				return _period.Begin.Stamp.Hour == 12;
+			}
+			set
+			{
+				if (value)
+				{
+					if (_period.Begin.Stamp.Hour == 0)
+						_period.Begin.Stamp = _period.Begin.Stamp.AddHours(12);
+				}
+				else
+				{
+					if (_period.Begin.Stamp.Hour == 12)
+						_period.Begin.Stamp = _period.Begin.Stamp.AddHours(-12);
+				}
+				RaisePropertyChanged(() => SelectedBeginDateAfterNoon);
+			}
+		}
 		public DateTime SelectedEndDate
 		{
 			get
@@ -60,6 +81,27 @@ namespace Purity
 			{
 				_period.End.Stamp = value;
 				RaisePropertyChanged(() => SelectedEndDate);
+			}
+		}
+		public bool SelectedEndDateAfterNoon
+		{
+			get
+			{
+				return _period.End.Stamp.Hour == 12;
+			}
+			set
+			{
+				if (value)
+				{
+					if (_period.End.Stamp.Hour == 0)
+						_period.End.Stamp = _period.End.Stamp.AddHours(12);
+				}
+				else
+				{
+					if (_period.End.Stamp.Hour == 12)
+						_period.End.Stamp = _period.End.Stamp.AddHours(-12);
+				}
+				RaisePropertyChanged(() => SelectedEndDateAfterNoon);
 			}
 		}
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }

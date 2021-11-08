@@ -80,7 +80,7 @@ namespace Purity
 		public IMvxCommand AddPeriodCommand { get; private set; }
 		internal void AddPeriod()
 		{
-			AddPeriod(DateTime.Now, DateTime.Now.AddDays(7));
+			AddPeriod(DateTime.Today, DateTime.Today.AddDays(7));
 		}
 
 		public void AddPeriod(DateTime beg, DateTime end)
