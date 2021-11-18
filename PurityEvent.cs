@@ -9,12 +9,12 @@ namespace Purity
 {
 	public enum PurityEventType
 	{
-		CycleBegin		= 1,
-		CycleEnd		= 2,
-		Mikveh			= 3,
-		VesetHodesh		= 4,
-		VesetAflaga		= 5,
-		TkufaBeinonit	= 6,
+		CycleBegin	= 1,
+		CycleEnd	= 2,
+		Mikveh		= 3,
+		VesetHodesh	= 4,
+		VesetAflaga	= 5,
+		OnaBeinonit	= 6,
 	}
 
 
@@ -107,7 +107,7 @@ namespace Purity
 		{
 			if (a.Begin.Stamp == DateTime.MinValue || b.Begin.Stamp == DateTime.MinValue)
 				return 0;
-			return (a.Begin.Stamp - b.Begin.Stamp).Days * 2;
+			return Math.Abs((a.Begin.Stamp - b.Begin.Stamp).Days) * 2;
 		}
 
 		public void ClosePeriod(PurityPeriod lastPeriod, HebrewCalendar hec, List<int> recentPeriodsStreak)
@@ -115,7 +115,7 @@ namespace Purity
 			AddMikveh();
 			AddVesetHodesh(lastPeriod, hec);
 			AddVesetAflaga(recentPeriodsStreak);
-			AddTkufaBeinonit();
+			AddOnaBeinonit();
 			SubEvents = SubEvents.OrderBy(el => el.Stamp).ToList();
 		}
 		public void AddMikveh()
@@ -142,10 +142,10 @@ namespace Purity
 				AddEvent(tm, PurityEventType.VesetAflaga);
 			}
 		}
-		public void AddTkufaBeinonit()
+		public void AddOnaBeinonit()
 		{
-			var tm = Begin.Stamp.AddDays(7 * 4);				// adding four full weeks
-			AddEvent(tm, PurityEventType.TkufaBeinonit);
+			var tm = Begin.Stamp.AddDays(7 * 4  + 1);			// adding four full weeks + 1 day
+			AddEvent(tm, PurityEventType.OnaBeinonit);
 		}
 		private void AddEvent(DateTime tm, PurityEventType typ)
 		{

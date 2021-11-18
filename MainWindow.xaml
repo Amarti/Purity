@@ -37,19 +37,19 @@
                             <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
                                 <DatePicker Margin="5,0,0,0" Height="25" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateAfterNoon, Converter={StaticResource Bool2NotConverter}}">
-                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
-                                </ToggleButton>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateAfterNoon}">
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateIsDarkHalfDay, Converter={StaticResource Bool2NotConverter}}">
                                     <Rectangle Height="10" Width="10" Fill="White"/>
+                                </ToggleButton>
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateIsDarkHalfDay}">
+                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
                                 </ToggleButton>
                                 <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
                                 <DatePicker Margin="5,0,0,0" Height="25" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateAfterNoon, Converter={StaticResource Bool2NotConverter}}">
-                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
-                                </ToggleButton>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateAfterNoon}">
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateIsDarkHalfDay, Converter={StaticResource Bool2NotConverter}}">
                                     <Rectangle Height="10" Width="10" Fill="White"/>
+                                </ToggleButton>
+                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateIsDarkHalfDay}">
+                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
                                 </ToggleButton>
                                 <Button Margin="15,0,0,0" Height="25" Content="Close" Command="{Binding ClosePeriodCommand}"/>
                                 <Button Margin="15,0,5,0" Height="25" Content="Remove" Command="{Binding RemovePeriodCommand}"/>

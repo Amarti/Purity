@@ -50,7 +50,7 @@ namespace Purity
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
-		public bool SelectedBeginDateAfterNoon
+		public bool SelectedBeginDateIsDarkHalfDay
 		{
 			get
 			{
@@ -68,7 +68,7 @@ namespace Purity
 					if (_period.Begin.Stamp.Hour == 12)
 						_period.Begin.Stamp = _period.Begin.Stamp.AddHours(-12);
 				}
-				RaisePropertyChanged(() => SelectedBeginDateAfterNoon);
+				RaisePropertyChanged(() => SelectedBeginDateIsDarkHalfDay);
 			}
 		}
 		public DateTime SelectedEndDate
@@ -83,7 +83,7 @@ namespace Purity
 				RaisePropertyChanged(() => SelectedEndDate);
 			}
 		}
-		public bool SelectedEndDateAfterNoon
+		public bool SelectedEndDateIsDarkHalfDay
 		{
 			get
 			{
@@ -101,7 +101,7 @@ namespace Purity
 					if (_period.End.Stamp.Hour == 12)
 						_period.End.Stamp = _period.End.Stamp.AddHours(-12);
 				}
-				RaisePropertyChanged(() => SelectedEndDateAfterNoon);
+				RaisePropertyChanged(() => SelectedEndDateIsDarkHalfDay);
 			}
 		}
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }

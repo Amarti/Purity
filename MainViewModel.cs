@@ -56,6 +56,7 @@ namespace Purity
 			foreach (var period in Data)
 			{
 				UpdateRecentPeriodsStreak(lastPeriod, period);
+				period.SubEvents.Clear();
 				if (period.End.Stamp != DateTime.MinValue)
 					period.ClosePeriod(lastPeriod, _hec, _recentPeriodsStreak);
 				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
@@ -72,8 +73,12 @@ namespace Purity
 				return;
 
 			if (!_recentPeriodsStreak.Any() || _recentPeriodsStreak.Last() < l)
+			{
 				_recentPeriodsStreak.Clear();
+				Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: cleared recent period streaks");
+			}
 			_recentPeriodsStreak.Add(l);
+			Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} days");
 		}
 
 
