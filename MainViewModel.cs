@@ -59,8 +59,12 @@ namespace Purity
 				period.SubEvents.Clear();
 				if (period.End.Stamp != DateTime.MinValue)
 					period.ClosePeriod(lastPeriod, _hec, _recentPeriodsStreak);
-				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
 				lastPeriod = period;
+			}
+			foreach (var period in Data)
+			{
+				//period.SubEvents = period.SubEvents.OrderBy(el => el.Stamp).ToList();
+				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
 			}
 		}
 		private void UpdateRecentPeriodsStreak(PurityPeriod a, PurityPeriod b)
@@ -78,7 +82,7 @@ namespace Purity
 				Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: cleared recent period streaks");
 			}
 			_recentPeriodsStreak.Add(l);
-			Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} days");
+			Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} half-calendar days");
 		}
 
 

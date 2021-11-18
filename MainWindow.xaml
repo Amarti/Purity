@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Purity"
         mc:Ignorable="d"
-        Title="Purity" Height="450" Width="800"
+        Title="Purity" d:Height="450" Width="700" Height="900"
         Closing="WindowClosing">
     <Window.Resources>
         <ResourceDictionary>
@@ -15,9 +15,9 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -36,7 +36,7 @@
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
                             <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
-                                <DatePicker Margin="5,0,0,0" Height="25" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
                                 <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateIsDarkHalfDay, Converter={StaticResource Bool2NotConverter}}">
                                     <Rectangle Height="10" Width="10" Fill="White"/>
                                 </ToggleButton>
@@ -44,7 +44,7 @@
                                     <Rectangle Height="10" Width="10" Fill="Gray"/>
                                 </ToggleButton>
                                 <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
-                                <DatePicker Margin="5,0,0,0" Height="25" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
                                 <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateIsDarkHalfDay, Converter={StaticResource Bool2NotConverter}}">
                                     <Rectangle Height="10" Width="10" Fill="White"/>
                                 </ToggleButton>
@@ -57,12 +57,10 @@
                             <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <!--<Border BorderThickness="1" BorderBrush="Black">-->
-                                            <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampRepr}" VerticalAlignment="Center"/>
-                                                <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        <!--</Border>-->
+                                        <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampRepr}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
