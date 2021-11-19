@@ -7,15 +7,12 @@ using System.Text.Json.Serialization;
 
 namespace Purity
 {
-	// TODO: remove cycle beg/end, move them to simple dates, since nobody uses them anyway
 	public enum PurityEventType
 	{
-		CycleBegin	= 1,
-		CycleEnd	= 2,
-		Mikveh		= 3,
-		VesetHodesh	= 4,
-		VesetAflaga	= 5,
-		OnaBeinonit	= 6,
+		Mikveh		= 1,
+		VesetHodesh	= 2,
+		VesetAflaga	= 3,
+		OnaBeinonit	= 4,
 	}
 
 
@@ -75,6 +72,7 @@ namespace Purity
 			return res;
 		}
 
+		public static bool IsAfterDark(DateTime d) => d.Hour == 12;
 
 		/// <summary>
 		/// Stamp contains date and two states for hours:
@@ -83,9 +81,7 @@ namespace Purity
 		/// </summary>
 		public DateTime Stamp { get; set; }
 		[JsonIgnore]
-		public bool IsAfterDark => Stamp.Hour == 12;
-		[JsonIgnore]
-		public string StampRepr //=> Stamp.ToString("dd MMMM yyyy");
+		public string StampRepr
 		{
 			get
 			{
@@ -95,7 +91,7 @@ namespace Purity
 						return $"{Stamp.Day - 1}-{Stamp:d MMMM yyyy}";
 					case PurityEventType.VesetHodesh:
 					case PurityEventType.VesetAflaga:
-						return $"{Stamp:dd MMMM yyyy} {(IsAfterDark ? "(Night)" : "(Day)")}";
+						return $"{Stamp:dd MMMM yyyy} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")}";
 					default:
 					case PurityEventType.Mikveh:
 						return Stamp.ToString("dd MMMM yyyy");
@@ -130,8 +126,8 @@ namespace Purity
 		public PurityPeriod(DateTime begin, DateTime end)
 			: this()
 		{
-			Begin = new PurityEvent(begin, PurityEventType.CycleBegin);
-			End = new PurityEvent(end, PurityEventType.CycleEnd);
+			BeginDate = begin;
+			EndDate = end;
 		}
 
 
@@ -142,77 +138,51 @@ namespace Purity
 		/// <param name="b">Second period</param>
 		public static int GetFullPeriodLength(PurityPeriod a, PurityPeriod b)
 		{
-			if (a.Begin.Stamp == DateTime.MinValue || b.Begin.Stamp == DateTime.MinValue)
+			if (a.BeginDate == DateTime.MinValue || b.BeginDate == DateTime.MinValue)
 				return 0;
-			var l = (b.Begin.Stamp - a.End.Stamp).Days * 2;
-			if (!a.Begin.IsAfterDark)
+			var l = (b.BeginDate - a.EndDate).Days * 2;
+			if (!PurityEvent.IsAfterDark(a.BeginDate))
 				l += 1;
 			return l;
 		}
-		///// <summary>
-		///// Calculates length between two periods beginnings in half-24-hours
-		///// </summary>
-		///// <param name="a">First period</param>
-		///// <param name="b">Second period</param>
-		//public static int GetFullPeriodLength(PurityPeriod a, PurityPeriod b)
-		//{
-		//	if (a.Begin.Stamp == DateTime.MinValue || b.Begin.Stamp == DateTime.MinValue)
-		//		return 0;
-		//	return Math.Abs((a.Begin.Stamp - b.Begin.Stamp).Days) * 2;
-		//}
+
 
 		public void ClosePeriod(PurityPeriod lastPeriod, HebrewCalendar hec, List<int> recentPeriodsStreak)
 		{
 			var mt = AddMikveh();
 			AddOnaBeinonit();
-			//AddVesetHodesh(lastPeriod, hec);
 			AddVesetHodesh(hec);
 			AddVesetAflaga(recentPeriodsStreak, mt);
 			SubEvents = SubEvents.OrderBy(el => el.Stamp).ToList();
 		}
 		public DateTime AddMikveh()
 		{
-			var ed = EffectiveEnd;// End.IsAfterDark ? End.Stamp.AddHours(12) : End.Stamp;		// if bdikah is made after dark, it is considered next hebrew date, since all bdikah is counted in the light of day
+			var ed = EffectiveEnd;
 			ed = ed.AddDays(7);		// adding one full week
 			ed = ed.AddHours(12);	// mikveh is always after dark
 			AddEvent(ed, PurityEventType.Mikveh);
 
 			return ed;
-			//var tm = End.Stamp.AddDays(7);		// adding one full week
-			//if (End.IsAfterDark)				// if bdikah is made after dark, it is considered next hebrew date, since all bdikah is counted in the light of day
-			//	tm = tm.AddDays(1);
-			//AddEvent(tm, PurityEventType.Mikveh);
 		}
 		public void AddOnaBeinonit()
 		{
-			var tm = Begin.Stamp.AddDays(7 * 4  + 1);			// adding four full weeks + 1 day
+			var tm = BeginDate.AddDays(7 * 4  + 1);				// adding four full weeks + 1 day
 			AddEvent(tm, PurityEventType.OnaBeinonit);
 		}
 		public void AddVesetHodesh(HebrewCalendar hec)
 		{
-			var b = Begin.Stamp;
+			var b = BeginDate;
 			//if (b.Hour != 0)    // hebrew date starts aligned with greg date from 00:00, so no relation to evening -> if i want to make next hebrew date, i need to add +1 day if time is 12:00
 			//	b = b.AddDays(1).AddHours(-12);
 			var tm = hec.AddMonths(b, 1);	// adding full hebrew month
 			AddEvent(tm, PurityEventType.VesetHodesh);
 		}
-		//public void AddVesetHodesh(PurityPeriod prevPeriod, HebrewCalendar hec)
-		//{
-		//	if (prevPeriod == null)
-		//		return;
-
-		//	var b = prevPeriod.Begin.Stamp;
-		//	//if (b.Hour != 0)    // hebrew date starts aligned with greg date from 00:00, so no relation to evening -> if i want to make next hebrew date, i need to add +1 day if time is 12:00
-		//	//	b = b.AddDays(1).AddHours(-12);
-		//	var tm = hec.AddMonths(b, 1);	// adding full hebrew month
-		//	prevPeriod.AddEvent(tm, PurityEventType.VesetHodesh);
-		//}
 		public void AddVesetAflaga(List<int> recentPeriodsStreak, DateTime mikvehTime)
 		{
 			foreach (var p in recentPeriodsStreak)
 			{
-				var tm = Begin.Stamp.AddHours(12 * p);			// adding p half-calendar days
-				if (tm > mikvehTime)
+				var tm = EndDate.AddHours(12 * p);			// adding p half-calendar days
+				//if (tm > mikvehTime)
 					AddEvent(tm, PurityEventType.VesetAflaga);
 			}
 		}
@@ -228,20 +198,22 @@ namespace Purity
 		{
 			get
 			{
-				if (Begin.Stamp == DateTime.MinValue || End.Stamp == DateTime.MinValue)
+				if (BeginDate == DateTime.MinValue || EndDate == DateTime.MinValue)
 					return 0;
-				return (End.Stamp - Begin.Stamp).Days * 2;
+				return (EndDate - BeginDate).Days * 2;
 			}
 		}
 
-		public PurityEvent Begin { get; set; }
-		public PurityEvent End { get; set; }
+		//public PurityEvent Begin { get; set; }
+		public DateTime BeginDate { get; set; }// => Begin.Stamp;
+		//public PurityEvent End { get; set; }
+		public DateTime EndDate { get; set; }// => End.Stamp;
 		/// <summary>
 		/// End date corrected to beginning of next hebrew calendar day.
 		/// <para/>If verification (bdikah) is made after dark, it is considered next hebrew date, since all bdikah is counted in the light of day
 		/// </summary>
 		[JsonIgnore]
-		public DateTime EffectiveEnd => End.IsAfterDark ? End.Stamp.AddHours(12) : End.Stamp;
+		public DateTime EffectiveEnd => PurityEvent.IsAfterDark(EndDate) ? EndDate.AddHours(12) : EndDate;
 		public List<PurityEvent> SubEvents { get; set; }
 	}
 }

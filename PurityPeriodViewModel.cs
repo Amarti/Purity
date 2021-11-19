@@ -42,11 +42,11 @@ namespace Purity
 		{
 			get
 			{
-				return _period.Begin.Stamp;
+				return _period.BeginDate;
 			}
 			set
 			{
-				_period.Begin.Stamp = value;
+				_period.BeginDate = value;
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
@@ -54,19 +54,19 @@ namespace Purity
 		{
 			get
 			{
-				return _period.Begin.IsAfterDark;
+				return PurityEvent.IsAfterDark(_period.BeginDate);
 			}
 			set
 			{
 				if (value)
 				{
-					if (!_period.Begin.IsAfterDark)
-						_period.Begin.Stamp = _period.Begin.Stamp.AddHours(12);
+					if (!PurityEvent.IsAfterDark(_period.BeginDate))
+						_period.BeginDate = _period.BeginDate.AddHours(12);
 				}
 				else
 				{
-					if (_period.Begin.IsAfterDark)
-						_period.Begin.Stamp = _period.Begin.Stamp.AddHours(-12);
+					if (PurityEvent.IsAfterDark(_period.BeginDate))
+						_period.BeginDate = _period.BeginDate.AddHours(-12);
 				}
 				RaisePropertyChanged(() => SelectedBeginDateIsDarkHalfDay);
 			}
@@ -75,11 +75,11 @@ namespace Purity
 		{
 			get
 			{
-				return _period.End.Stamp;
+				return _period.EndDate;
 			}
 			set
 			{
-				_period.End.Stamp = value;
+				_period.EndDate = value;
 				RaisePropertyChanged(() => SelectedEndDate);
 			}
 		}
@@ -87,19 +87,19 @@ namespace Purity
 		{
 			get
 			{
-				return _period.End.IsAfterDark;
+				return PurityEvent.IsAfterDark(_period.EndDate);
 			}
 			set
 			{
 				if (value)
 				{
-					if (!_period.End.IsAfterDark)
-						_period.End.Stamp = _period.End.Stamp.AddHours(12);
+					if (!PurityEvent.IsAfterDark(_period.EndDate))
+						_period.EndDate = _period.EndDate.AddHours(12);
 				}
 				else
 				{
-					if (_period.End.IsAfterDark)
-						_period.End.Stamp = _period.End.Stamp.AddHours(-12);
+					if (PurityEvent.IsAfterDark(_period.EndDate))
+						_period.EndDate = _period.EndDate.AddHours(-12);
 				}
 				RaisePropertyChanged(() => SelectedEndDateIsDarkHalfDay);
 			}
