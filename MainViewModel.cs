@@ -130,7 +130,7 @@ namespace Purity
 			{
 				Data.Remove(period);
 				PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
-				if (_recentPeriodsStreak.Count != 0)
+				if (_recentPeriodsStreak.Count != 0 && !period.SkipStreak)
 					_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
 				if (_recentPeriodsStreak.Count == 0)
 					BakeData(false);   // need to recalculate _recentPeriodsStreak
@@ -142,7 +142,7 @@ namespace Purity
 			{
 				if (Data[^1] == period)
 				{
-					if (_recentPeriodsStreak.Count > 0)
+					if (period.Closed && _recentPeriodsStreak.Count > 0)
 						_recentPeriodsStreak.Remove(_recentPeriodsStreak[^1]);
 					var lastPeriod = Data.Count > 1 ? Data[^2] : null;
 					UpdateRecentPeriodsStreak(lastPeriod, period);
