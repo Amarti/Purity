@@ -138,7 +138,7 @@ namespace Purity
 		/// <param name="b">Second period</param>
 		public static int GetFullPeriodLength(PurityPeriod a, PurityPeriod b)
 		{
-			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue)
+			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue || b.SkipStreak)	// skipping streak calculation only to upcoming period
 				return 0;
 			var l = (int)((b.Begin - a.EffectiveEnd).TotalHours / 12) - 1;
 			//if (!PurityEvent.IsAfterDark(a.Begin))
@@ -149,11 +149,12 @@ namespace Purity
 
 		public void Commit(HebrewCalendar hec, List<int> recentPeriodsStreak)
 		{
-			if (SubEvents.Count > 0 && recentPeriodsStreak.Count > 0)
-			{
-				recentPeriodsStreak.RemoveAt(recentPeriodsStreak.Count - 1);
-				SubEvents.Clear();
-			}
+			SubEvents.Clear();
+			//if (SubEvents.Count > 0 && recentPeriodsStreak.Count > 0)
+			//{
+			//	recentPeriodsStreak.RemoveAt(recentPeriodsStreak.Count - 1);
+			//	SubEvents.Clear();
+			//}
 
 			AddMikveh();
 			AddOnaBeinonit();
@@ -170,7 +171,9 @@ namespace Purity
 		}
 		private void AddOnaBeinonit()
 		{
-			var tm = Begin.AddDays(7 * 4  + 1);				// adding four full weeks + 1 day
+			// if period was after dark, this is counted as new hebrew date, so by adding 12 more hours swe increment gregorian day
+			var b = PurityEvent.IsAfterDark(Begin) ? Begin.AddHours(12) : Begin;
+			var tm = b.AddDays(7 * 4  + 1);					// adding four full weeks + 1 day
 			AddEvent(tm, PurityEventType.OnaBeinonit);
 		}
 		private void AddVesetHodesh(HebrewCalendar hec)
@@ -193,17 +196,6 @@ namespace Purity
 		}
 
 
-		[JsonIgnore]
-		public int Length
-		{
-			get
-			{
-				if (Begin == DateTime.MinValue || End == DateTime.MinValue)
-					return 0;
-				return (End - Begin).Days * 2;
-			}
-		}
-
 		public DateTime Begin { get; set; }
 		public DateTime End { get; set; }
 		/// <summary>
@@ -212,6 +204,14 @@ namespace Purity
 		/// </summary>
 		[JsonIgnore]
 		public DateTime EffectiveEnd => PurityEvent.IsAfterDark(End) ? End.AddHours(12) : End;
+		/// <summary>
+		/// Period is closed and needs calculation
+		/// </summary>
+		public bool Closed { get; set; }
+		/// <summary>
+		/// Skip adding period into periods streak in some rare cases (surgery, intrauterine device installation, etc)
+		/// </summary>
+		public bool SkipStreak { get; set; }
 		public List<PurityEvent> SubEvents { get; set; }
 	}
 }

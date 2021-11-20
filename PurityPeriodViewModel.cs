@@ -12,6 +12,8 @@ namespace Purity
 		{
 			_period = period;
 			_owner = owner;
+			var idx = _owner.Data.IndexOf(period);
+			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_owner.Data[idx - 1], period) : 0;
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
 			ClosePeriodCommand = new MvxCommand(ClosePeriod);
@@ -104,9 +106,23 @@ namespace Purity
 				RaisePropertyChanged(() => SelectedEndDateIsDarkHalfDay);
 			}
 		}
+		public bool SkipStreak
+		{
+			get
+			{
+				return _period.SkipStreak;
+			}
+			set
+			{
+				_period.SkipStreak = value;
+				RaisePropertyChanged(() => SkipStreak);
+			}
+		}
+		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
 
 		private readonly PurityPeriod _period;
 		private readonly MainViewModel _owner;
+		private int _periodFullLength;
 	}
 }
