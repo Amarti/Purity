@@ -49,7 +49,7 @@ namespace Purity
 		/// <param name="rawData">Raw data set</param>
 		public void BakeData(List<PurityPeriod> rawData)
 		{
-			Data = rawData.OrderBy(el => el.BeginDate).ToList();
+			Data = rawData.OrderBy(el => el.Begin).ToList();
 
 			PurityPeriod lastPeriod = null;
 
@@ -57,8 +57,8 @@ namespace Purity
 			{
 				UpdateRecentPeriodsStreak(lastPeriod, period);
 				period.SubEvents.Clear();
-				if (period.EndDate != DateTime.MinValue)
-					period.ClosePeriod(lastPeriod, _hec, _recentPeriodsStreak);
+				if (period.End != DateTime.MinValue)
+					period.Commit(_hec, _recentPeriodsStreak);
 				lastPeriod = period;
 			}
 			foreach (var period in Data)
@@ -103,7 +103,7 @@ namespace Purity
 			if (period == Data.Last())
 			{
 				Data.Remove(period);
-				PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.BeginDate));
+				PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
 				if (_recentPeriodsStreak.Count != 0)
 					_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
 				if (_recentPeriodsStreak.Count == 0)
@@ -112,11 +112,14 @@ namespace Purity
 		}
 		public void ClosePeriod(PurityPeriod period)
 		{
-			if (period != null && period.EndDate != DateTime.MinValue)
+			if (period != null && period.End != DateTime.MinValue)
 			{
-				var idx = Data.IndexOf(period);
-				var lastPeriod = idx > 0 ? Data[idx - 1] : null;
-				period.ClosePeriod(lastPeriod, _hec, _recentPeriodsStreak);
+				var lastPeriod = Data.Count > 1 ? Data[Data.Count - 2] : null;
+				UpdateRecentPeriodsStreak(lastPeriod, period);
+				period.Commit(_hec, _recentPeriodsStreak);
+				// refreshing UI
+				PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
+				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
 			}
 		}
 
