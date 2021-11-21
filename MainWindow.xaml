@@ -60,8 +60,8 @@
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampRepr}" VerticalAlignment="Center"/>
-                                            <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="200" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampRepr}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>

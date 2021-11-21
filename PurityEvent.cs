@@ -18,10 +18,11 @@ namespace Purity
 
 	public class PurityEvent
 	{
-		public PurityEvent(DateTime stamp, PurityEventType type)
+		public PurityEvent(DateTime stamp, PurityEventType type, string note = null)
 		{
 			Stamp = stamp;
 			Type = type;
+			Note = note;
 		}
 
 
@@ -88,10 +89,14 @@ namespace Purity
 				switch (Type)
 				{
 					case PurityEventType.OnaBeinonit:
-						return $"{Stamp.Day - 1}-{Stamp:d MMMM yyyy}";
+						return $"{Stamp.Day - 1}-{Stamp:d MMMM yyyy} ({Stamp.ToString("d MMMM", CultureHolder.Instance.HebrewCulture)})";
 					case PurityEventType.VesetHodesh:
+						{
+							var es = IsAfterDark(Stamp) ? Stamp.AddDays(1) : Stamp;
+							return $"{Stamp:d MMMM yyyy} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")} ({es.ToString("d MMMM", CultureHolder.Instance.HebrewCulture)})";
+						}
 					case PurityEventType.VesetAflaga:
-						return $"{Stamp:d MMMM yyyy} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")}";
+						return $"{Stamp:d MMMM yyyy} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")} {Note}";
 					default:
 					case PurityEventType.Mikveh:
 						return Stamp.ToString("d MMMM yyyy");
@@ -100,6 +105,10 @@ namespace Purity
 		}
 
 		public PurityEventType Type { get; set; }
+		/// <summary>
+		/// Information for optional presentation
+		/// </summary>
+		public string Note { get; set; }
 		[JsonIgnore]
 		public string TypeRepr => Spacify(Type.ToString());
 		//{
@@ -141,8 +150,6 @@ namespace Purity
 			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue || b.SkipStreak)	// skipping streak calculation only to upcoming period
 				return 0;
 			var l = (int)((b.Begin - a.EffectiveEnd).TotalHours / 12) - 1;
-			//if (!PurityEvent.IsAfterDark(a.Begin))
-			//	l += 1;
 			return l;
 		}
 
@@ -150,11 +157,6 @@ namespace Purity
 		public void Commit(HebrewCalendar hec, List<int> recentPeriodsStreak)
 		{
 			SubEvents.Clear();
-			//if (SubEvents.Count > 0 && recentPeriodsStreak.Count > 0)
-			//{
-			//	recentPeriodsStreak.RemoveAt(recentPeriodsStreak.Count - 1);
-			//	SubEvents.Clear();
-			//}
 
 			AddMikveh();
 			AddOnaBeinonit();
@@ -186,13 +188,13 @@ namespace Purity
 			foreach (var p in recentPeriodsStreak)
 			{
 				var tm = End.AddHours(12 * p);				// adding p half-calendar days
-				AddEvent(tm, PurityEventType.VesetAflaga);
+				AddEvent(tm, PurityEventType.VesetAflaga, $"[{p}]");
 			}
 		}
-		private void AddEvent(DateTime tm, PurityEventType typ)
+		private void AddEvent(DateTime tm, PurityEventType typ, string note = null)
 		{
 			if (!SubEvents.Any(el => el.Stamp == tm && el.Type == typ))
-				SubEvents.Add(new PurityEvent(tm, typ));
+				SubEvents.Add(new PurityEvent(tm, typ, note));
 		}
 
 
