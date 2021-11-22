@@ -17,7 +17,7 @@ namespace Purity
 		/// <inheritdoc />
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return value is bool boolean && boolean ? Visibility.Visible : Visibility.Hidden;
+			throw new NotImplementedException();
 		}
 	}
 }

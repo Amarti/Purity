@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -88,15 +88,14 @@ namespace Purity
 			var period = new PurityPeriod(beg, end);
 			Data.Add(period);
 			PurityPeriods.Add(new PurityPeriodViewModel(period, this));
+			RefreshItems();
 		}
 
 		public IMvxCommand RecalculateCommand { get; private set; }
 		private void Recalculate()
 		{
-			PurityPeriods.Clear();
 			BakeData();
-			foreach (var period in Data)
-				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
+			RefreshItems();
 		}
 		public IMvxCommand SaveCommand { get; private set; }
 		private void Save()
@@ -106,18 +105,17 @@ namespace Purity
 
 		public void RemovePeriod(PurityPeriod period)
 		{
-			if (Data.Count == 0)
+			if (Data.Count == 0 || period != Data.Last())
 				return;
 
-			if (period == Data.Last())
-			{
-				Data.Remove(period);
-				PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
-				if (_recentPeriodsStreak.Count != 0 && !period.SkipStreak)
-					_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
-				if (_recentPeriodsStreak.Count == 0)
-					BakeData(false);   // need to recalculate _recentPeriodsStreak
-			}
+			Data.Remove(period);
+			PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
+			if (_recentPeriodsStreak.Count != 0 && !period.SkipStreak)
+				_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
+			if (_recentPeriodsStreak.Count == 0)
+				BakeData(false);   // need to recalculate _recentPeriodsStreak
+
+			RefreshItems();
 		}
 		public void ClosePeriod(PurityPeriod period)
 		{
@@ -132,15 +130,16 @@ namespace Purity
 					period.Commit(CultureHolder.Instance.HebrewCalendar, _recentPeriodsStreak);
 					period.Closed = true;
 
-					// refreshing UI
-					var vm = PurityPeriods.First(el => el.SelectedBeginDate == period.Begin);
-					var id = PurityPeriods.IndexOf(vm);
-					PurityPeriods.Remove(vm);
-					PurityPeriods.Insert(id, new PurityPeriodViewModel(period, this));
+					RefreshItems();
 				}
 				else
 					Recalculate();
 			}
+		}
+		private void RefreshItems()
+		{
+			foreach (var vm in PurityPeriods)
+				vm.Refresh();
 		}
 
 

@@ -11,6 +11,7 @@
         <ResourceDictionary>
             <local:Bool2NotConverter x:Key="Bool2NotConverter" />
             <local:Bool2VisibilityConverter x:Key="Bool2VisibilityConverter" />
+            <local:BoolToBorderBrushConverter x:Key="BoolToBorderBrushConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -34,7 +35,7 @@
                  ScrollViewer.CanContentScroll="False">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderThickness="2" BorderBrush="Red">
+                    <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={StaticResource BoolToBorderBrushConverter}}">
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
                             <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
@@ -62,7 +63,8 @@
                                     <DataTemplate>
                                         <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="200" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampRepr}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>

@@ -18,10 +18,10 @@ namespace Purity
 
 	public class PurityEvent
 	{
-		public PurityEvent(DateTime stamp, PurityEventType type, string note = null)
+		public PurityEvent(PurityEventType type, DateTime stamp, string note = null)
 		{
-			Stamp = stamp;
 			Type = type;
+			Stamp = stamp;
 			Note = note;
 		}
 
@@ -75,54 +75,67 @@ namespace Purity
 
 		public static bool IsAfterDark(DateTime d) => d.Hour == 12;
 
+		public PurityEventType Type { get; set; }
 		/// <summary>
 		/// Stamp contains date and two states for hours:
 		/// <para/>00 stands for beginning of light half of calendar day (more aligned with beginning of gregorian calendar day)
 		/// <para/>12 stands for beginning of dark half of calendar day (more aligned with beginning of hebrew calendar day)
 		/// </summary>
 		public DateTime Stamp { get; set; }
+		/// <summary>
+		/// Information for optional presentation
+		/// </summary>
+		public string Note { get; set; }
+
 		[JsonIgnore]
-		public string StampRepr
+		public string TypeRepr
 		{
 			get
 			{
 				switch (Type)
 				{
-					case PurityEventType.OnaBeinonit:
-						return $"{Stamp.Day - 1}-{Stamp:d MMMM yyyy} ({Stamp.ToString("d MMMM", CultureHolder.Instance.HebrewCulture)})";
-					case PurityEventType.VesetHodesh:
-						{
-							var es = IsAfterDark(Stamp) ? Stamp.AddDays(1) : Stamp;
-							return $"{Stamp:d MMMM yyyy} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")} ({es.ToString("d MMMM", CultureHolder.Instance.HebrewCulture)})";
-						}
-					case PurityEventType.VesetAflaga:
-						return $"{Stamp:d MMMM yyyy} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")} {Note}";
-					default:
 					case PurityEventType.Mikveh:
-						return Stamp.ToString("d MMMM yyyy");
+						return "Mikveh";
+					case PurityEventType.VesetHodesh:
+						return "Veset Hachodesh";
+					case PurityEventType.VesetAflaga:
+						return "Veset Aflaga";
+					case PurityEventType.OnaBeinonit:
+						return "Ona Benonis";
+					default:
+						return string.Empty;
 				}
 			}
 		}
-
-		public PurityEventType Type { get; set; }
-		/// <summary>
-		/// Information for optional presentation
-		/// </summary>
-		public string Note { get; set; }
 		[JsonIgnore]
-		public string TypeRepr => Spacify(Type.ToString());
-		//{
-		//	get
-		//	{
-		//		switch (Type)
-		//		{
-		//			case PurityEventType.Mikveh:
-		//				return Type.ToString();
-		//			case PurityEventType.OnaBeinonit:
+		public string StampHebRepr
+		{
+			get
+			{
+				var es = IsAfterDark(Stamp) ? Stamp.AddDays(1) : Stamp;
+				return es.ToString("d MMMM", CultureHolder.Instance.HebrewCulture);
+			}
+		}
+		[JsonIgnore]
+		public string StampGrgRepr
+		{
+			get
+			{
+				var gd = Stamp.ToString("d MMMM yyyy");
 
-		//		}
-		//	}
-		//}
+				switch (Type)
+				{
+					case PurityEventType.OnaBeinonit:
+						return $"{Stamp.Day - 1}-{gd}";
+					case PurityEventType.VesetHodesh:
+					case PurityEventType.VesetAflaga:
+						return $"{gd} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")} {Note}";
+					default:
+					case PurityEventType.Mikveh:
+						return gd;
+				}
+			}
+		}
 	}
 
 
@@ -194,7 +207,7 @@ namespace Purity
 		private void AddEvent(DateTime tm, PurityEventType typ, string note = null)
 		{
 			if (!SubEvents.Any(el => el.Stamp == tm && el.Type == typ))
-				SubEvents.Add(new PurityEvent(tm, typ, note));
+				SubEvents.Add(new PurityEvent(typ, tm, note));
 		}
 
 

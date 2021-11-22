@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
@@ -12,8 +12,7 @@ namespace Purity
 		{
 			_period = period;
 			_owner = owner;
-			var idx = _owner.Data.IndexOf(period);
-			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_owner.Data[idx - 1], period) : 0;
+			UpdateFullPeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
 			ClosePeriodCommand = new MvxCommand(ClosePeriod);
@@ -25,6 +24,21 @@ namespace Purity
 		{}
 
 
+		private void UpdateFullPeriodLength()
+		{
+			var idx = _owner.Data.IndexOf(_period);
+			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_owner.Data[idx - 1], _period) : 0;
+			RaisePropertyChanged(() => SkipPeriodLength);
+		}
+
+		public void Refresh()
+		{
+			RaiseAllPropertiesChanged();
+			SubEvents.Clear();
+			foreach (var p in _period.SubEvents)
+				SubEvents.Add(p);
+		}
+
 		public IMvxCommand RemovePeriodCommand { get; private set; }
 		internal void DeletePeriod()
 		{
@@ -34,9 +48,7 @@ namespace Purity
 		internal void ClosePeriod()
 		{
 			_owner.ClosePeriod(_period);
-			SubEvents.Clear();
-			foreach (var p in _period.SubEvents)
-				SubEvents.Add(p);
+			Refresh();
 		}
 
 
@@ -49,6 +61,7 @@ namespace Purity
 			set
 			{
 				_period.Begin = value;
+				UpdateFullPeriodLength();
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
@@ -68,7 +81,10 @@ namespace Purity
 				else
 				{
 					if (PurityEvent.IsAfterDark(_period.Begin))
+					{
 						_period.Begin = _period.Begin.AddHours(-12);
+						UpdateFullPeriodLength();
+					}
 				}
 				RaisePropertyChanged(() => SelectedBeginDateIsDarkHalfDay);
 			}
@@ -119,6 +135,7 @@ namespace Purity
 			}
 		}
 		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
+		public bool IsClosed => _period.Closed;
 		public bool IsLast => _owner.Data.Count > 0 && _owner.Data[^1] == _period;
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
 
