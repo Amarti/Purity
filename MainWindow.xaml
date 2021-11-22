@@ -58,7 +58,7 @@
                                     <Rectangle Height="10" Width="10" Fill="Gray"/>
                                 </ToggleButton>
                                 <CheckBox Margin="10,8,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" Height="25" Width="70"/>
-                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding ClosePeriodCommand}">
+                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding AcceptPeriodCommand}">
                                     <Image Height="13" Width="13">
                                         <Image.Source>
                                             <DrawingImage>
@@ -113,8 +113,8 @@
                                                 <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="White" SnapsToDevicePixels="True"/>
                                             </Canvas>
                                             <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsFullDay, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
-                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="White" SnapsToDevicePixels="True"/>
-                                                <Path Data="M17,0 L0,17 L17,17" Height="17" Stretch="Fill" Stroke="LightGray" Width="17" Fill="DarkGray"/>
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="DarkGray" SnapsToDevicePixels="True"/>
+                                                <Path Data="M17,0 L0,17 L17,17" Height="17" Stretch="Fill" Stroke="LightGray" Width="17" Fill="White"/>
                                                 <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" SnapsToDevicePixels="True"/>
                                             </Canvas>
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>

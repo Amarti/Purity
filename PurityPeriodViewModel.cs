@@ -15,8 +15,8 @@ namespace Purity
 			UpdateFullPeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
-			ClosePeriodCommand = new MvxCommand(ClosePeriod);
-			RemovePeriodCommand = new MvxCommand(DeletePeriod);
+			AcceptPeriodCommand = new MvxCommand(AcceptPeriod);
+			RemovePeriodCommand = new MvxCommand(RemovePeriod);
 		}
 
 
@@ -39,16 +39,16 @@ namespace Purity
 				SubEvents.Add(p);
 		}
 
+		public IMvxCommand AcceptPeriodCommand { get; private set; }
+		internal void AcceptPeriod()
+		{
+			_owner.AcceptPeriod(_period);
+			Refresh();
+		}
 		public IMvxCommand RemovePeriodCommand { get; private set; }
-		internal void DeletePeriod()
+		internal void RemovePeriod()
 		{
 			_owner.RemovePeriod(_period);
-		}
-		public IMvxCommand ClosePeriodCommand { get; private set; }
-		internal void ClosePeriod()
-		{
-			_owner.ClosePeriod(_period);
-			Refresh();
 		}
 
 

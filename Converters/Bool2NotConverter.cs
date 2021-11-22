@@ -16,7 +16,7 @@ namespace Purity
 		/// <inheritdoc />
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			throw new NotImplementedException();
+			return value is bool boolean && boolean ? !boolean : true;
 		}
 	}
 }

@@ -103,21 +103,7 @@ namespace Purity
 			DataSerializer.Serialize(Data);
 		}
 
-		public void RemovePeriod(PurityPeriod period)
-		{
-			if (Data.Count == 0 || period != Data.Last())
-				return;
-
-			Data.Remove(period);
-			PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
-			if (_recentPeriodsStreak.Count != 0 && !period.SkipStreak)
-				_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
-			if (_recentPeriodsStreak.Count == 0)
-				BakeData(false);   // need to recalculate _recentPeriodsStreak
-
-			RefreshItems();
-		}
-		public void ClosePeriod(PurityPeriod period)
+		public void AcceptPeriod(PurityPeriod period)
 		{
 			if (period != null && period.End != DateTime.MinValue)
 			{
@@ -130,11 +116,33 @@ namespace Purity
 					period.Commit(CultureHolder.Instance.HebrewCalendar, _recentPeriodsStreak);
 					period.Closed = true;
 
-					RefreshItems();
+					if (Data[^1] == period)
+					{
+						// reinserting purity period item to autoscroll to the bottom in case this was last item and its subitems changed
+						var vm = PurityPeriods.Last();
+						PurityPeriods.Remove(vm);
+						PurityPeriods.Add(vm);
+					}
+					else
+						RefreshItems();
 				}
 				else
 					Recalculate();
 			}
+		}
+		public void RemovePeriod(PurityPeriod period)
+		{
+			if (Data.Count == 0 || period != Data.Last())
+				return;
+
+			Data.Remove(period);
+			PurityPeriods.Remove(PurityPeriods.First(el => el.SelectedBeginDate == period.Begin));
+			if (_recentPeriodsStreak.Count != 0 && !period.SkipStreak)
+				_recentPeriodsStreak.RemoveAt(_recentPeriodsStreak.Count - 1);
+			if (_recentPeriodsStreak.Count == 0)
+				BakeData(false);	// need to recalculate _recentPeriodsStreak
+
+			RefreshItems();
 		}
 		private void RefreshItems()
 		{
