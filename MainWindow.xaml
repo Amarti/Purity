@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:Purity"
         mc:Ignorable="d"
         Title="Purity" d:Height="400" Width="750" Height="900"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanMinimize"
         Closing="WindowClosing">
     <Window.Resources>
         <ResourceDictionary>
