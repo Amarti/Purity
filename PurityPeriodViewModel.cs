@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
@@ -119,6 +119,7 @@ namespace Purity
 			}
 		}
 		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
+		public bool IsLast => _owner.Data.Count > 0 && _owner.Data[^1] == _period;
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
 
 		private readonly PurityPeriod _period;

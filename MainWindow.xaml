@@ -10,6 +10,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <local:Bool2NotConverter x:Key="Bool2NotConverter" />
+            <local:Bool2VisibilityConverter x:Key="Bool2VisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -28,10 +29,10 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <ListView x:Name="Periods" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PurityPeriods}" Width="Auto" VerticalContentAlignment="Top" HorizontalContentAlignment="Stretch"
-                  ScrollViewer.VerticalScrollBarVisibility="Visible"
-                  ScrollViewer.CanContentScroll="False">
-            <ListView.ItemTemplate>
+        <ListBox x:Name="Periods" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PurityPeriods}" Width="Auto" VerticalContentAlignment="Top" HorizontalContentAlignment="Stretch"
+                 ScrollViewer.VerticalScrollBarVisibility="Visible"
+                 ScrollViewer.CanContentScroll="False">
+            <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border BorderThickness="2" BorderBrush="Red">
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
@@ -54,7 +55,7 @@
                                 </ToggleButton>
                                 <CheckBox Margin="10,8,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" Height="25" Width="70"/>
                                 <Button Margin="15,0,0,0" Height="25" Content="Close" Command="{Binding ClosePeriodCommand}"/>
-                                <Button Margin="15,0,5,0" Height="25" Content="Remove" Command="{Binding RemovePeriodCommand}"/>
+                                <Button Margin="15,0,5,0" Height="25" Content="Remove" Command="{Binding RemovePeriodCommand}" Visibility="{Binding IsLast, Converter={StaticResource Bool2VisibilityConverter}}"/>
                             </StackPanel>
                             <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
                                 <ListView.ItemTemplate>
@@ -69,8 +70,8 @@
                         </StackPanel>
                     </Border>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <Button Grid.Row="3" Grid.Column="1" Content="Add period" Margin="0,5,0,0" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
         <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Width="Auto" HorizontalAlignment="Center">

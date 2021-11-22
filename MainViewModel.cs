@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -13,7 +13,6 @@ namespace Purity
 	{
 		public MainViewModel()
 		{
-
 			AddPeriodCommand = new MvxCommand(AddPeriod);
 			RecalculateCommand = new MvxCommand(Recalculate);
 			SaveCommand = new MvxCommand(Save);
@@ -83,6 +82,9 @@ namespace Purity
 		}
 		public void AddPeriod(DateTime beg, DateTime end)
 		{
+			if (Data.Any(el => el.Begin == beg))
+				return;
+
 			var period = new PurityPeriod(beg, end);
 			Data.Add(period);
 			PurityPeriods.Add(new PurityPeriodViewModel(period, this));
