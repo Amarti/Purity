@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Purity"
         mc:Ignorable="d"
-        Title="Purity" d:Height="400" Width="800" Height="900"
+        Title="Purity" d:Height="400" Width="750" Height="900"
         Closing="WindowClosing">
     <Window.Resources>
         <ResourceDictionary>
             <local:Bool2NotConverter x:Key="Bool2NotConverter" />
-            <local:Bool2VisibilityConverter x:Key="Bool2VisibilityConverter" />
+            <local:Bool2VisibilityHiddenConverter x:Key="Bool2VisibilityHiddenConverter" />
+            <local:Bool2VisibilityCollapsedConverter x:Key="Bool2VisibilityCollapsedConverter" />
             <local:BoolToBorderBrushConverter x:Key="BoolToBorderBrushConverter" />
         </ResourceDictionary>
     </Window.Resources>
@@ -55,14 +56,65 @@
                                     <Rectangle Height="10" Width="10" Fill="Gray"/>
                                 </ToggleButton>
                                 <CheckBox Margin="10,8,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" Height="25" Width="70"/>
-                                <Button Margin="15,0,0,0" Height="25" Content="Close" Command="{Binding ClosePeriodCommand}"/>
-                                <Button Margin="15,0,5,0" Height="25" Content="Remove" Command="{Binding RemovePeriodCommand}" Visibility="{Binding IsLast, Converter={StaticResource Bool2VisibilityConverter}}"/>
+                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding ClosePeriodCommand}">
+                                    <Image Height="13" Width="13">
+                                        <Image.Source>
+                                            <DrawingImage>
+                                                <DrawingImage.Drawing>
+                                                    <GeometryDrawing>
+                                                        <GeometryDrawing.Geometry>
+                                                            <GeometryGroup>
+                                                                <LineGeometry StartPoint="0,5" EndPoint="5,9"/>
+                                                                <LineGeometry StartPoint="5,10" EndPoint="13,0"/>
+                                                            </GeometryGroup>
+                                                        </GeometryDrawing.Geometry>
+                                                        <GeometryDrawing.Pen>
+                                                            <Pen Thickness="2" Brush="Green" />
+                                                        </GeometryDrawing.Pen>
+                                                    </GeometryDrawing>
+                                                </DrawingImage.Drawing>
+                                            </DrawingImage>
+                                        </Image.Source>
+                                    </Image>
+                                </Button>
+                                <Button Margin="15,0,5,0" Height="25" Width="25" ToolTip="Remove period" Command="{Binding RemovePeriodCommand}" Visibility="{Binding IsLast, Converter={StaticResource Bool2VisibilityHiddenConverter}}">
+                                    <Image Height="13" Width="13">
+                                        <Image.Source>
+                                            <DrawingImage>
+                                                <DrawingImage.Drawing>
+                                                    <GeometryDrawing>
+                                                        <GeometryDrawing.Geometry>
+                                                            <GeometryGroup>
+                                                                <LineGeometry StartPoint="0,0" EndPoint="13,13"/>
+                                                                <LineGeometry StartPoint="13,0" EndPoint="0,13"/>
+                                                            </GeometryGroup>
+                                                        </GeometryDrawing.Geometry>
+                                                        <GeometryDrawing.Pen>
+                                                            <Pen Thickness="2" Brush="Red" />
+                                                        </GeometryDrawing.Pen>
+                                                    </GeometryDrawing>
+                                                </DrawingImage.Drawing>
+                                            </DrawingImage>
+                                        </Image.Source>
+                                    </Image>
+                                </Button>
                             </StackPanel>
                             <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="200" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsAfterDark, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="DarkGray" SnapsToDevicePixels="True"/>
+                                            </Canvas>
+                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsBeforeDark, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="White" SnapsToDevicePixels="True"/>
+                                            </Canvas>
+                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsFullDay, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="White" SnapsToDevicePixels="True"/>
+                                                <Path Data="M17,0 L0,17 L17,17" Height="17" Stretch="Fill" Stroke="LightGray" Width="17" Fill="DarkGray"/>
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" SnapsToDevicePixels="True"/>
+                                            </Canvas>
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
                                         </StackPanel>
@@ -78,7 +130,35 @@
         <Button Grid.Row="3" Grid.Column="1" Content="Add period" Margin="0,5,0,0" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
         <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Width="Auto" HorizontalAlignment="Center">
             <Button Content="Recalculate" Margin="0,5,15,0" Command="{Binding RecalculateCommand}" HorizontalAlignment="Stretch" Width="200" Height="30"/>
-            <Button Content="Save" Margin="15,5,0,0" Command="{Binding SaveCommand}" HorizontalAlignment="Stretch" Width="200" Height="30"/>
+            <Button Margin="15,5,0,0" Content="Save" Command="{Binding SaveCommand}" HorizontalAlignment="Stretch" Width="200" Height="30"/>
+            <!--<Button x:Uid="TestButton" Margin="15,5,0,0" Width="30" Height="30">
+                <Image Height="13" Width="13">
+                    <Image.Source>
+                        <DrawingImage>
+                            <DrawingImage.Drawing>
+                                <GeometryDrawing>
+                                    <GeometryDrawing.Geometry>
+                                        <GeometryGroup>
+                                            <LineGeometry StartPoint="0,0" EndPoint="13,13"/>
+                                            <LineGeometry StartPoint="13,0" EndPoint="0,13"/>
+                                        </GeometryGroup>
+                                    </GeometryDrawing.Geometry>
+                                    <GeometryDrawing.Pen>
+                                        <Pen Thickness="2" Brush="Red" />
+                                    </GeometryDrawing.Pen>
+                                </GeometryDrawing>
+                            </DrawingImage.Drawing>
+                        </DrawingImage>
+                    </Image.Source>
+                </Image>
+            </Button>-->
         </StackPanel>
+        <!--<Canvas Grid.Column="1" HorizontalAlignment="Left" Height="17" Margin="620,9,0,0" Grid.Row="4" VerticalAlignment="Top" Width="17">
+            <Path Data="M17,0 L0,17 L17,17" Height="18" Stretch="Fill" Stroke="Black" Width="18" Fill="Gray"/>
+            <Path Data="M13,3 L3,13" Height="13" Canvas.Left="2.5" Stretch="Fill" Stroke="Red" Canvas.Top="2.5" Width="13"/>
+            <Path Data="M2.5,2.5 L13,13" Height="13" Canvas.Left="2.5" Stretch="Fill" Stroke="Red" Canvas.Top="2.5" Width="13"/>
+            <Path Data="M3,9 L8.5,14.5" Fill="#FFF4F4F5" Height="6" Canvas.Left="3.867" Stretch="Fill" Stroke="Green" Canvas.Top="7" Width="6"/>
+            <Path Data="M9,15 L15.5,6.5" Fill="#FFF4F4F5" Height="9" Canvas.Left="8.5" Stretch="Fill" Stroke="Green" Canvas.Top="4" Width="8"/>
+        </Canvas>-->
     </Grid>
 </Window>

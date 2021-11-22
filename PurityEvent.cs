@@ -73,7 +73,7 @@ namespace Purity
 			return res;
 		}
 
-		public static bool IsAfterDark(DateTime d) => d.Hour == 12;
+		public static bool IsDateAfterDark(DateTime d) => d.Hour == 12;
 
 		public PurityEventType Type { get; set; }
 		/// <summary>
@@ -108,11 +108,17 @@ namespace Purity
 			}
 		}
 		[JsonIgnore]
+		public bool IsAfterDark => Type != PurityEventType.OnaBeinonit && IsDateAfterDark(Stamp);
+		[JsonIgnore]
+		public bool IsBeforeDark => Type != PurityEventType.OnaBeinonit && !IsDateAfterDark(Stamp);
+		[JsonIgnore]
+		public bool IsFullDay => Type == PurityEventType.OnaBeinonit;
+		[JsonIgnore]
 		public string StampHebRepr
 		{
 			get
 			{
-				var es = IsAfterDark(Stamp) ? Stamp.AddDays(1) : Stamp;
+				var es = IsDateAfterDark(Stamp) ? Stamp.AddDays(1) : Stamp;
 				return es.ToString("d MMMM", CultureHolder.Instance.HebrewCulture);
 			}
 		}
@@ -126,13 +132,12 @@ namespace Purity
 				switch (Type)
 				{
 					case PurityEventType.OnaBeinonit:
-						return $"{Stamp.Day - 1}-{gd}";
+						return $"{Stamp.Day - 1}-{gd} {Note}";
+					case PurityEventType.Mikveh:
 					case PurityEventType.VesetHodesh:
 					case PurityEventType.VesetAflaga:
-						return $"{gd} {(IsAfterDark(Stamp) ? "(Night)" : "(Day)")} {Note}";
 					default:
-					case PurityEventType.Mikveh:
-						return gd;
+						return $"{gd} {Note}";
 				}
 			}
 		}
@@ -187,7 +192,7 @@ namespace Purity
 		private void AddOnaBeinonit()
 		{
 			// if period was after dark, this is counted as new hebrew date, so by adding 12 more hours swe increment gregorian day
-			var b = PurityEvent.IsAfterDark(Begin) ? Begin.AddHours(12) : Begin;
+			var b = PurityEvent.IsDateAfterDark(Begin) ? Begin.AddHours(12) : Begin;
 			var tm = b.AddDays(7 * 4  + 1);					// adding four full weeks + 1 day
 			AddEvent(tm, PurityEventType.OnaBeinonit);
 		}
@@ -218,7 +223,7 @@ namespace Purity
 		/// <para/>If verification (bdikah) is made after dark, it is considered next hebrew date, since all bdikah is counted in the light of day
 		/// </summary>
 		[JsonIgnore]
-		public DateTime EffectiveEnd => PurityEvent.IsAfterDark(End) ? End.AddHours(12) : End;
+		public DateTime EffectiveEnd => PurityEvent.IsDateAfterDark(End) ? End.AddHours(12) : End;
 		/// <summary>
 		/// Period is closed and needs calculation
 		/// </summary>

@@ -6,7 +6,7 @@ using System.Windows.Data;
 
 namespace Purity
 {
-	public class Bool2VisibilityConverter : IValueConverter
+	public class Bool2VisibilityHiddenConverter : IValueConverter
 	{
 		/// <inheritdoc />
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

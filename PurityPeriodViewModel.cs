@@ -69,18 +69,18 @@ namespace Purity
 		{
 			get
 			{
-				return PurityEvent.IsAfterDark(_period.Begin);
+				return PurityEvent.IsDateAfterDark(_period.Begin);
 			}
 			set
 			{
 				if (value)
 				{
-					if (!PurityEvent.IsAfterDark(_period.Begin))
+					if (!PurityEvent.IsDateAfterDark(_period.Begin))
 						_period.Begin = _period.Begin.AddHours(12);
 				}
 				else
 				{
-					if (PurityEvent.IsAfterDark(_period.Begin))
+					if (PurityEvent.IsDateAfterDark(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(-12);
 						UpdateFullPeriodLength();
@@ -105,18 +105,18 @@ namespace Purity
 		{
 			get
 			{
-				return PurityEvent.IsAfterDark(_period.End);
+				return PurityEvent.IsDateAfterDark(_period.End);
 			}
 			set
 			{
 				if (value)
 				{
-					if (!PurityEvent.IsAfterDark(_period.End))
+					if (!PurityEvent.IsDateAfterDark(_period.End))
 						_period.End = _period.End.AddHours(12);
 				}
 				else
 				{
-					if (PurityEvent.IsAfterDark(_period.End))
+					if (PurityEvent.IsDateAfterDark(_period.End))
 						_period.End = _period.End.AddHours(-12);
 				}
 				RaisePropertyChanged(() => SelectedEndDateIsDarkHalfDay);
