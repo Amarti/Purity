@@ -55,6 +55,7 @@ namespace Purity
 		internal void AcceptPeriod()
 		{
 			_owner.AcceptPeriod(_period);
+			UpdateFullPeriodLength();
 			Refresh();
 		}
 		public IMvxCommand RemovePeriodCommand { get; private set; }
