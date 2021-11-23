@@ -1,6 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Purity.Resources">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <DrawingBrush x:Key="RefreshIconDrawingBrush" Drawing="{DynamicResource RefreshIconDrawingGroup}" Stretch="Uniform"/>
     <DrawingImage x:Key="RefreshIconDrawingImage" Drawing="{DynamicResource RefreshIconDrawingGroup}"/>
@@ -41,6 +40,35 @@
                 <Pen Thickness="2" Brush="Red" />
             </GeometryDrawing.Pen>
         </GeometryDrawing>
+    </DrawingGroup>
+
+    <DrawingBrush x:Key="AfterDuskIconDrawingBrush" Drawing="{DynamicResource AfterDuskIconDrawingGroup}" Stretch="Uniform"/>
+    <DrawingImage x:Key="AfterDuskIconDrawingImage" Drawing="{DynamicResource AfterDuskIconDrawingGroup}"/>
+    <DrawingGroup x:Key="AfterDuskIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Gray" Geometry="M0,0 L0,20 L20,20 L20,0"/>
+            <GeometryDrawing Brush="DarkGray" Geometry="M1,1 L1,19 L19,19 L19,1"/>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingBrush x:Key="AfterDawnIconDrawingBrush" Drawing="{DynamicResource AfterDawnIconDrawingGroup}" Stretch="Uniform"/>
+    <DrawingImage x:Key="AfterDawnIconDrawingImage" Drawing="{DynamicResource AfterDawnIconDrawingGroup}"/>
+    <DrawingGroup x:Key="AfterDawnIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Gray" Geometry="M0,0 L0,20 L20,20 L20,0"/>
+            <GeometryDrawing Brush="White" Geometry="M1,1 L1,19 L19,19 L19,1"/>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingBrush x:Key="FullDayIconDrawingBrush" Drawing="{DynamicResource FullDayIconDrawingGroup}" Stretch="Uniform"/>
+    <DrawingImage x:Key="FullDayIconDrawingImage" Drawing="{DynamicResource FullDayIconDrawingGroup}"/>
+    <DrawingGroup x:Key="FullDayIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Gray" Geometry="M0,0 L0,20 L20,20 L20,0"/>
+            <GeometryDrawing Brush="DarkGray" Geometry="M1,1 L1,19 L19,19 L19,1"/>
+            <GeometryDrawing Brush="White" Geometry="M19,1 L1,19 L19,19"/>
+            <GeometryDrawing Brush="LightGray" Geometry="M18,1 L19,2 L2,19 L1,18"/>
+        </DrawingGroup.Children>
     </DrawingGroup>
 
 </ResourceDictionary>

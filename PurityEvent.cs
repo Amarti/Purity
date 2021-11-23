@@ -73,7 +73,7 @@ namespace Purity
 			return res;
 		}
 
-		public static bool IsDateAfterDark(DateTime d) => d.Hour == 12;
+		public static bool IsDateAfterDusk(DateTime d) => d.Hour == 12;
 
 		public PurityEventType Type { get; set; }
 		/// <summary>
@@ -108,9 +108,9 @@ namespace Purity
 			}
 		}
 		[JsonIgnore]
-		public bool IsAfterDark => Type != PurityEventType.OnaBeinonit && IsDateAfterDark(Stamp);
+		public bool IsAfterDusk => Type != PurityEventType.OnaBeinonit && IsDateAfterDusk(Stamp);
 		[JsonIgnore]
-		public bool IsBeforeDark => Type != PurityEventType.OnaBeinonit && !IsDateAfterDark(Stamp);
+		public bool IsAfterDawn => Type != PurityEventType.OnaBeinonit && !IsDateAfterDusk(Stamp);
 		[JsonIgnore]
 		public bool IsFullDay => Type == PurityEventType.OnaBeinonit;
 		[JsonIgnore]
@@ -118,7 +118,7 @@ namespace Purity
 		{
 			get
 			{
-				var es = IsDateAfterDark(Stamp) ? Stamp.AddDays(1) : Stamp;
+				var es = IsDateAfterDusk(Stamp) ? Stamp.AddDays(1) : Stamp;
 				return es.ToString("d MMMM", CultureHolder.Instance.HebrewCulture);
 			}
 		}
@@ -179,13 +179,13 @@ namespace Purity
 		{
 			var ed = EffectiveEnd;
 			ed = ed.AddDays(7);								// adding one full week
-			ed = ed.AddHours(12);							// mikveh is always after dark
+			ed = ed.AddHours(12);							// mikveh is always after dusk
 			AddEvent(ed, PurityEventType.Mikveh);
 		}
 		private void AddOnaBeinonit()
 		{
-			// if period was after dark, this is counted as new hebrew date, so by adding 12 more hours swe increment gregorian day
-			var b = PurityEvent.IsDateAfterDark(Begin) ? Begin.AddHours(12) : Begin;
+			// if period was after dusk, this is counted as new hebrew date, so by adding 12 more hours swe increment gregorian day
+			var b = PurityEvent.IsDateAfterDusk(Begin) ? Begin.AddHours(12) : Begin;
 			var tm = b.AddDays(7 * 4  + 1);					// adding four full weeks + 1 day
 			AddEvent(tm, PurityEventType.OnaBeinonit);
 		}
@@ -213,10 +213,10 @@ namespace Purity
 		public DateTime End { get; set; }
 		/// <summary>
 		/// End date corrected to beginning of next hebrew calendar day.
-		/// <para/>If verification (bdikah) is made after dark, it is considered next hebrew date, since all bdikah is counted in the light of day
+		/// <para/>If verification (bdikah) is made after dusk, it is considered next hebrew date, since all bdikah is counted in the light of day
 		/// </summary>
 		[JsonIgnore]
-		public DateTime EffectiveEnd => PurityEvent.IsDateAfterDark(End) ? End.AddHours(12) : End;
+		public DateTime EffectiveEnd => PurityEvent.IsDateAfterDusk(End) ? End.AddHours(12) : End;
 		/// <summary>
 		/// Period is closed and needs calculation
 		/// </summary>

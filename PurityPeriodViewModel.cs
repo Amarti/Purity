@@ -44,12 +44,12 @@ namespace Purity
 		public IMvxCommand SelectedBeginDateHalfDayCommand { get; private set; }
 		internal void SelectedBeginDateHalfDay()
 		{
-			SelectedBeginDateIsDarkHalfDay = !SelectedBeginDateIsDarkHalfDay;
+			SelectedBeginDateIsAfterDusk = !SelectedBeginDateIsAfterDusk;
 		}
 		public IMvxCommand SelectedEndDateHalfDayCommand { get; private set; }
 		internal void SelectedEndDateHalfDay()
 		{
-			SelectedEndDateIsDarkHalfDay = !SelectedEndDateIsDarkHalfDay;
+			SelectedEndDateIsAfterDusk = !SelectedEndDateIsAfterDusk;
 		}
 		public IMvxCommand AcceptPeriodCommand { get; private set; }
 		internal void AcceptPeriod()
@@ -77,17 +77,17 @@ namespace Purity
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
-		public bool SelectedBeginDateIsDarkHalfDay
+		public bool SelectedBeginDateIsAfterDusk
 		{
 			get
 			{
-				return PurityEvent.IsDateAfterDark(_period.Begin);
+				return PurityEvent.IsDateAfterDusk(_period.Begin);
 			}
 			set
 			{
 				if (value)
 				{
-					if (!PurityEvent.IsDateAfterDark(_period.Begin))
+					if (!PurityEvent.IsDateAfterDusk(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(12);
 						UpdateFullPeriodLength();
@@ -95,13 +95,13 @@ namespace Purity
 				}
 				else
 				{
-					if (PurityEvent.IsDateAfterDark(_period.Begin))
+					if (PurityEvent.IsDateAfterDusk(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(-12);
 						UpdateFullPeriodLength();
 					}
 				}
-				RaisePropertyChanged(() => SelectedBeginDateIsDarkHalfDay);
+				RaisePropertyChanged(() => SelectedBeginDateIsAfterDusk);
 			}
 		}
 		public DateTime SelectedEndDate
@@ -116,25 +116,25 @@ namespace Purity
 				RaisePropertyChanged(() => SelectedEndDate);
 			}
 		}
-		public bool SelectedEndDateIsDarkHalfDay
+		public bool SelectedEndDateIsAfterDusk
 		{
 			get
 			{
-				return PurityEvent.IsDateAfterDark(_period.End);
+				return PurityEvent.IsDateAfterDusk(_period.End);
 			}
 			set
 			{
 				if (value)
 				{
-					if (!PurityEvent.IsDateAfterDark(_period.End))
+					if (!PurityEvent.IsDateAfterDusk(_period.End))
 						_period.End = _period.End.AddHours(12);
 				}
 				else
 				{
-					if (PurityEvent.IsDateAfterDark(_period.End))
+					if (PurityEvent.IsDateAfterDusk(_period.End))
 						_period.End = _period.End.AddHours(-12);
 				}
-				RaisePropertyChanged(() => SelectedEndDateIsDarkHalfDay);
+				RaisePropertyChanged(() => SelectedEndDateIsAfterDusk);
 			}
 		}
 		public bool SkipStreak
