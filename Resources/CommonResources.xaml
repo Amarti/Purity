@@ -1,0 +1,46 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Purity.Resources">
+
+    <DrawingBrush x:Key="RefreshIconDrawingBrush" Drawing="{DynamicResource RefreshIconDrawingGroup}" Stretch="Uniform"/>
+    <DrawingImage x:Key="RefreshIconDrawingImage" Drawing="{DynamicResource RefreshIconDrawingGroup}"/>
+    <DrawingGroup x:Key="RefreshIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Navy" Geometry="F1 M 299.446,228.023C 300.459,231.146 300.287,234.545 299.186,237.638L 301.535,238.818C 301.629,238.859 301.706,238.942 301.746,239.062C 301.821,239.286 301.73,239.539 301.542,239.63L 292.586,246.401L 290.326,234.766L 290.141,233.829L 290.149,233.83C 290.102,233.614 290.182,233.39 290.347,233.307C 290.458,233.255 290.571,233.278 290.665,233.349L 293.533,234.791C 293.987,232.873 293.978,230.938 293.402,229.162C 291.841,224.353 286.689,222.237 281.127,223.693L 280.918,223.049C 281.678,222.449 282.493,221.917 283.373,221.481C 290.001,218.177 297.197,221.105 299.446,228.023 Z "/>
+            <GeometryDrawing Brush="Navy" Geometry="F1 M 270.938,235.445C 269.925,232.321 270.098,228.923 271.198,225.831L 268.85,224.648C 268.757,224.608 268.678,224.527 268.638,224.405C 268.566,224.183 268.65,223.927 268.845,223.837L 277.798,217.068L 280.059,228.703L 280.245,229.64L 280.237,229.639C 280.282,229.852 280.201,230.076 280.034,230.159C 279.926,230.213 279.813,230.188 279.721,230.117L 276.853,228.676C 276.398,230.595 276.407,232.529 276.982,234.307C 278.545,239.115 283.695,241.229 289.257,239.773L 289.467,240.419C 288.706,241.019 287.89,241.549 287.011,241.987C 280.385,245.292 273.187,242.364 270.938,235.445 Z "/>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingBrush x:Key="AcceptIconDrawingBrush" Drawing="{DynamicResource AcceptIconDrawingGroup}" Stretch="Uniform"/>
+    <DrawingImage x:Key="AcceptIconDrawingImage" Drawing="{DynamicResource AcceptIconDrawingGroup}"/>
+    <DrawingGroup x:Key="AcceptIconDrawingGroup">
+        <GeometryDrawing>
+            <GeometryDrawing.Geometry>
+                <GeometryGroup>
+                    <LineGeometry StartPoint="0,5" EndPoint="5,9"/>
+                    <LineGeometry StartPoint="5,10" EndPoint="13,0"/>
+                </GeometryGroup>
+            </GeometryDrawing.Geometry>
+            <GeometryDrawing.Pen>
+                <Pen Thickness="2" Brush="Green" />
+            </GeometryDrawing.Pen>
+        </GeometryDrawing>
+    </DrawingGroup>
+
+    <DrawingBrush x:Key="RemoveIconDrawingBrush" Drawing="{DynamicResource RemoveIconDrawingGroup}" Stretch="Uniform"/>
+    <DrawingImage x:Key="RemoveIconDrawingImage" Drawing="{DynamicResource RemoveIconDrawingGroup}"/>
+    <DrawingGroup x:Key="RemoveIconDrawingGroup">
+        <GeometryDrawing>
+            <GeometryDrawing.Geometry>
+                <GeometryGroup>
+                    <LineGeometry StartPoint="0,0" EndPoint="13,13"/>
+                    <LineGeometry StartPoint="13,0" EndPoint="0,13"/>
+                </GeometryGroup>
+            </GeometryDrawing.Geometry>
+            <GeometryDrawing.Pen>
+                <Pen Thickness="2" Brush="Red" />
+            </GeometryDrawing.Pen>
+        </GeometryDrawing>
+    </DrawingGroup>
+
+</ResourceDictionary>

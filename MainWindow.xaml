@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Purity"
         mc:Ignorable="d"
-        Title="Purity" d:Height="400" Width="750" Height="900"
-        WindowStyle="SingleBorderWindow"
+        Title="Purity" d:Height="400" Width="710" Height="900"
         ResizeMode="CanMinimize"
+        WindowStyle="SingleBorderWindow"
+        WindowStartupLocation="CenterScreen"
         Closing="WindowClosing">
     <Window.Resources>
         <ResourceDictionary>
@@ -15,6 +16,7 @@
             <local:Bool2VisibilityHiddenConverter x:Key="Bool2VisibilityHiddenConverter" />
             <local:Bool2VisibilityCollapsedConverter x:Key="Bool2VisibilityCollapsedConverter" />
             <local:BoolToBorderBrushConverter x:Key="BoolToBorderBrushConverter" />
+            <local:Bool2DuskDawnBrushConverter x:Key="Bool2DuskDawnBrushConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -25,115 +27,21 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <ListBox x:Name="Periods" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PurityPeriods}" Width="Auto" VerticalContentAlignment="Top" HorizontalContentAlignment="Stretch"
-                 ScrollViewer.VerticalScrollBarVisibility="Visible"
-                 ScrollViewer.CanContentScroll="False">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={StaticResource BoolToBorderBrushConverter}}">
-                        <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
-                            <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
-                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateIsDarkHalfDay, Converter={StaticResource Bool2NotConverter}}">
-                                    <Rectangle Height="10" Width="10" Fill="White"/>
-                                </ToggleButton>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedBeginDateIsDarkHalfDay}">
-                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
-                                </ToggleButton>
-                                <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
-                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateIsDarkHalfDay, Converter={StaticResource Bool2NotConverter}}">
-                                    <Rectangle Height="10" Width="10" Fill="White"/>
-                                </ToggleButton>
-                                <ToggleButton Margin="5,0,0,0" Height="20" Width="20" VerticalAlignment="Center" IsChecked="{Binding SelectedEndDateIsDarkHalfDay}">
-                                    <Rectangle Height="10" Width="10" Fill="Gray"/>
-                                </ToggleButton>
-                                <CheckBox Margin="10,8,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" Height="25" Width="70"/>
-                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding AcceptPeriodCommand}">
-                                    <Image Height="13" Width="13">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <GeometryDrawing>
-                                                        <GeometryDrawing.Geometry>
-                                                            <GeometryGroup>
-                                                                <LineGeometry StartPoint="0,5" EndPoint="5,9"/>
-                                                                <LineGeometry StartPoint="5,10" EndPoint="13,0"/>
-                                                            </GeometryGroup>
-                                                        </GeometryDrawing.Geometry>
-                                                        <GeometryDrawing.Pen>
-                                                            <Pen Thickness="2" Brush="Green" />
-                                                        </GeometryDrawing.Pen>
-                                                    </GeometryDrawing>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                </Button>
-                                <Button Margin="15,0,5,0" Height="25" Width="25" ToolTip="Remove period" Command="{Binding RemovePeriodCommand}" Visibility="{Binding IsLast, Converter={StaticResource Bool2VisibilityHiddenConverter}}">
-                                    <Image Height="13" Width="13">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <GeometryDrawing>
-                                                        <GeometryDrawing.Geometry>
-                                                            <GeometryGroup>
-                                                                <LineGeometry StartPoint="0,0" EndPoint="13,13"/>
-                                                                <LineGeometry StartPoint="13,0" EndPoint="0,13"/>
-                                                            </GeometryGroup>
-                                                        </GeometryDrawing.Geometry>
-                                                        <GeometryDrawing.Pen>
-                                                            <Pen Thickness="2" Brush="Red" />
-                                                        </GeometryDrawing.Pen>
-                                                    </GeometryDrawing>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                </Button>
-                            </StackPanel>
-                            <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="200" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
-                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsAfterDark, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
-                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="DarkGray" SnapsToDevicePixels="True"/>
-                                            </Canvas>
-                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsBeforeDark, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
-                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="White" SnapsToDevicePixels="True"/>
-                                            </Canvas>
-                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsFullDay, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
-                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="DarkGray" SnapsToDevicePixels="True"/>
-                                                <Path Data="M17,0 L0,17 L17,17" Height="17" Stretch="Fill" Stroke="LightGray" Width="17" Fill="White"/>
-                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" SnapsToDevicePixels="True"/>
-                                            </Canvas>
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-
-        <Button Grid.Row="3" Grid.Column="1" Content="Add period" Margin="0,5,0,0" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
-        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Width="Auto" HorizontalAlignment="Center">
-            <Button Content="Recalculate" Margin="0,5,15,0" Command="{Binding RecalculateCommand}" HorizontalAlignment="Stretch" Width="200" Height="30"/>
-            <Button Margin="15,5,0,0" Content="Save" Command="{Binding SaveCommand}" HorizontalAlignment="Stretch" Width="200" Height="30"/>
-            <!--<Button x:Uid="TestButton" Margin="15,5,0,0" Width="30" Height="30">
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Width="Auto">
+            <Button Margin="0,0,15,5" Command="{Binding RecalculateCommand}" ToolTip="Refresh" Height="30" Width="30">
+                <Image Source="{StaticResource RefreshIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Button>
+            <Button Margin="15,0,0,5" Content="Save" Command="{Binding SaveCommand}" Height="30" Width="100" Visibility="{Binding IsSaveVisible, Converter={StaticResource Bool2VisibilityCollapsedConverter}}"/>
+            <Button Margin="15,0,0,5" Content="Config" Command="{Binding ConfigCommand}" Height="30" Width="100"/>
+            <!--<Button x:Uid="TestButton" Margin="15,5,0,0" Height="30" Width="30">
                 <Image Height="13" Width="13">
                     <Image.Source>
                         <DrawingImage>
@@ -155,6 +63,62 @@
                 </Image>
             </Button>-->
         </StackPanel>
+        <ListBox x:Name="Periods" Grid.Row="2" Grid.Column="1" ItemsSource="{Binding PurityPeriods}" Width="Auto" VerticalContentAlignment="Top" HorizontalContentAlignment="Stretch"
+                 ScrollViewer.VerticalScrollBarVisibility="Visible"
+                 ScrollViewer.CanContentScroll="False"
+                 SnapsToDevicePixels="True">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={StaticResource BoolToBorderBrushConverter}}">
+                        <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
+                            <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
+                                <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedBeginDateHalfDayCommand}">
+                                    <Rectangle Height="17" Width="17" Fill="{Binding SelectedBeginDateIsDarkHalfDay, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
+                                </Button>
+                                <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
+                                <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedEndDateHalfDayCommand}">
+                                    <Rectangle Height="17" Width="17" Fill="{Binding SelectedEndDateIsDarkHalfDay, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
+                                </Button>
+                                <CheckBox Margin="10,8,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" ToolTip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)" Height="25" Width="80"/>
+                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding AcceptPeriodCommand}">
+                                    <Image Source="{StaticResource AcceptIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"/>
+                                </Button>
+                                <Button Margin="15,0,5,0" Height="25" Width="25" ToolTip="Remove period" Command="{Binding RemovePeriodCommand}" Visibility="{Binding IsLast, Converter={StaticResource Bool2VisibilityHiddenConverter}}">
+                                    <Image Source="{StaticResource RemoveIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"/>
+                                </Button>
+                            </StackPanel>
+                            <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="177" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsAfterDark, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="DarkGray"/>
+                                            </Canvas>
+                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsBeforeDark, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="White"/>
+                                            </Canvas>
+                                            <Canvas Margin="5,0,5,0" Height="17" Width="17" Visibility="{Binding IsFullDay, Converter={StaticResource Bool2VisibilityCollapsedConverter}}" VerticalAlignment="Center">
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17" Fill="DarkGray"/>
+                                                <Path Data="M17,0 L0,17 L17,17" Height="17" Stretch="Fill" Stroke="LightGray" Width="17" Fill="White"/>
+                                                <Rectangle Height="17" Canvas.Left="0" Stroke="Gray" Canvas.Top="0" Width="17"/>
+                                            </Canvas>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Button Grid.Row="3" Grid.Column="1" Content="Add period" Margin="0,5,0,0" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
         <!--<Canvas Grid.Column="1" HorizontalAlignment="Left" Height="17" Margin="620,9,0,0" Grid.Row="4" VerticalAlignment="Top" Width="17">
             <Path Data="M17,0 L0,17 L17,17" Height="18" Stretch="Fill" Stroke="Black" Width="18" Fill="Gray"/>
             <Path Data="M13,3 L3,13" Height="13" Canvas.Left="2.5" Stretch="Fill" Stroke="Red" Canvas.Top="2.5" Width="13"/>

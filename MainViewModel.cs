@@ -105,30 +105,30 @@ namespace Purity
 
 		public void AcceptPeriod(PurityPeriod period)
 		{
-			if (period != null && period.End != DateTime.MinValue)
+			if (period == null || period.End == DateTime.MinValue)
+				return;
+
+			if (Data[^1] == period)
 			{
+				if (period.Closed && _recentPeriodsStreak.Count > 0)
+					_recentPeriodsStreak.Remove(_recentPeriodsStreak[^1]);
+				var lastPeriod = Data.Count > 1 ? Data[^2] : null;
+				UpdateRecentPeriodsStreak(lastPeriod, period);
+				period.Commit(CultureHolder.Instance.HebrewCalendar, _recentPeriodsStreak);
+				period.Closed = true;
+
 				if (Data[^1] == period)
 				{
-					if (period.Closed && _recentPeriodsStreak.Count > 0)
-						_recentPeriodsStreak.Remove(_recentPeriodsStreak[^1]);
-					var lastPeriod = Data.Count > 1 ? Data[^2] : null;
-					UpdateRecentPeriodsStreak(lastPeriod, period);
-					period.Commit(CultureHolder.Instance.HebrewCalendar, _recentPeriodsStreak);
-					period.Closed = true;
-
-					if (Data[^1] == period)
-					{
-						// reinserting purity period item to autoscroll to the bottom in case this was last item and its subitems changed
-						var vm = PurityPeriods.Last();
-						PurityPeriods.Remove(vm);
-						PurityPeriods.Add(vm);
-					}
-					else
-						RefreshItems();
+					// reinserting purity period item to autoscroll to the bottom in case this was last item and its subitems changed
+					var vm = PurityPeriods.Last();
+					PurityPeriods.Remove(vm);
+					PurityPeriods.Add(vm);
 				}
 				else
-					Recalculate();
+					RefreshItems();
 			}
+			else
+				Recalculate();
 		}
 		public void RemovePeriod(PurityPeriod period)
 		{
@@ -152,6 +152,17 @@ namespace Purity
 
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
+		public bool IsSaveVisible
+		{
+			get
+			{
+#if DEBUG
+				return true;
+#else
+				return false;
+#endif
+			}
+		}
 
 		public List<PurityPeriod> Data;
 		private readonly List<int> _recentPeriodsStreak = new List<int>();

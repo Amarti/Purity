@@ -15,6 +15,8 @@ namespace Purity
 			UpdateFullPeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
+			SelectedBeginDateHalfDayCommand = new MvxCommand(SelectedBeginDateHalfDay);
+			SelectedEndDateHalfDayCommand = new MvxCommand(SelectedEndDateHalfDay);
 			AcceptPeriodCommand = new MvxCommand(AcceptPeriod);
 			RemovePeriodCommand = new MvxCommand(RemovePeriod);
 		}
@@ -39,6 +41,16 @@ namespace Purity
 				SubEvents.Add(p);
 		}
 
+		public IMvxCommand SelectedBeginDateHalfDayCommand { get; private set; }
+		internal void SelectedBeginDateHalfDay()
+		{
+			SelectedBeginDateIsDarkHalfDay = !SelectedBeginDateIsDarkHalfDay;
+		}
+		public IMvxCommand SelectedEndDateHalfDayCommand { get; private set; }
+		internal void SelectedEndDateHalfDay()
+		{
+			SelectedEndDateIsDarkHalfDay = !SelectedEndDateIsDarkHalfDay;
+		}
 		public IMvxCommand AcceptPeriodCommand { get; private set; }
 		internal void AcceptPeriod()
 		{
@@ -76,7 +88,10 @@ namespace Purity
 				if (value)
 				{
 					if (!PurityEvent.IsDateAfterDark(_period.Begin))
+					{
 						_period.Begin = _period.Begin.AddHours(12);
+						UpdateFullPeriodLength();
+					}
 				}
 				else
 				{

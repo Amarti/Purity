@@ -127,18 +127,11 @@ namespace Purity
 		{
 			get
 			{
-				var gd = Stamp.ToString("d MMMM yyyy");
+				var res = $"{Stamp:d MMMM} {Note}";
+				if (Type == PurityEventType.OnaBeinonit)
+					res = $"{Stamp.Day - 1}-{res}";
 
-				switch (Type)
-				{
-					case PurityEventType.OnaBeinonit:
-						return $"{Stamp.Day - 1}-{gd} {Note}";
-					case PurityEventType.Mikveh:
-					case PurityEventType.VesetHodesh:
-					case PurityEventType.VesetAflaga:
-					default:
-						return $"{gd} {Note}";
-				}
+				return res;
 			}
 		}
 	}
@@ -229,7 +222,7 @@ namespace Purity
 		/// </summary>
 		public bool Closed { get; set; }
 		/// <summary>
-		/// Skip adding period into periods streak in some rare cases (surgery, intrauterine device installation, etc)
+		/// Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)
 		/// </summary>
 		public bool SkipStreak { get; set; }
 		public List<PurityEvent> SubEvents { get; set; }
