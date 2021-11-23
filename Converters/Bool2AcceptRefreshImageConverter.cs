@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
-using System.Windows.Media;
 
 
 namespace Purity
 {
-	public class Bool2DuskDawnBrushConverter : IValueConverter
+	public class Bool2AcceptRefreshImageConverter : IValueConverter
 	{
 		/// <inheritdoc />
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return value is bool boolean && boolean ? Brushes.DarkGray : Brushes.White;
+			var name = value is bool boolean && boolean ? "Refresh" : "Accept";
+			return Application.Current.Resources[$"{name}IconDrawingImage"];
 		}
 
 		/// <inheritdoc />
