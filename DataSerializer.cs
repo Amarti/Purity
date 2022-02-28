@@ -83,9 +83,7 @@ namespace Purity
 		{
 			WriteIndented = true,
 			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,  // default encoder escapes '<', '>' and other non-HTML-safe symbols
-			Converters =
-					{
-					}
+			Converters = {}
 		};
 
 		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();

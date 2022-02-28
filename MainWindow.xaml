@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Purity"
         mc:Ignorable="d"
-        Title="Purity" d:Height="400" Width="670" Height="900"
+        Title="Purity" d:Height="400" Width="710" Height="900"
         ResizeMode="CanMinimize"
         WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterScreen"
@@ -14,6 +14,7 @@
         <ResourceDictionary>
             <local:Bool2NotConverter x:Key="Bool2NotConverter" />
             <local:Bool2VisibilityHiddenConverter x:Key="Bool2VisibilityHiddenConverter" />
+            <local:Bool2NotVisibilityHiddenConverter x:Key="Bool2NotVisibilityHiddenConverter" />
             <local:Bool2VisibilityCollapsedConverter x:Key="Bool2VisibilityCollapsedConverter" />
             <local:Bool2NotVisibilityCollapsedConverter x:Key="Bool2NotVisibilityCollapsedConverter" />
             <local:BoolToBorderBrushConverter x:Key="BoolToBorderBrushConverter" />
@@ -56,7 +57,7 @@
                                     <Rectangle Height="17" Width="17" Fill="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
                                 </Button>
                                 <CheckBox Margin="10,8,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" ToolTip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)" Height="25" Width="80"/>
-                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding AcceptPeriodCommand}" Visibility="{Binding IsClosed, Converter={StaticResource Bool2NotVisibilityCollapsedConverter}}">
+                                <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding AcceptPeriodCommand}" Visibility="{Binding IsClosed, Converter={StaticResource Bool2NotVisibilityHiddenConverter}}">
                                     <Image Source="{StaticResource AcceptIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"/>
                                 </Button>
                                 <Button Margin="15,0,5,0" Height="25" Width="25" ToolTip="Remove period" Command="{Binding RemovePeriodCommand}" Visibility="{Binding IsLast, Converter={StaticResource Bool2VisibilityHiddenConverter}}">
@@ -85,20 +86,17 @@
 
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="40"/>
                 <!--<ColumnDefinition Width="40"/>-->
+                <!--<ColumnDefinition Width="50"/>-->
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Margin="0,10,10,0" HorizontalAlignment="Left" Content="Save" Command="{Binding SaveCommand}" Height="30" Width="40"
-                    Visibility="{Binding IsSaveVisible, Converter={StaticResource Bool2VisibilityCollapsedConverter}}"/>
-            <Button Grid.Column="1" Margin="0,10,0,0" Content="Add period" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
-            <Button Grid.Column="2" Margin="10,10,0,0" Command="{Binding RecalculateCommand}" ToolTip="Refresh" Height="30" Width="30">
+            <Button Grid.Column="0" Margin="0,10,0,0" Content="Add period" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
+            <Button Grid.Column="1" Margin="10,10,0,0" Command="{Binding RecalculateCommand}" ToolTip="Refresh" Height="30" Width="30">
                 <Image Source="{StaticResource RefreshIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="24" Width="24"/>
             </Button>
-            <Button Grid.Column="3" Margin="10,10,0,0" Content="Config" Command="{Binding ConfigCommand}" Height="30" Width="30" Visibility="Collapsed"/>
-           
-            <!--<Button x:Uid="TestButton" Margin="15,5,0,0" Height="30" Width="30">
+            <Button Grid.Column="2" Margin="10,10,0,0" Content="Config" Command="{Binding ConfigCommand}" Height="30" Width="30" Visibility="Collapsed"/>
+            <!--<Button x:Uid="TestButton" Margin="10,10,0,0" Height="30" Width="30">
                 <Image Height="13" Width="13">
                     <Image.Source>
                         <DrawingImage>
@@ -119,6 +117,7 @@
                     </Image.Source>
                 </Image>
             </Button>-->
+            <!--<Button Grid.Column="3" Margin="10,10,0,0" HorizontalAlignment="Left" Content="Save" Command="{Binding SaveCommand}" Height="30" Width="40"/>-->
         </Grid>
 
         <!--<Canvas Grid.Column="1" HorizontalAlignment="Left" Height="17" Margin="620,9,0,0" Grid.Row="4" VerticalAlignment="Top" Width="17">

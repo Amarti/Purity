@@ -140,19 +140,8 @@ namespace Purity
 
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
-		public bool IsSaveVisible
-		{
-			get
-			{
-#if DEBUG
-				return true;
-#else
-				return false;
-#endif
-			}
-		}
 
 		public List<PurityPeriod> Data;
-		private readonly List<int> _recentPeriodsStreak = new List<int>();
+		private readonly List<int> _recentPeriodsStreak = new();
 	}
 }
