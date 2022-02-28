@@ -127,9 +127,11 @@ namespace Purity
 		{
 			get
 			{
-				var res = $"{Stamp:d MMMM} {Note}";
+				var res = $"{Stamp:d MMM} {Note}";
 				if (Type == PurityEventType.OnaBeinonit)
-					res = $"{Stamp.Day - 1}-{res}";
+					res = (Stamp.Day > 1)
+							? $"{Stamp.Day - 1}-{res}"
+							: $"{Stamp.AddDays(-1):d MMM} - {res}";
 
 				return res;
 			}
