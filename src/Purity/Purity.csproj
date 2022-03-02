@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>../../bin/</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>../../bin/</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
