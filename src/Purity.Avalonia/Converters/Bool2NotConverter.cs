@@ -1,0 +1,22 @@
+﻿using System;
+using System.Globalization;
+using Avalonia.Data.Converters;
+
+
+namespace Purity.Avalonia
+{
+	public class Bool2NotConverter : IValueConverter
+	{
+		/// <inheritdoc />
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return value is bool boolean && boolean ? !boolean : true;
+		}
+
+		/// <inheritdoc />
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return value is bool boolean && boolean ? !boolean : true;
+		}
+	}
+}
