@@ -61,15 +61,15 @@ namespace Purity.Avalonia.ViewModels
 		}
 
 
-		public DateTime SelectedBeginDate
+		public DateTimeOffset SelectedBeginDate
 		{
 			get
 			{
-				return _period.Begin;
+				return new DateTimeOffset(_period.Begin);
 			}
 			set
 			{
-				_period.Begin = value;
+				_period.Begin = new DateTime(value.Ticks);
 				UpdateFullPeriodLength();
 				//RaisePropertyChanged(() => SelectedBeginDate);
 			}
@@ -101,15 +101,15 @@ namespace Purity.Avalonia.ViewModels
 				//RaisePropertyChanged(() => SelectedBeginDateIsAfterDusk);
 			}
 		}
-		public DateTime SelectedEndDate
+		public DateTimeOffset SelectedEndDate
 		{
 			get
 			{
-				return _period.End;
+				return new DateTimeOffset(_period.End);
 			}
 			set
 			{
-				_period.End = value;
+				_period.End = new DateTime(value.Ticks);
 				//RaisePropertyChanged(() => SelectedEndDate);
 			}
 		}
