@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
+using NLog;
 
 
 namespace Purity
@@ -68,10 +68,10 @@ namespace Purity
 			if (!_recentPeriodsStreak.Any() || _recentPeriodsStreak.Last() < l)
 			{
 				_recentPeriodsStreak.Clear();
-				Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: cleared recent period streaks");
+				Logger.Info($"{nameof(UpdateRecentPeriodsStreak)}: cleared recent period streaks");
 			}
 			_recentPeriodsStreak.Add(l);
-			Trace.WriteLine($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} half-calendar days");
+			Logger.Info($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} half-calendar days");
 		}
 
 
@@ -143,5 +143,7 @@ namespace Purity
 
 		public List<PurityPeriod> Data;
 		private readonly List<int> _recentPeriodsStreak = new();
+
+		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 	}
 }

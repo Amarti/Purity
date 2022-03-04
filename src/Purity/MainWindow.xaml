@@ -64,8 +64,8 @@
                                     <Image Source="{StaticResource RemoveIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"/>
                                 </Button>
                             </StackPanel>
-                            <ListView Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
-                                <ListView.ItemTemplate>
+                            <ListBox Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
+                                <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="177" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
@@ -76,8 +76,8 @@
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="Auto" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </StackPanel>
                     </Border>
                 </DataTemplate>

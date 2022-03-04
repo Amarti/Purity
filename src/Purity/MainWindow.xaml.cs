@@ -14,11 +14,11 @@ namespace Purity
 
 			((INotifyCollectionChanged)Periods.Items).CollectionChanged += PurityPeriodsCollectionChanged;
 
-			_vm = new MainViewModel();
+			var vm = new MainViewModel();
 			var rawData = DataSerializer.Deserialize();
-			_vm.InitData(rawData);
+			vm.InitData(rawData);
 
-			DataContext = _vm;
+			DataContext = vm;
 		}
 
 		private void PurityPeriodsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -37,7 +37,5 @@ namespace Purity
 			DataSerializer.Serialize(_vm.Data);
 #endif
 		}
-
-		private readonly MainViewModel _vm;
 	}
 }

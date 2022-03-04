@@ -30,14 +30,14 @@ namespace Purity
 
 		public static List<PurityPeriod> Deserialize(string filePath = null)
 		{
-			List<PurityPeriod> data;
+			var data = new List<PurityPeriod>();
 			try
 			{
 				filePath ??= GetDefaultDataFilePath();
 
 				var json = File.ReadAllText(filePath);
 				var v = GetConfigurationVersion(json);
-				data = JsonSerializer.Deserialize<List<PurityPeriod>>(json, DEFAULT_SERIALIZATION_OPTIONS);
+				data = JsonSerializer.Deserialize<List<PurityPeriod>>(json, DEFAULT_SERIALIZATION_OPTIONS) ?? data;
 
 				UpgradeData(data);
 
@@ -47,8 +47,6 @@ namespace Purity
 			{
 				Logger.Error($"{nameof(Deserialize)}: {e.Message}\n{e.StackTrace}");
 			}
-
-			data = new List<PurityPeriod>();
 
 			return data;
 		}
@@ -79,7 +77,7 @@ namespace Purity
 		private const string BACKUP_EXTENSION = ".bck";
 		private const string VERSION_TOKEN = "\"Version\":";
 
-		public static JsonSerializerOptions DEFAULT_SERIALIZATION_OPTIONS = new JsonSerializerOptions
+		public static readonly JsonSerializerOptions DEFAULT_SERIALIZATION_OPTIONS = new JsonSerializerOptions
 		{
 			WriteIndented = true,
 			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,  // default encoder escapes '<', '>' and other non-HTML-safe symbols
