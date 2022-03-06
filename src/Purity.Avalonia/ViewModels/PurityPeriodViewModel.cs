@@ -26,12 +26,12 @@ namespace Purity.Avalonia.ViewModels
 		{
 			var idx = _owner.Data.IndexOf(_period);
 			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_owner.Data[idx - 1], _period) : 0;
-			//RaisePropertyChanged(() => SkipPeriodLength);
+			this.RaisePropertyChanged(nameof(SkipPeriodLength));
 		}
 
 		public void Refresh()
 		{
-			//RaiseAllPropertiesChanged();
+			this.RaisePropertyChanged();
 			SubEvents.Clear();
 			foreach (var p in _period.SubEvents)
 				SubEvents.Add(p);
@@ -71,6 +71,7 @@ namespace Purity.Avalonia.ViewModels
 			{
 				_period.Begin = new DateTime(value.Ticks);
 				UpdateFullPeriodLength();
+				this.RaisePropertyChanged(nameof(SelectedBeginDate));
 				//RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
@@ -98,6 +99,7 @@ namespace Purity.Avalonia.ViewModels
 						UpdateFullPeriodLength();
 					}
 				}
+				this.RaisePropertyChanged(nameof(SelectedBeginDateIsAfterDusk));
 				//RaisePropertyChanged(() => SelectedBeginDateIsAfterDusk);
 			}
 		}
@@ -110,6 +112,7 @@ namespace Purity.Avalonia.ViewModels
 			set
 			{
 				_period.End = new DateTime(value.Ticks);
+				this.RaisePropertyChanged(nameof(SelectedEndDate));
 				//RaisePropertyChanged(() => SelectedEndDate);
 			}
 		}
@@ -131,21 +134,27 @@ namespace Purity.Avalonia.ViewModels
 					if (PurityEvent.IsDateAfterDusk(_period.End))
 						_period.End = _period.End.AddHours(-12);
 				}
+				this.RaisePropertyChanged(nameof(SelectedEndDateIsAfterDusk));
 				//RaisePropertyChanged(() => SelectedEndDateIsAfterDusk);
 			}
 		}
 		public bool SkipStreak
 		{
-			get
-			{
-				return _period.SkipStreak;
-			}
-			set
-			{
-				_period.SkipStreak = value;
-				//RaisePropertyChanged(() => SkipStreak);
-			}
+			get => _period.SkipStreak;
+			set => this.RaiseAndSetIfChanged(ref _period.SkipStreak, value);
 		}
+		//public bool SkipStreak
+		//{
+		//	get
+		//	{
+		//		return _period.SkipStreak;
+		//	}
+		//	set
+		//	{
+		//		_period.SkipStreak = value;
+		//		//RaisePropertyChanged(() => SkipStreak);
+		//	}
+		//}
 		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
 		public bool IsClosed => _period.Closed;
 		public bool IsLast => _owner.Data.Count > 0 && _owner.Data[^1] == _period;
