@@ -9,7 +9,11 @@ Current TODOs:
 	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
 	- external storage file path
- - Port to macOS
+ - Port to macOS (avalonia)
+	- fix serialization
+	- fix autoscroll down
+	- make standalone macos app
+	- better styling
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration

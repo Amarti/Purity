@@ -7,11 +7,10 @@
         mc:Ignorable="d"
         x:Class="Purity.Avalonia.Views.MainWindow"
         Icon="/Assets/Purity.ico"
-        Title="Purity" d:DesignHeight="400" Width="920" Height="900"
+        Title="Purity" d:DesignHeight="900" Width="930" Height="900"
         CanResize="False"
         WindowStartupLocation="CenterScreen"
         >
-
     <!--ExtendClientAreaToDecorationsHint="True"-->
     <!--ExtendClientAreaChromeHints="NoChrome"-->
     <!--ExtendClientAreaTitleBarHeightHint="-1"-->
@@ -45,11 +44,18 @@
 
         <ListBox x:Name="Periods" Grid.Row="1" Grid.Column="1" Items="{Binding PurityPeriods}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.Styles>
+                <!-- Give the ListBoxItems a fixed with of 100 and right-align them -->
+                <!--<Style Selector="ListBoxItem">
+                    --><!--<Setter Property="Width" Value="100"/>--><!--
+                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                </Style>-->
+            </ListBox.Styles>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={StaticResource BoolToBorderBrushConverter}}">
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
-                            <Grid ColumnDefinitions="300, 35, 300, 35, 83, 35, 35">
+                            <Grid ColumnDefinitions="305, 40, 305, 40, 90, 40, 40">
                                 <DatePicker Grid.Column="0" Margin="5,0,0,0" Header="Begin" Height="45" Width="300" SelectedDate="{Binding SelectedBeginDate}"/>
                                 <Button Grid.Column="1" Margin="5,21,10,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedBeginDateHalfDayCommand}">
                                     <Rectangle Margin="1,1,0,0" Height="17" Width="17" Fill="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
@@ -58,7 +64,7 @@
                                 <Button Grid.Column="3" Margin="5,21,10,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedEndDateHalfDayCommand}">
                                     <Rectangle Margin="1,1,0,0" Height="17" Width="17" Fill="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
                                 </Button>
-                                <CheckBox Grid.Column="4" Margin="5,21,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" ToolTip.Tip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)" Height="25" Width="80"/>
+                                <CheckBox Grid.Column="4" Margin="5,21,0,0" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" ToolTip.Tip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)" Height="25" Width="90"/>
                                 <Button Grid.Column="5" Margin="10,21,0,0" Height="25" Width="25" ToolTip.Tip="Accept period" Command="{Binding AcceptPeriodCommand}" IsVisible="{Binding !IsClosed}">
                                     <Image Margin="1,1,0,0" Source="{StaticResource AcceptIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"/>
                                 </Button>
@@ -70,10 +76,10 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Height="15" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="286" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
-                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding !IsAfterDusk}" VerticalAlignment="Center"/>
-                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !IsAfterDawn}" VerticalAlignment="Center"/>
-                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding !IsFullDay}" VerticalAlignment="Center"/>
+                                            <TextBlock Margin="5,5,6,0" Height="23" Width="286" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding IsAfterDusk}" VerticalAlignment="Center"/>
+                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding IsAfterDawn}" VerticalAlignment="Center"/>
+                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding IsFullDay}" VerticalAlignment="Center"/>
                                             <TextBlock Margin="5,5,5,0" Height="23" Width="100" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
                                             <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
                                         </StackPanel>

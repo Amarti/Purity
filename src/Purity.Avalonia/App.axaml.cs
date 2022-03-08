@@ -24,7 +24,7 @@ namespace Purity.Avalonia
 
 				desktop.MainWindow = new MainWindow
 				{
-					DataContext = new MainWindowViewModel(),
+					DataContext = vm,
 				};
 			}
 

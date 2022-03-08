@@ -31,7 +31,10 @@ namespace Purity.Avalonia.ViewModels
 
 		public void Refresh()
 		{
-			this.RaisePropertyChanged();
+			this.RaisePropertyChanged(nameof(SkipPeriodLength));
+			this.RaisePropertyChanged(nameof(IsClosed));
+			this.RaisePropertyChanged(nameof(IsLast));
+
 			SubEvents.Clear();
 			foreach (var p in _period.SubEvents)
 				SubEvents.Add(p);
@@ -72,7 +75,6 @@ namespace Purity.Avalonia.ViewModels
 				_period.Begin = new DateTime(value.Ticks);
 				UpdateFullPeriodLength();
 				this.RaisePropertyChanged(nameof(SelectedBeginDate));
-				//RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
 		public bool SelectedBeginDateIsAfterDusk
@@ -100,7 +102,6 @@ namespace Purity.Avalonia.ViewModels
 					}
 				}
 				this.RaisePropertyChanged(nameof(SelectedBeginDateIsAfterDusk));
-				//RaisePropertyChanged(() => SelectedBeginDateIsAfterDusk);
 			}
 		}
 		public DateTimeOffset SelectedEndDate
@@ -113,7 +114,6 @@ namespace Purity.Avalonia.ViewModels
 			{
 				_period.End = new DateTime(value.Ticks);
 				this.RaisePropertyChanged(nameof(SelectedEndDate));
-				//RaisePropertyChanged(() => SelectedEndDate);
 			}
 		}
 		public bool SelectedEndDateIsAfterDusk
@@ -135,7 +135,6 @@ namespace Purity.Avalonia.ViewModels
 						_period.End = _period.End.AddHours(-12);
 				}
 				this.RaisePropertyChanged(nameof(SelectedEndDateIsAfterDusk));
-				//RaisePropertyChanged(() => SelectedEndDateIsAfterDusk);
 			}
 		}
 		public bool SkipStreak
