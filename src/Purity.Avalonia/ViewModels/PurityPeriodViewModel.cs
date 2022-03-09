@@ -66,10 +66,7 @@ namespace Purity.Avalonia.ViewModels
 
 		public DateTimeOffset SelectedBeginDate
 		{
-			get
-			{
-				return new DateTimeOffset(_period.Begin);
-			}
+			get => new(_period.Begin);
 			set
 			{
 				_period.Begin = new DateTime(value.Ticks);
@@ -79,10 +76,7 @@ namespace Purity.Avalonia.ViewModels
 		}
 		public bool SelectedBeginDateIsAfterDusk
 		{
-			get
-			{
-				return PurityEvent.IsDateAfterDusk(_period.Begin);
-			}
+			get => PurityEvent.IsDateAfterDusk(_period.Begin);
 			set
 			{
 				if (value)
@@ -106,10 +100,7 @@ namespace Purity.Avalonia.ViewModels
 		}
 		public DateTimeOffset SelectedEndDate
 		{
-			get
-			{
-				return new DateTimeOffset(_period.End);
-			}
+			get => new(_period.End);
 			set
 			{
 				_period.End = new DateTime(value.Ticks);
@@ -118,10 +109,7 @@ namespace Purity.Avalonia.ViewModels
 		}
 		public bool SelectedEndDateIsAfterDusk
 		{
-			get
-			{
-				return PurityEvent.IsDateAfterDusk(_period.End);
-			}
+			get => PurityEvent.IsDateAfterDusk(_period.End);
 			set
 			{
 				if (value)
@@ -140,20 +128,12 @@ namespace Purity.Avalonia.ViewModels
 		public bool SkipStreak
 		{
 			get => _period.SkipStreak;
-			set => this.RaiseAndSetIfChanged(ref _period.SkipStreak, value);
+			set
+			{
+				_period.SkipStreak = value;
+				this.RaisePropertyChanged(nameof(SkipStreak));
+			}
 		}
-		//public bool SkipStreak
-		//{
-		//	get
-		//	{
-		//		return _period.SkipStreak;
-		//	}
-		//	set
-		//	{
-		//		_period.SkipStreak = value;
-		//		//RaisePropertyChanged(() => SkipStreak);
-		//	}
-		//}
 		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
 		public bool IsClosed => _period.Closed;
 		public bool IsLast => _owner.Data.Count > 0 && _owner.Data[^1] == _period;

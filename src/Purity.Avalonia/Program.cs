@@ -1,7 +1,7 @@
 using System;
 using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
+
 
 namespace Purity.Avalonia
 {
@@ -19,6 +19,7 @@ namespace Purity.Avalonia
 			=> AppBuilder.Configure<App>()
 				.UsePlatformDetect()
 				.LogToTrace()
-				.UseReactiveUI();
+				.UseReactiveUI()
+				.UseSkia();
 	}
 }

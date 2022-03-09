@@ -226,7 +226,7 @@ namespace Purity.Avalonia
 		/// <summary>
 		/// Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)
 		/// </summary>
-		public bool SkipStreak;// { get; set; }
+		public bool SkipStreak { get; set; }
 		public List<PurityEvent> SubEvents { get; set; }
 	}
 }
