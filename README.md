@@ -10,7 +10,6 @@ Current TODOs:
 	- Or Zarua option
 	- external storage file path
  - Port to macOS (avalonia)
-	- fix autoscroll down
 	- make standalone macos app
 	- better styling
  - Port to iOS
@@ -22,3 +21,4 @@ Current TODOs:
  - Port to linux
  - More icons
  - Better styling
+ - Reorganize and refactor code

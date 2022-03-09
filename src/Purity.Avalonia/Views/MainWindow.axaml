@@ -10,6 +10,7 @@
         Title="Purity" d:DesignHeight="900" Width="930" Height="900"
         CanResize="False"
         WindowStartupLocation="CenterScreen"
+        Activated="WindowActivated"
         Closing="WindowClosing"
         >
     <!--ExtendClientAreaToDecorationsHint="True"-->

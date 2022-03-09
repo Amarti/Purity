@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Specialized;
 using System.Reactive.Disposables;
 using Avalonia;
@@ -14,17 +15,18 @@ namespace Purity.Avalonia.Views
 	{
 		public MainWindow()
 		{
+			InitializeComponent();
+
+#if DEBUG
+			this.AttachDevTools();
+#endif
+
 			//this.WhenActivated(d =>
 			//{
 			//	this.OneWayBind(DataContext as MainWindowViewModel,
 			//	   vm => vm.PurityPeriods,
 			//	   view => view.Periods.Items).DisposeWith(d);
 			//});
-
-			InitializeComponent();
-#if DEBUG
-			this.AttachDevTools();
-#endif
 		}
 
 		private void InitializeComponent()
@@ -32,24 +34,24 @@ namespace Purity.Avalonia.Views
 			AvaloniaXamlLoader.Load(this);
 		}
 
-		private void PurityPeriodsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+
+		private void WindowActivated(object sender, EventArgs e)
 		{
-			//if (VisualTreeHelper.GetChildrenCount(Periods) > 0)
-			//{
-			//	var border = (Border)VisualTreeHelper.GetChild(Periods, 0);
-			//	var scrollViewer = (ScrollViewer)VisualTreeHelper.GetChild(border, 0);
-			//	scrollViewer.ScrollToBottom();
-			//}
+			if (_periods == null)
+			{
+				_periods = this.FindControl<ListBox>("Periods");
+				((INotifyCollectionChanged)_periods.Items).CollectionChanged += PurityPeriodsCollectionChanged;
+				ScrollDown();
+			}
 		}
-		//		private void PurityPeriodsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		//		{
-		//			//if (VisualTreeHelper.GetChildrenCount(Periods) > 0)
-		//			//{
-		//			//	var border = (Border)VisualTreeHelper.GetChild(Periods, 0);
-		//			//	var scrollViewer = (ScrollViewer)VisualTreeHelper.GetChild(border, 0);
-		//			//	scrollViewer.ScrollToBottom();
-		//			//}
-		//		}
+		private void PurityPeriodsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+		{
+			ScrollDown();
+		}
+		private void ScrollDown()
+		{
+			_periods?.ScrollIntoView(_periods.ItemCount - 1);
+		}
 
 		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
@@ -58,7 +60,7 @@ namespace Purity.Avalonia.Views
 #endif
 		}
 
-		//public ListBox Periods => this.FindControl<ListBox>("Periods");
-		//		private readonly MainWindowViewModel _vm;
+
+		private ListBox? _periods;
 	}
 }
