@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Controls;
@@ -11,7 +12,7 @@ using ReactiveUI;
 
 namespace Purity.Avalonia.Views
 {
-	public partial class MainWindow : /*ReactiveWindow<MainWindowViewModel>*/Window
+	public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 	{
 		public MainWindow()
 		{
@@ -53,10 +54,11 @@ namespace Purity.Avalonia.Views
 			_periods?.ScrollIntoView(_periods.ItemCount - 1);
 		}
 
-		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void WindowClosing(object sender, CancelEventArgs e)
 		{
 #if !DEBUG
-			DataSerializer.Serialize(_vm.Data);
+			if (ViewModel != null)
+				DataSerializer.Serialize(ViewModel.Data);
 #endif
 		}
 

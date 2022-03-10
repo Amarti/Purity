@@ -10,7 +10,6 @@ Current TODOs:
 	- Or Zarua option
 	- external storage file path
  - Port to macOS (avalonia)
-	- make standalone macos app
 	- better styling
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)

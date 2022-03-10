@@ -34,7 +34,7 @@ namespace Purity
 		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 #if !DEBUG
-			DataSerializer.Serialize(_vm.Data);
+			DataSerializer.Serialize(((MainViewModel)DataContext).Data);
 #endif
 		}
 	}

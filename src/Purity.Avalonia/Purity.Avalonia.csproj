@@ -17,14 +17,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
-    <!--<AvaloniaResource Remove="Assets\CommonResources.axaml" />-->
     <None Remove=".gitignore" />
-    <!--<None Remove="Assets\CommonResources.xaml" />-->
   </ItemGroup>
-
-  <!--<ItemGroup>
-    <AvaloniaXaml Include="Assets\CommonResources.xaml" />
-  </ItemGroup>-->
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.10" />
@@ -34,17 +28,5 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.10" />
     <PackageReference Include="NLog" Version="4.7.11" />
   </ItemGroup>
-
-  <!--<ItemGroup>
-    <AvaloniaXaml Update="Assets\CommonResources.axaml">
-      <SubType>Designer</SubType>
-    </AvaloniaXaml>
-  </ItemGroup>-->
-
-  <!--<ItemGroup>
-    <AvaloniaResource Update="Assets\CommonResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </AvaloniaResource>
-  </ItemGroup>-->
 
 </Project>
