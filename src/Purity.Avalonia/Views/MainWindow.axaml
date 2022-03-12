@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         x:Class="Purity.Avalonia.Views.MainWindow"
         Icon="/Assets/Purity.ico"
-        Title="Purity" d:DesignHeight="900" Width="930" Height="900"
+        Title="Purity" Width="930" Height="400"
         CanResize="False"
         WindowStartupLocation="CenterScreen"
         Activated="WindowActivated"
