@@ -20,4 +20,3 @@ Current TODOs:
  - Port to linux
  - More icons
  - Better styling
- - Reorganize and refactor code

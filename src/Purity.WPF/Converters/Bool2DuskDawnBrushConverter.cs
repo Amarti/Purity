@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 
-namespace Purity
+namespace Purity.WPF
 {
-	public class Bool2NotVisibilityCollapsedConverter : IValueConverter
+	public class Bool2DuskDawnBrushConverter : IValueConverter
 	{
 		/// <inheritdoc />
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return value is bool boolean && boolean ? Visibility.Collapsed : Visibility.Visible;
+			return value is bool boolean && boolean ? Brushes.DarkGray : Brushes.White;
 		}
 
 		/// <inheritdoc />

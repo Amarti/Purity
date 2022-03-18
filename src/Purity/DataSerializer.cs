@@ -10,7 +10,7 @@ namespace Purity
 {
 	public static class DataSerializer
 	{
-		public static void Serialize(List<PurityPeriod> data, string filePath = null, bool backup = false)
+		public static void Serialize(List<PurityPeriod> data, string? filePath = null, bool backup = false)
 		{
 			try
 			{
@@ -28,7 +28,7 @@ namespace Purity
 			}
 		}
 
-		public static List<PurityPeriod> Deserialize(string filePath = null)
+		public static List<PurityPeriod> Deserialize(string? filePath = null)
 		{
 			var data = new List<PurityPeriod>();
 			try
@@ -54,7 +54,7 @@ namespace Purity
 		{
 			return DATA_FILE_NAME;
 		}
-		private static void UpgradeData(List<PurityPeriod> data)
+		private static void UpgradeData(List<PurityPeriod>? data)
 		{
 			// ¯\_(ツ)_/¯
 		}

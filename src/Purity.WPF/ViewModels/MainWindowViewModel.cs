@@ -7,16 +7,17 @@ using MvvmCross.ViewModels;
 using NLog;
 
 
-namespace Purity
+namespace Purity.WPF.ViewModels
 {
-	public class MainViewModel : MvxViewModel, IDisposable
+	public class MainWindowViewModel : MvxViewModel, IDisposable
 	{
-		public MainViewModel()
+		public MainWindowViewModel()
 		{
 			AddPeriodCommand = new MvxCommand(AddPeriod);
 			RecalculateCommand = new MvxCommand(Recalculate);
 			SaveCommand = new MvxCommand(Save);
 
+			Data = new List<PurityPeriod>();
 			PurityPeriods = new ObservableCollection<PurityPeriodViewModel>();
 		}
 
@@ -43,7 +44,7 @@ namespace Purity
 		{
 			_recentPeriodsStreak.Clear();
 
-			PurityPeriod lastPeriod = null;
+			PurityPeriod? lastPeriod = null;
 			foreach (var period in Data)
 			{
 				UpdateRecentPeriodsStreak(lastPeriod, period);
@@ -56,7 +57,7 @@ namespace Purity
 				lastPeriod = period;
 			}
 		}
-		private void UpdateRecentPeriodsStreak(PurityPeriod a, PurityPeriod b)
+		private void UpdateRecentPeriodsStreak(PurityPeriod? a, PurityPeriod b)
 		{
 			if (a == null || b == null)
 				return;
@@ -75,7 +76,7 @@ namespace Purity
 		}
 
 
-		public IMvxCommand AddPeriodCommand { get; private set; }
+		public IMvxCommand AddPeriodCommand { get; }
 		private void AddPeriod()
 		{
 			AddPeriod(DateTime.Today, DateTime.Today.AddDays(7));
@@ -91,13 +92,13 @@ namespace Purity
 			RefreshItems();
 		}
 
-		public IMvxCommand RecalculateCommand { get; private set; }
+		public IMvxCommand RecalculateCommand { get; }
 		private void Recalculate()
 		{
 			BakeData();
 			RefreshItems();
 		}
-		public IMvxCommand SaveCommand { get; private set; }
+		public IMvxCommand SaveCommand { get; }
 		private void Save()
 		{
 			DataSerializer.Serialize(Data);
@@ -138,6 +139,18 @@ namespace Purity
 				vm.Refresh();
 		}
 
+
+		public static bool IsDebug
+		{
+			get
+			{
+#if DEBUG
+				return true;
+#else
+				return false;
+#endif
+			}
+		}
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
 

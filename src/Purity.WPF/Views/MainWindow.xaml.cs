@@ -2,9 +2,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Purity.WPF.ViewModels;
 
 
-namespace Purity
+namespace Purity.WPF
 {
 	public partial class MainWindow : Window
 	{
@@ -14,14 +15,14 @@ namespace Purity
 
 			((INotifyCollectionChanged)Periods.Items).CollectionChanged += PurityPeriodsCollectionChanged;
 
-			var vm = new MainViewModel();
+			var vm = new MainWindowViewModel();
 			var rawData = DataSerializer.Deserialize();
 			vm.InitData(rawData);
 
 			DataContext = vm;
 		}
 
-		private void PurityPeriodsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void PurityPeriodsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
 		{
 			if (VisualTreeHelper.GetChildrenCount(Periods) > 0)
 			{
@@ -34,7 +35,7 @@ namespace Purity
 		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 #if !DEBUG
-			DataSerializer.Serialize(((MainViewModel)DataContext).Data);
+			DataSerializer.Serialize(((MainWindowViewModel)DataContext).Data);
 #endif
 		}
 	}

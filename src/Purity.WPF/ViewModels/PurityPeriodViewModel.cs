@@ -4,11 +4,11 @@ using MvvmCross.Commands;
 using MvvmCross.ViewModels;
 
 
-namespace Purity
+namespace Purity.WPF.ViewModels
 {
 	public class PurityPeriodViewModel : MvxViewModel, IDisposable
 	{
-		public PurityPeriodViewModel(PurityPeriod period, MainViewModel owner)
+		public PurityPeriodViewModel(PurityPeriod period, MainWindowViewModel owner)
 		{
 			_period = period;
 			_owner = owner;
@@ -41,17 +41,17 @@ namespace Purity
 				SubEvents.Add(p);
 		}
 
-		public IMvxCommand SelectedBeginDateHalfDayCommand { get; private set; }
+		public IMvxCommand SelectedBeginDateHalfDayCommand { get; }
 		internal void SelectedBeginDateHalfDay()
 		{
 			SelectedBeginDateIsAfterDusk = !SelectedBeginDateIsAfterDusk;
 		}
-		public IMvxCommand SelectedEndDateHalfDayCommand { get; private set; }
+		public IMvxCommand SelectedEndDateHalfDayCommand { get; }
 		internal void SelectedEndDateHalfDay()
 		{
 			SelectedEndDateIsAfterDusk = !SelectedEndDateIsAfterDusk;
 		}
-		public IMvxCommand AcceptPeriodCommand { get; private set; }
+		public IMvxCommand AcceptPeriodCommand { get; }
 		internal void AcceptPeriod()
 		{
 			_owner.AcceptPeriod(_period);
@@ -67,10 +67,7 @@ namespace Purity
 
 		public DateTime SelectedBeginDate
 		{
-			get
-			{
-				return _period.Begin;
-			}
+			get => _period.Begin;
 			set
 			{
 				_period.Begin = value;
@@ -80,10 +77,7 @@ namespace Purity
 		}
 		public bool SelectedBeginDateIsAfterDusk
 		{
-			get
-			{
-				return PurityEvent.IsDateAfterDusk(_period.Begin);
-			}
+			get => PurityEvent.IsDateAfterDusk(_period.Begin);
 			set
 			{
 				if (value)
@@ -107,10 +101,7 @@ namespace Purity
 		}
 		public DateTime SelectedEndDate
 		{
-			get
-			{
-				return _period.End;
-			}
+			get => _period.End;
 			set
 			{
 				_period.End = value;
@@ -119,10 +110,7 @@ namespace Purity
 		}
 		public bool SelectedEndDateIsAfterDusk
 		{
-			get
-			{
-				return PurityEvent.IsDateAfterDusk(_period.End);
-			}
+			get => PurityEvent.IsDateAfterDusk(_period.End);
 			set
 			{
 				if (value)
@@ -140,10 +128,7 @@ namespace Purity
 		}
 		public bool SkipStreak
 		{
-			get
-			{
-				return _period.SkipStreak;
-			}
+			get => _period.SkipStreak;
 			set
 			{
 				_period.SkipStreak = value;
@@ -156,7 +141,7 @@ namespace Purity
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
 
 		private readonly PurityPeriod _period;
-		private readonly MainViewModel _owner;
+		private readonly MainWindowViewModel _owner;
 		private int _periodFullLength;
 	}
 }

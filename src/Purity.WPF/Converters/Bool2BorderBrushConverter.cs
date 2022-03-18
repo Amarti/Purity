@@ -4,14 +4,17 @@ using System.Windows.Data;
 using System.Windows.Media;
 
 
-namespace Purity
+namespace Purity.WPF
 {
-	public class Bool2DuskDawnBrushConverter : IValueConverter
+	public class BoolToBorderBrushConverter : IValueConverter
 	{
 		/// <inheritdoc />
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return value is bool boolean && boolean ? Brushes.DarkGray : Brushes.White;
+			if (value == null)
+				return Brushes.Transparent;
+
+			return value is bool boolean && boolean ? Brushes.CornflowerBlue : Brushes.Red;
 		}
 
 		/// <inheritdoc />

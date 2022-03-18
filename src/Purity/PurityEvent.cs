@@ -18,7 +18,7 @@ namespace Purity
 
 	public class PurityEvent
 	{
-		public PurityEvent(PurityEventType type, DateTime stamp, string note = null)
+		public PurityEvent(PurityEventType type, DateTime stamp, string? note = null)
 		{
 			Type = type;
 			Stamp = stamp;
@@ -85,7 +85,7 @@ namespace Purity
 		/// <summary>
 		/// Information for optional presentation
 		/// </summary>
-		public string Note { get; set; }
+		public string? Note { get; set; }
 
 		[JsonIgnore]
 		public string TypeRepr
@@ -204,7 +204,7 @@ namespace Purity
 				AddEvent(tm, PurityEventType.VesetAflaga, $"[{p}]");
 			}
 		}
-		private void AddEvent(DateTime tm, PurityEventType typ, string note = null)
+		private void AddEvent(DateTime tm, PurityEventType typ, string? note = null)
 		{
 			if (!SubEvents.Any(el => el.Stamp == tm && el.Type == typ))
 				SubEvents.Add(new PurityEvent(typ, tm, note));

@@ -4,14 +4,14 @@ using System.Windows;
 using System.Windows.Data;
 
 
-namespace Purity
+namespace Purity.WPF
 {
-	public class Bool2VisibilityCollapsedConverter : IValueConverter
+	public class Bool2VisibilityHiddenConverter : IValueConverter
 	{
 		/// <inheritdoc />
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return value is bool boolean && boolean ? Visibility.Visible : Visibility.Collapsed;
+			return value is bool boolean && boolean ? Visibility.Visible : Visibility.Hidden;
 		}
 
 		/// <inheritdoc />

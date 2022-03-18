@@ -27,7 +27,7 @@ namespace Purity
 
 
 		public static CultureHolder Instance => _instance ??= new CultureHolder();
-		private static CultureHolder _instance;
+		private static CultureHolder? _instance;
 
 		public readonly HebrewCalendar HebrewCalendar;
 		public readonly CultureInfo HebrewCulture;

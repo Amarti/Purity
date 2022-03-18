@@ -136,9 +136,6 @@ namespace Purity.Avalonia.ViewModels
 		}
 
 
-		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
-
-		public List<PurityPeriod> Data;
 		public static bool IsDebug
 		{
 			get
@@ -151,6 +148,9 @@ namespace Purity.Avalonia.ViewModels
 			}
 		}
 
+		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
+
+		public List<PurityPeriod> Data;
 		private readonly List<int> _recentPeriodsStreak = new();
 
 		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
