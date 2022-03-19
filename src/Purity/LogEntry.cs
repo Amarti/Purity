@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +10,7 @@ using NLog.Config;
 using NLog.Targets;
 
 
-namespace Purity.Avalonia
+namespace Purity
 {
 	public static class LogEntry
 	{
@@ -35,8 +36,8 @@ namespace Purity.Avalonia
 			var fileTarget = new FileTarget("fileTarget")
 			{
 				Layout = "${longdate} [${threadid}] ${level:uppercase=true} ${logger}:> ${message}",
-				FileName = $"../log/{productName}.log",
-				ArchiveFileName = "../log/" + productName + ".log.{#}",
+				FileName = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "../" : string.Empty) + $"log/{productName}.log",
+				ArchiveFileName = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "../" : string.Empty) + "log/" + productName + ".log.{#}",
 				ArchiveAboveSize = 2 * 1024 * 1024,
 				ArchiveNumbering = ArchiveNumberingMode.Rolling,
 				MaxArchiveFiles = 5,
@@ -46,7 +47,7 @@ namespace Purity.Avalonia
 				WriteBom = true,
 			};
 			config.AddTarget(fileTarget);
-			config.AddRule(LogLevel.Trace, LogLevel.Fatal, fileTarget, "*");
+			config.AddRule(LogLevel.Info, LogLevel.Fatal, fileTarget, "*");
 			config.AddTarget(traceTarget);
 			config.AddRule(LogLevel.Trace, LogLevel.Fatal, traceTarget, "*");
 			config.Variables.Add(HOSTNAME_ID, "${hostname}");
@@ -59,53 +60,27 @@ namespace Purity.Avalonia
 			return productAttribute?.Product ?? assembly?.GetName().Name ?? string.Empty;
 		}
 
-		//public static string CurrentSystemVersion
-		//{
-		//	get
-		//	{
-		//		if (string.IsNullOrWhiteSpace(_systemVersion))
-		//		{
-		//			var assembly = Assembly.GetEntryAssembly();
-		//			_systemVersion = "dev";
-		//			if (assembly.Location != null)
-		//			{
-		//				var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-		//				_systemVersion = fvi.ProductVersion;
-		//			}
-		//		}
-		//		return _systemVersion;
-		//	}
-		//}
-		//public static string CurrentSystemSoftware
-		//{
-		//	get
-		//	{
-		//		if (string.IsNullOrWhiteSpace(_systemSoftware))
-		//		{
-		//			var assembly = Assembly.GetEntryAssembly();
-		//			_systemSoftware = assembly.GetName().Name + " " + CurrentSystemVersion;
-		//		}
-		//		return _systemSoftware;
-		//	}
-		//}
-		//public static string CurrentSystemIPAddress
-		//{
-		//	get
-		//	{
-		//		if (string.IsNullOrWhiteSpace(_systemIPAddress))
-		//			_systemIPAddress = GlobalDiagnosticsContext.Get(SYSTEM_IP_ID) ?? string.Empty;
-		//		return _systemIPAddress;
-		//	}
-		//}
+		public static string? CurrentSystemVersion
+		{
+			get
+			{
+				if (string.IsNullOrWhiteSpace(_systemVersion))
+				{
+					var assembly = Assembly.GetExecutingAssembly();
+					_systemVersion = "dev";
+					if (assembly?.Location != null)
+					{
+						var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+						_systemVersion = fvi.ProductVersion;
+					}
+				}
+				return _systemVersion;
+			}
+		}
 
 
 		private const string HOSTNAME_ID = "hostname";
 
-		//private static string _systemName;
-		//private static string _systemIPAddress;
-		//private static string _systemVersion;
-		//private static string _systemSoftware;
-
-		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+		private static string? _systemVersion;
 	}
 }

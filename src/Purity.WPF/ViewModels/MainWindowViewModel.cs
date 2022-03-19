@@ -69,10 +69,10 @@ namespace Purity.WPF.ViewModels
 			if (!_recentPeriodsStreak.Any() || _recentPeriodsStreak.Last() < l)
 			{
 				_recentPeriodsStreak.Clear();
-				Logger.Info($"{nameof(UpdateRecentPeriodsStreak)}: cleared recent period streaks");
+				Logger.Debug($"{nameof(UpdateRecentPeriodsStreak)}: cleared recent period streaks");
 			}
 			_recentPeriodsStreak.Add(l);
-			Logger.Info($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} half-calendar days");
+			Logger.Debug($"{nameof(UpdateRecentPeriodsStreak)}: added recent period streak in {l} half-calendar days");
 		}
 
 

@@ -11,8 +11,7 @@ namespace Purity.WPF
 		{
 			base.OnStartup(e);
 
-			//PathFinder.EnsurePaths();
-			//LogEntry.ConfigureLogging();
+			LogEntry.ConfigureLogging();
 
 			//SetLocalization();
 		}
