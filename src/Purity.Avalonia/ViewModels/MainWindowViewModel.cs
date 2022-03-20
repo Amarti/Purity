@@ -11,12 +11,13 @@ namespace Purity.Avalonia.ViewModels
 {
 	public class MainWindowViewModel : ViewModelBase
 	{
-		public MainWindowViewModel()
+		public MainWindowViewModel(Settings settings)
 		{
 			AddPeriodCommand = ReactiveCommand.Create(AddPeriod);
 			RecalculateCommand = ReactiveCommand.Create(Recalculate);
 			SaveCommand = ReactiveCommand.Create(Save);
 
+			Settings = settings;
 			Data = new List<PurityPeriod>();
 			PurityPeriods = new ObservableCollection<PurityPeriodViewModel>();
 		}
@@ -94,10 +95,11 @@ namespace Purity.Avalonia.ViewModels
 			BakeData();
 			RefreshItems();
 		}
+
 		public ICommand SaveCommand { get; }
 		private void Save()
 		{
-			DataSerializer.Serialize(Data);
+			DataSerializer.SerializeData(Data);
 		}
 
 		public void AcceptPeriod(PurityPeriod period)
@@ -150,6 +152,7 @@ namespace Purity.Avalonia.ViewModels
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
 
+		public readonly Settings Settings;
 		public List<PurityPeriod> Data;
 		private readonly List<int> _recentPeriodsStreak = new();
 

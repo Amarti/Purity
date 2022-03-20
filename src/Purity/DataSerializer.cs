@@ -10,11 +10,48 @@ namespace Purity
 {
 	public static class DataSerializer
 	{
-		public static void Serialize(List<PurityPeriod> data, string? filePath = null, bool backup = false)
+		public static void SerializeSettings(Settings settings, string? filePath = null)
 		{
 			try
 			{
-				filePath ??= GetDefaultDataFilePath();
+				filePath ??= SETTINGS_FILE_NAME;
+
+				var json = JsonSerializer.Serialize(settings, DEFAULT_SERIALIZATION_OPTIONS);
+				File.WriteAllText(filePath, json);
+			}
+			catch (Exception e)
+			{
+				Logger.Error($"{nameof(SerializeSettings)}: {e.Message}\n{e.StackTrace}");
+			}
+		}
+
+		public static Settings DeserializeSettings(string? filePath = null)
+		{
+			var settings = new Settings();
+			try
+			{
+				filePath ??= SETTINGS_FILE_NAME;
+
+				var json = File.ReadAllText(filePath);
+				settings = JsonSerializer.Deserialize<Settings>(json, DEFAULT_SERIALIZATION_OPTIONS) ?? settings;
+
+				return settings;
+			}
+			catch (Exception e)
+			{
+				Logger.Error($"{nameof(DeserializeSettings)}: {e.Message}\n{e.StackTrace}");
+			}
+
+			return settings;
+		}
+
+
+		public static void SerializeData(List<PurityPeriod> data, string? filePath = null, bool backup = false)
+		{
+			try
+			{
+				if (string.IsNullOrWhiteSpace(filePath))
+					filePath = GetDefaultDataFilePath();
 
 				if (backup && File.Exists(filePath))
 					File.Copy(filePath, filePath + BACKUP_EXTENSION, true);
@@ -24,19 +61,20 @@ namespace Purity
 			}
 			catch (Exception e)
 			{
-				Logger.Error($"{nameof(Serialize)}: {e.Message}\n{e.StackTrace}");
+				Logger.Error($"{nameof(SerializeData)}: {e.Message}\n{e.StackTrace}");
 			}
 		}
 
-		public static List<PurityPeriod> Deserialize(string? filePath = null)
+		public static List<PurityPeriod> DeserializeData(string? filePath = null)
 		{
 			var data = new List<PurityPeriod>();
 			try
 			{
-				filePath ??= GetDefaultDataFilePath();
+				if (string.IsNullOrWhiteSpace(filePath))
+					filePath = GetDefaultDataFilePath();
 
 				var json = File.ReadAllText(filePath);
-				var v = GetConfigurationVersion(json);
+				var v = GetDataVersion(json);
 				data = JsonSerializer.Deserialize<List<PurityPeriod>>(json, DEFAULT_SERIALIZATION_OPTIONS) ?? data;
 
 				UpgradeData(data);
@@ -45,7 +83,7 @@ namespace Purity
 			}
 			catch (Exception e)
 			{
-				Logger.Error($"{nameof(Deserialize)}: {e.Message}\n{e.StackTrace}");
+				Logger.Error($"{nameof(DeserializeData)}: {e.Message}\n{e.StackTrace}");
 			}
 
 			return data;
@@ -58,8 +96,7 @@ namespace Purity
 		{
 			// ¯\_(ツ)_/¯
 		}
-
-		private static int GetConfigurationVersion(string json)
+		private static int GetDataVersion(string json)
 		{
 			var p = json.IndexOf(VERSION_TOKEN) + VERSION_TOKEN.Length;
 			var pc = json.IndexOf(',', p);
@@ -73,6 +110,8 @@ namespace Purity
 			return 0;
 		}
 
+
+		private const string SETTINGS_FILE_NAME = "pureSettings.json";
 		private const string DATA_FILE_NAME = "pureData.json";
 		private const string BACKUP_EXTENSION = ".bck";
 		private const string VERSION_TOKEN = "\"Version\":";

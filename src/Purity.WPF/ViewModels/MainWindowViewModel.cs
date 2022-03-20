@@ -11,12 +11,13 @@ namespace Purity.WPF.ViewModels
 {
 	public class MainWindowViewModel : MvxViewModel, IDisposable
 	{
-		public MainWindowViewModel()
+		public MainWindowViewModel(Settings settings)
 		{
 			AddPeriodCommand = new MvxCommand(AddPeriod);
 			RecalculateCommand = new MvxCommand(Recalculate);
 			SaveCommand = new MvxCommand(Save);
 
+			Settings = settings;
 			Data = new List<PurityPeriod>();
 			PurityPeriods = new ObservableCollection<PurityPeriodViewModel>();
 		}
@@ -98,10 +99,11 @@ namespace Purity.WPF.ViewModels
 			BakeData();
 			RefreshItems();
 		}
+
 		public IMvxCommand SaveCommand { get; }
 		private void Save()
 		{
-			DataSerializer.Serialize(Data);
+			DataSerializer.SerializeData(Data);
 		}
 
 		public void AcceptPeriod(PurityPeriod period)
@@ -154,6 +156,7 @@ namespace Purity.WPF.ViewModels
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
 
+		public readonly Settings Settings;
 		public List<PurityPeriod> Data;
 		private readonly List<int> _recentPeriodsStreak = new();
 

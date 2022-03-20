@@ -56,10 +56,13 @@ namespace Purity.Avalonia.Views
 
 		private void WindowClosing(object sender, CancelEventArgs e)
 		{
-#if !DEBUG
 			if (ViewModel != null)
-				DataSerializer.Serialize(ViewModel.Data);
+			{
+				DataSerializer.SerializeSettings(ViewModel.Settings);
+#if !DEBUG
+				DataSerializer.SerializeData(ViewModel.Data, ViewModel.Settings.DataFilePath);
 #endif
+			}
 		}
 
 

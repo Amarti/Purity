@@ -15,8 +15,10 @@ namespace Purity.WPF
 
 			((INotifyCollectionChanged)Periods.Items).CollectionChanged += PurityPeriodsCollectionChanged;
 
-			var vm = new MainWindowViewModel();
-			var rawData = DataSerializer.Deserialize();
+			var settings = DataSerializer.DeserializeSettings();
+			var rawData = DataSerializer.DeserializeData(settings.DataFilePath);
+
+			var vm = new MainWindowViewModel(settings);
 			vm.InitData(rawData);
 
 			DataContext = vm;
@@ -34,8 +36,10 @@ namespace Purity.WPF
 
 		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
+			var vm = (MainWindowViewModel)DataContext;
+			DataSerializer.SerializeSettings(vm.Settings);
 #if !DEBUG
-			DataSerializer.Serialize(((MainWindowViewModel)DataContext).Data);
+			DataSerializer.SerializeData(vm.Data, vm.Settings.DataFilePath);
 #endif
 		}
 	}

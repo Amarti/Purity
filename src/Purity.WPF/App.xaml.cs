@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Windows;
+using NLog;
 
 
 namespace Purity.WPF
@@ -11,7 +12,17 @@ namespace Purity.WPF
 		{
 			base.OnStartup(e);
 
-			LogEntry.ConfigureLogging();
+			try
+			{
+				LogEntry.ConfigureLogging();
+				Logger.Info("Initialized logging");
+				LogEntry.SetCurrentDirectoryToEntryAssemblyLocation();
+				Logger.Info($"Working directory is set to be '{Environment.CurrentDirectory}'");
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"{ex.Message}\n{ex.StackTrace}");
+			}
 
 			//SetLocalization();
 		}
@@ -40,5 +51,7 @@ namespace Purity.WPF
 		//		//Logger.Error($"{nameof(SetLocalization)}: {e.Message}\n{e.StackTrace}");
 		//	}
 		//}
+
+		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 	}
 }

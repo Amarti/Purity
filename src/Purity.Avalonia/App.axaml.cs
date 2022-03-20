@@ -33,8 +33,10 @@ namespace Purity.Avalonia
 
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 			{
-				var vm = new MainWindowViewModel();
-				var rawData = DataSerializer.Deserialize();
+				var settings = DataSerializer.DeserializeSettings();
+				var rawData = DataSerializer.DeserializeData(settings.DataFilePath);
+
+				var vm = new MainWindowViewModel(settings);
 				vm.InitData(rawData);
 
 				desktop.MainWindow = new MainWindow
