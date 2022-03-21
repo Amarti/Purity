@@ -9,7 +9,8 @@
         ResizeMode="CanMinimize"
         WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterScreen"
-        Closing="WindowClosing">
+        Closing="WindowClosing"
+        >
     <Window.Resources>
         <ResourceDictionary>
             <local:Bool2NotConverter x:Key="Bool2NotConverter" />
@@ -86,16 +87,19 @@
 
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="40"/>
-                <!--<ColumnDefinition Width="40"/>-->
-                <!--<ColumnDefinition Width="50"/>-->
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Margin="0,10,0,0" Content="Add period" Command="{Binding AddPeriodCommand}" HorizontalAlignment="Stretch" Width="Auto" Height="30"/>
-            <Button Grid.Column="1" Margin="10,10,0,0" Command="{Binding RecalculateCommand}" ToolTip="Refresh" Height="30" Width="30">
+            <Button Grid.Column="0" Margin="-10,10,0,0" Command="{Binding OpenSettingsCommand}" ToolTip="Settings" Height="30" Width="30">
+                <Image Source="{StaticResource SettingsIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="24" Width="24"/>
+            </Button>
+            <Button Grid.Column="1" Margin="0,10,0,0" Command="{Binding AddPeriodCommand}" ToolTip="Add period" HorizontalAlignment="Stretch" Width="Auto" Height="30">
+                <Image Source="{StaticResource AddPeriodIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="24" Width="24"/>
+            </Button>
+            <Button Grid.Column="2" Margin="10,10,0,0" Command="{Binding RecalculateCommand}" ToolTip="Refresh" Height="30" Width="30">
                 <Image Source="{StaticResource RefreshIconDrawingImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="24" Width="24"/>
             </Button>
-            <Button Grid.Column="2" Margin="10,10,0,0" Content="Config" Command="{Binding ConfigCommand}" Height="30" Width="30" Visibility="Collapsed"/>
             <!--<Button x:Uid="TestButton" Margin="10,10,0,0" Height="30" Width="30">
                 <Image Height="13" Width="13">
                     <Image.Source>
@@ -117,7 +121,6 @@
                     </Image.Source>
                 </Image>
             </Button>-->
-            <!--<Button Grid.Column="3" Margin="10,10,0,0" HorizontalAlignment="Left" Content="Save" Command="{Binding SaveCommand}" Height="30" Width="40"/>-->
         </Grid>
 
         <!--<Canvas Grid.Column="1" HorizontalAlignment="Left" Height="17" Margin="620,9,0,0" Grid.Row="4" VerticalAlignment="Top" Width="17">

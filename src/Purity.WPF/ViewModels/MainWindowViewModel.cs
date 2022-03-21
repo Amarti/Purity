@@ -5,6 +5,7 @@ using System.Linq;
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
 using NLog;
+using Purity.WPF.Views;
 
 
 namespace Purity.WPF.ViewModels
@@ -13,9 +14,9 @@ namespace Purity.WPF.ViewModels
 	{
 		public MainWindowViewModel(Settings settings)
 		{
+			OpenSettingsCommand = new MvxCommand(OpenSettings);
 			AddPeriodCommand = new MvxCommand(AddPeriod);
 			RecalculateCommand = new MvxCommand(Recalculate);
-			SaveCommand = new MvxCommand(Save);
 
 			Settings = settings;
 			Data = new List<PurityPeriod>();
@@ -28,13 +29,15 @@ namespace Purity.WPF.ViewModels
 
 
 		/// <summary>
-		/// Initializes with raw data set and shows UI
+		/// Initializes with raw data set
 		/// </summary>
-		/// <param name="rawData">Raw data set</param>
-		public void InitData(List<PurityPeriod> rawData)
+		public void InitData()
 		{
+			var rawData = DataSerializer.DeserializeData(Settings.DataFilePath);
 			Data = rawData.OrderBy(el => el.Begin).ToList();
 			BakeData(false);
+
+			PurityPeriods.Clear();
 			foreach (var period in Data)
 				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
 		}
@@ -77,6 +80,18 @@ namespace Purity.WPF.ViewModels
 		}
 
 
+		public IMvxCommand OpenSettingsCommand { get; }
+		private void OpenSettings()
+		{
+			var settingsCopy = new Settings(Settings);
+			var w = new SettingsWindow(settingsCopy, path => DataSerializer.SerializeData(Data, path));
+			if (w.ShowDialog() == true)
+			{
+				Settings = settingsCopy;
+				InitData();
+			}
+		}
+
 		public IMvxCommand AddPeriodCommand { get; }
 		private void AddPeriod()
 		{
@@ -98,12 +113,6 @@ namespace Purity.WPF.ViewModels
 		{
 			BakeData();
 			RefreshItems();
-		}
-
-		public IMvxCommand SaveCommand { get; }
-		private void Save()
-		{
-			DataSerializer.SerializeData(Data);
 		}
 
 		public void AcceptPeriod(PurityPeriod period)
@@ -142,21 +151,9 @@ namespace Purity.WPF.ViewModels
 		}
 
 
-		public static bool IsDebug
-		{
-			get
-			{
-#if DEBUG
-				return true;
-#else
-				return false;
-#endif
-			}
-		}
-
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
 
-		public readonly Settings Settings;
+		public Settings Settings;
 		public List<PurityPeriod> Data;
 		private readonly List<int> _recentPeriodsStreak = new();
 

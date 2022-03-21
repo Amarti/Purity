@@ -14,7 +14,7 @@ namespace Purity.WPF
 			if (value == null)
 				return Brushes.Transparent;
 
-			return value is bool boolean && boolean ? Brushes.CornflowerBlue : Brushes.Red;
+			return value is bool boolean && boolean ? new SolidColorBrush(Color.FromRgb(86, 131, 169))/* aka #5683A9*/ : new SolidColorBrush(Color.FromRgb(255, 0, 97))/* aka #FF0061*/;
 		}
 
 		/// <inheritdoc />

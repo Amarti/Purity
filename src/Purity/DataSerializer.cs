@@ -98,7 +98,11 @@ namespace Purity
 		}
 		private static int GetDataVersion(string json)
 		{
-			var p = json.IndexOf(VERSION_TOKEN) + VERSION_TOKEN.Length;
+			var p = json.IndexOf(VERSION_TOKEN);
+			if (p == -1)
+				return 0;
+
+			p += VERSION_TOKEN.Length;
 			var pc = json.IndexOf(',', p);
 			if (p > 0 && pc > 0)
 			{

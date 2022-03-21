@@ -8,7 +8,6 @@ Current TODOs:
 	- Language option (en, heb)
 	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
-	- external storage file path
  - Port to macOS (avalonia)
 	- better styling
  - Port to iOS
@@ -20,3 +19,4 @@ Current TODOs:
  - Port to linux
  - More icons
  - Better styling
+ - Confirm on deleting non-empty period

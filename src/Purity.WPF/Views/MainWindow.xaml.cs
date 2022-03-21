@@ -16,10 +16,8 @@ namespace Purity.WPF
 			((INotifyCollectionChanged)Periods.Items).CollectionChanged += PurityPeriodsCollectionChanged;
 
 			var settings = DataSerializer.DeserializeSettings();
-			var rawData = DataSerializer.DeserializeData(settings.DataFilePath);
-
 			var vm = new MainWindowViewModel(settings);
-			vm.InitData(rawData);
+			vm.InitData();
 
 			DataContext = vm;
 		}

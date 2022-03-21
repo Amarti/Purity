@@ -9,6 +9,11 @@
 		{
 			DataFilePath = string.Empty;
 		}
+		public Settings(Settings origin)
+		{
+			DataFilePath = origin.DataFilePath;
+		}
+		
 
 		/// <summary>
 		/// Absolute path to the data file.<br/>
