@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using Avalonia.Controls;
 using NLog;
+using Purity.Avalonia.Views;
 using ReactiveUI;
 
 
@@ -11,24 +13,25 @@ namespace Purity.Avalonia.ViewModels
 {
 	public class MainWindowViewModel : ViewModelBase
 	{
-		public MainWindowViewModel(Settings settings)
+		public MainWindowViewModel(Window owner, Settings settings)
 		{
-			AddPeriodCommand = ReactiveCommand.Create(AddPeriod);
-			RecalculateCommand = ReactiveCommand.Create(Recalculate);
-			SaveCommand = ReactiveCommand.Create(Save);
-
+			_owner = owner;
 			Settings = settings;
 			Data = new List<PurityPeriod>();
 			PurityPeriods = new ObservableCollection<PurityPeriodViewModel>();
+
+			OpenSettingsCommand = ReactiveCommand.Create(OpenSettings);
+			AddPeriodCommand = ReactiveCommand.Create(AddPeriod);
+			RecalculateCommand = ReactiveCommand.Create(Recalculate);
 		}
 
 
 		/// <summary>
 		/// Initializes with raw data set and shows UI
 		/// </summary>
-		/// <param name="rawData">Raw data set</param>
-		public void InitData(List<PurityPeriod> rawData)
+		public void InitData()
 		{
+			var rawData = DataSerializer.DeserializeData(Settings.DataFilePath);
 			Data = rawData.OrderBy(el => el.Begin).ToList();
 			BakeData(false);
 			foreach (var period in Data)
@@ -73,6 +76,19 @@ namespace Purity.Avalonia.ViewModels
 		}
 
 
+		public ICommand OpenSettingsCommand { get; }
+		private async void OpenSettings()
+		{
+			var settingsCopy = new Settings(Settings);
+			var w = new SettingsWindow();
+			w.InitDataContext(settingsCopy, path => DataSerializer.SerializeData(Data, path));
+			if (await w.ShowDialog<bool?>(_owner) == true)
+			{
+				Settings = settingsCopy;
+				InitData();
+			}
+		}
+
 		public ICommand AddPeriodCommand { get; }
 		private void AddPeriod()
 		{
@@ -94,12 +110,6 @@ namespace Purity.Avalonia.ViewModels
 		{
 			BakeData();
 			RefreshItems();
-		}
-
-		public ICommand SaveCommand { get; }
-		private void Save()
-		{
-			DataSerializer.SerializeData(Data);
 		}
 
 		public void AcceptPeriod(PurityPeriod period)
@@ -137,23 +147,20 @@ namespace Purity.Avalonia.ViewModels
 				vm.Refresh();
 		}
 
-
-		public static bool IsDebug
+		public void SaveState()
 		{
-			get
-			{
-#if DEBUG
-				return true;
-#else
-				return false;
+			DataSerializer.SerializeSettings(Settings);
+#if !DEBUG
+			DataSerializer.SerializeData(Data, Settings.DataFilePath);
 #endif
-			}
 		}
+
 
 		public ObservableCollection<PurityPeriodViewModel> PurityPeriods { get; set; }
 
-		public readonly Settings Settings;
+		public Settings Settings;
 		public List<PurityPeriod> Data;
+		private readonly Window _owner;
 		private readonly List<int> _recentPeriodsStreak = new();
 
 		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();

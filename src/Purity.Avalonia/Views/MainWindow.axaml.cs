@@ -7,7 +7,6 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using Purity.Avalonia.ViewModels;
-using ReactiveUI;
 
 
 namespace Purity.Avalonia.Views
@@ -21,6 +20,11 @@ namespace Purity.Avalonia.Views
 #if DEBUG
 			this.AttachDevTools();
 #endif
+
+			var settings = DataSerializer.DeserializeSettings();
+			var vm = new MainWindowViewModel(this, settings);
+			vm.InitData();
+			DataContext = vm;
 
 			//this.WhenActivated(d =>
 			//{
@@ -56,13 +60,7 @@ namespace Purity.Avalonia.Views
 
 		private void WindowClosing(object sender, CancelEventArgs e)
 		{
-			if (ViewModel != null)
-			{
-				DataSerializer.SerializeSettings(ViewModel.Settings);
-#if !DEBUG
-				DataSerializer.SerializeData(ViewModel.Data, ViewModel.Settings.DataFilePath);
-#endif
-			}
+			ViewModel?.SaveState();
 		}
 
 

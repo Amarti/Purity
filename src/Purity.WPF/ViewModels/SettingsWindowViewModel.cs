@@ -5,9 +5,9 @@ using MvvmCross.ViewModels;
 
 namespace Purity.WPF.ViewModels
 {
-	public class SettingsViewModel : MvxViewModel, IDisposable
+	public class SettingsWindowViewModel : MvxViewModel, IDisposable
 	{
-		public SettingsViewModel(Settings settings, Action<string> dataSaver)
+		public SettingsWindowViewModel(Settings settings, Action<string> dataSaver)
 		{
 			_settings = settings;
 			_dataSaver = dataSaver;

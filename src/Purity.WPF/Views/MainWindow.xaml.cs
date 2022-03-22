@@ -34,11 +34,7 @@ namespace Purity.WPF
 
 		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			var vm = (MainWindowViewModel)DataContext;
-			DataSerializer.SerializeSettings(vm.Settings);
-#if !DEBUG
-			DataSerializer.SerializeData(vm.Data, vm.Settings.DataFilePath);
-#endif
+			(DataContext as MainWindowViewModel)?.SaveState();
 		}
 	}
 }

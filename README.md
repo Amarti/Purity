@@ -10,6 +10,8 @@ Current TODOs:
 	- Or Zarua option
  - Port to macOS (avalonia)
 	- better styling
+	- fix right-to-left labels
+	- calendar/reminders integration
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
@@ -20,3 +22,4 @@ Current TODOs:
  - More icons
  - Better styling
  - Confirm on deleting non-empty period
+ - Add reports

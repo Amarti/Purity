@@ -13,7 +13,7 @@ namespace Purity.WPF.Views
 		{
 			InitializeComponent();
 
-			DataContext = new SettingsViewModel(settings, dataSaver);
+			DataContext = new SettingsWindowViewModel(settings, dataSaver);
 		}
 
 		private void PickFile_OnClick(object sender, EventArgs e)
