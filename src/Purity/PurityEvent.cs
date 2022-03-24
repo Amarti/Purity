@@ -154,15 +154,28 @@ namespace Purity
 
 
 		/// <summary>
-		/// Calculates length between two periods end and begin in half-calendar days (pure half-days)
+		/// Calculates length between two periods end and begin in half-calendar days (pure half-days)<br/>
+		/// Useful for Veset Aflaga calculation
 		/// </summary>
 		/// <param name="a">First period</param>
 		/// <param name="b">Second period</param>
-		public static int GetFullPeriodLength(PurityPeriod a, PurityPeriod b)
+		public static int GetPeriodLength(PurityPeriod a, PurityPeriod b)
 		{
 			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue || b.SkipStreak)	// skipping streak calculation only to upcoming period
 				return 0;
 			var l = (int)((b.Begin - a.EffectiveEnd).TotalHours / 12) - 1;
+			return l;
+		}
+		/// <summary>
+		/// Calculates full period length between two periods begin time in calendar days
+		/// </summary>
+		/// <param name="a">First period</param>
+		/// <param name="b">Second period</param>
+		public static float GetFullPeriodLength(PurityPeriod a, PurityPeriod b)
+		{
+			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue)
+				return 0;
+			var l = (float)((b.Begin - a.Begin).TotalHours / 24) - 1;
 			return l;
 		}
 

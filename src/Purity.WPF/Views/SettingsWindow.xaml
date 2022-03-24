@@ -39,8 +39,10 @@
         <TextBox x:Name="tbFilePath" Grid.Column="2" Grid.Row="1" Margin="0,0,10,0" Height="23" Text="{Binding DataFilePath}"/>
         <Button Grid.Column="3" Grid.Row="1" Content="..." Click="PickFile_OnClick" Height="23" Width="23"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Content="Save data" Command="{Binding SaveDataCommand}" Height="30" HorizontalAlignment="Stretch"
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Content="Save data" Command="{Binding SaveDataCommand}" Height="30" HorizontalAlignment="Stretch"
                 Visibility="{Binding IsDebug, Converter={StaticResource Bool2VisibilityCollapsedConverter}}"/>
+
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Content="Create periods lengths report" Command="{Binding SaveReportCommand}" Height="30" HorizontalAlignment="Stretch"/>
 
         <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="6" Content="OK" Click="Ok_OnClick" Height="30" Width="150" HorizontalAlignment="Left"/>
         <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="6" Content="Cancel" Click="Cancel_OnClick" Height="30" Width="150" HorizontalAlignment="Right"/>

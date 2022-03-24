@@ -21,4 +21,3 @@ Current TODOs:
  - Port to linux
  - More icons
  - Better styling
- - Add reports (csv export)

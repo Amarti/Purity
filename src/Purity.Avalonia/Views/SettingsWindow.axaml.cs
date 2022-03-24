@@ -23,9 +23,9 @@ namespace Purity.Avalonia.Views
 			AvaloniaXamlLoader.Load(this);
 		}
 
-		public void InitDataContext(Settings settings, Action<string> dataSaver)
+		public void InitDataContext(Settings settings, Action reportSaver, Action<string> dataSaver)
 		{
-			DataContext = new SettingsWindowViewModel(this, settings, dataSaver);
+			DataContext = new SettingsWindowViewModel(this, settings, reportSaver, dataSaver);
 		}
 	}
 }

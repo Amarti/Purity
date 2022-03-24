@@ -66,7 +66,7 @@ namespace Purity.WPF.ViewModels
 			if (a == null || b == null)
 				return;
 
-			var l = PurityPeriod.GetFullPeriodLength(a, b);
+			var l = PurityPeriod.GetPeriodLength(a, b);
 			if (l == 0)
 				return;
 
@@ -84,7 +84,7 @@ namespace Purity.WPF.ViewModels
 		private void OpenSettings()
 		{
 			var settingsCopy = new Settings(Settings);
-			var w = new SettingsWindow(settingsCopy, path => DataSerializer.SerializeData(Data, path));
+			var w = new SettingsWindow(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), path => DataSerializer.SerializeData(Data, path));
 			if (w.ShowDialog() == true)
 			{
 				Settings = settingsCopy;

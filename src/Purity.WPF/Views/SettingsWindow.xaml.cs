@@ -9,11 +9,11 @@ namespace Purity.WPF.Views
 {
 	public partial class SettingsWindow : Window
 	{
-		public SettingsWindow(Settings settings, Action<string> dataSaver)
+		public SettingsWindow(Settings settings, Action reportSaver, Action<string> dataSaver)
 		{
 			InitializeComponent();
 
-			DataContext = new SettingsWindowViewModel(settings, dataSaver);
+			DataContext = new SettingsWindowViewModel(settings, reportSaver, dataSaver);
 		}
 
 		private void PickFile_OnClick(object sender, EventArgs e)

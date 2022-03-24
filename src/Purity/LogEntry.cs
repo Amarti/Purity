@@ -17,7 +17,7 @@ namespace Purity
 		public static void SetCurrentDirectoryToEntryAssemblyLocation()
 		{
 			Environment.CurrentDirectory = GetCurrentPath();
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))     // running from *.app/Contents/MacOS
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))     // running from <>.app/Contents/MacOS
 				Environment.CurrentDirectory = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? Environment.CurrentDirectory;
 		}
 		public static string GetCurrentPath()
@@ -31,13 +31,12 @@ namespace Purity
 		public static void ConfigureLogging()
 		{
 			var config = new LoggingConfiguration();
-			var productName = ProductName;
 			var traceTarget = new TraceTarget("tracerTarget") { Layout = "[${threadid}] ${level:uppercase=true} ${logger}:> ${message}", RawWrite = true };
 			var fileTarget = new FileTarget("fileTarget")
 			{
 				Layout = "${longdate} [${threadid}] ${level:uppercase=true} ${logger}:> ${message}",
-				FileName = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "../" : string.Empty) + $"log/{productName}.log",
-				ArchiveFileName = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "../" : string.Empty) + "log/" + productName + ".log.{#}",
+				FileName = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "../" : string.Empty) + $"log/{ProductName}.log",
+				ArchiveFileName = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "../" : string.Empty) + "log/" + ProductName + ".log.{#}",
 				ArchiveAboveSize = 2 * 1024 * 1024,
 				ArchiveNumbering = ArchiveNumberingMode.Rolling,
 				MaxArchiveFiles = 5,

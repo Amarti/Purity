@@ -62,7 +62,7 @@ namespace Purity.Avalonia.ViewModels
 			if (a == null || b == null)
 				return;
 
-			var l = PurityPeriod.GetFullPeriodLength(a, b);
+			var l = PurityPeriod.GetPeriodLength(a, b);
 			if (l == 0)
 				return;
 
@@ -81,7 +81,7 @@ namespace Purity.Avalonia.ViewModels
 		{
 			var settingsCopy = new Settings(Settings);
 			var w = new SettingsWindow();
-			w.InitDataContext(settingsCopy, path => DataSerializer.SerializeData(Data, path));
+			w.InitDataContext(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), path => DataSerializer.SerializeData(Data, path));
 			if (await w.ShowDialog<bool?>(_ownerWindow) == true)
 			{
 				Settings = settingsCopy;

@@ -7,10 +7,12 @@ namespace Purity.WPF.ViewModels
 {
 	public class SettingsWindowViewModel : MvxViewModel, IDisposable
 	{
-		public SettingsWindowViewModel(Settings settings, Action<string> dataSaver)
+		public SettingsWindowViewModel(Settings settings, Action reportSaver, Action<string> dataSaver)
 		{
 			_settings = settings;
+			_reportSaver = reportSaver;
 			_dataSaver = dataSaver;
+			SaveReportCommand = new MvxCommand(SaveReport);
 			SaveDataCommand = new MvxCommand(SaveData);
 		}
 
@@ -19,6 +21,11 @@ namespace Purity.WPF.ViewModels
 		{}
 
 
+		public IMvxCommand SaveReportCommand { get; }
+		private void SaveReport()
+		{
+			_reportSaver.Invoke();
+		}
 		public IMvxCommand SaveDataCommand { get; }
 		private void SaveData()
 		{
@@ -49,6 +56,7 @@ namespace Purity.WPF.ViewModels
 		}
 
 		private readonly Settings _settings;
+		private readonly Action _reportSaver;
 		private readonly Action<string> _dataSaver;
 	}
 }

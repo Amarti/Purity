@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using NLog;
@@ -115,8 +116,29 @@ namespace Purity
 		}
 
 
+		public static void ExportPeriodsLengthsReport(List<PurityPeriod> data, string? filePath = null)
+		{
+			if (data.Count < 1)
+				return;
+
+			try
+			{
+				var sb = new StringBuilder("Periods lengths" + Environment.NewLine);
+				for (int i = 0; i < data.Count - 1; i++)
+					sb.AppendLine(PurityPeriod.GetFullPeriodLength(data[i], data[i + 1]).ToString("0.0"));
+
+				File.WriteAllText(filePath ?? REPORT_FILE_NAME, sb.ToString());
+			}
+			catch (Exception e)
+			{
+				Logger.Error($"{nameof(ExportPeriodsLengthsReport)}: {e.Message}\n{e.StackTrace}");
+			}
+		}
+
+
 		private const string SETTINGS_FILE_NAME = "pureSettings.json";
 		private const string DATA_FILE_NAME = "pureData.json";
+		private const string REPORT_FILE_NAME = "periodsLengths.csv";
 		private const string BACKUP_EXTENSION = ".bck";
 		private const string VERSION_TOKEN = "\"Version\":";
 

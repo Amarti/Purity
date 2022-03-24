@@ -13,7 +13,7 @@ namespace Purity.WPF.ViewModels
 		{
 			_period = period;
 			_ownerVM = ownerVM;
-			UpdateFullPeriodLength();
+			UpdatePeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
 			SelectedBeginDateHalfDayCommand = new MvxCommand(SelectedBeginDateHalfDay);
@@ -27,10 +27,10 @@ namespace Purity.WPF.ViewModels
 		{}
 
 
-		private void UpdateFullPeriodLength()
+		private void UpdatePeriodLength()
 		{
 			var idx = _ownerVM.Data.IndexOf(_period);
-			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
+			_periodFullLength = idx > 0 ? PurityPeriod.GetPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
 			RaisePropertyChanged(() => SkipPeriodLength);
 		}
 
@@ -56,7 +56,7 @@ namespace Purity.WPF.ViewModels
 		internal void AcceptPeriod()
 		{
 			_ownerVM.AcceptPeriod(_period);
-			UpdateFullPeriodLength();
+			UpdatePeriodLength();
 			Refresh();
 		}
 		public IMvxCommand RemovePeriodCommand { get; private set; }
@@ -75,7 +75,7 @@ namespace Purity.WPF.ViewModels
 			set
 			{
 				_period.Begin = value;
-				UpdateFullPeriodLength();
+				UpdatePeriodLength();
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
 		}
@@ -89,7 +89,7 @@ namespace Purity.WPF.ViewModels
 					if (!PurityEvent.IsDateAfterDusk(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(12);
-						UpdateFullPeriodLength();
+						UpdatePeriodLength();
 					}
 				}
 				else
@@ -97,7 +97,7 @@ namespace Purity.WPF.ViewModels
 					if (PurityEvent.IsDateAfterDusk(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(-12);
-						UpdateFullPeriodLength();
+						UpdatePeriodLength();
 					}
 				}
 				RaisePropertyChanged(() => SelectedBeginDateIsAfterDusk);

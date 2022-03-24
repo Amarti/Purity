@@ -8,12 +8,14 @@ namespace Purity.Avalonia.ViewModels
 {
 	public class SettingsWindowViewModel : ViewModelBase
 	{
-		public SettingsWindowViewModel(Window ownerWindow, Settings settings, Action<string> dataSaver)
+		public SettingsWindowViewModel(Window ownerWindow, Settings settings, Action reportSaver, Action<string> dataSaver)
 		{
 			_ownerWindow = ownerWindow;
 			_settings = settings;
+			_reportSaver = reportSaver;
 			_dataSaver = dataSaver;
 			PickFileCommand = ReactiveCommand.Create(PickFile);
+			SaveReportCommand = ReactiveCommand.Create(SaveReport);
 			SaveDataCommand = ReactiveCommand.Create(SaveData);
 			OkCommand = ReactiveCommand.Create(Ok);
 			CancelCommand = ReactiveCommand.Create(Cancel);
@@ -31,6 +33,11 @@ namespace Purity.Avalonia.ViewModels
 			var res = await dialog.ShowAsync(_ownerWindow);
 			if (res != null && res.Length > 0)
 				DataFilePath = res[0];
+		}
+		public ICommand SaveReportCommand { get; }
+		private void SaveReport()
+		{
+			_reportSaver.Invoke();
 		}
 		public ICommand SaveDataCommand { get; }
 		private void SaveData()
@@ -73,6 +80,7 @@ namespace Purity.Avalonia.ViewModels
 
 		private readonly Window _ownerWindow;
 		private readonly Settings _settings;
+		private readonly Action _reportSaver;
 		private readonly Action<string> _dataSaver;
 	}
 }

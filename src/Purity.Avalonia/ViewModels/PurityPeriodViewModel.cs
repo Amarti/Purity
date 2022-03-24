@@ -16,7 +16,7 @@ namespace Purity.Avalonia.ViewModels
 			_period = period;
 			_ownerVM = ownerVM;
 			_ownerWindow = ownerWindow;
-			UpdateFullPeriodLength();
+			UpdatePeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
 			SelectedBeginDateHalfDayCommand = ReactiveCommand.Create(SelectedBeginDateHalfDay);
@@ -26,10 +26,10 @@ namespace Purity.Avalonia.ViewModels
 		}
 
 
-		private void UpdateFullPeriodLength()
+		private void UpdatePeriodLength()
 		{
 			var idx = _ownerVM.Data.IndexOf(_period);
-			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
+			_periodFullLength = idx > 0 ? PurityPeriod.GetPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
 			this.RaisePropertyChanged(nameof(SkipPeriodLength));
 		}
 
@@ -58,7 +58,7 @@ namespace Purity.Avalonia.ViewModels
 		internal void AcceptPeriod()
 		{
 			_ownerVM.AcceptPeriod(_period);
-			UpdateFullPeriodLength();
+			UpdatePeriodLength();
 			Refresh();
 		}
 		public ICommand RemovePeriodCommand { get; }
@@ -78,7 +78,7 @@ namespace Purity.Avalonia.ViewModels
 			set
 			{
 				_period.Begin = new DateTime(value.Ticks);
-				UpdateFullPeriodLength();
+				UpdatePeriodLength();
 				this.RaisePropertyChanged(nameof(SelectedBeginDate));
 			}
 		}
@@ -92,7 +92,7 @@ namespace Purity.Avalonia.ViewModels
 					if (!PurityEvent.IsDateAfterDusk(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(12);
-						UpdateFullPeriodLength();
+						UpdatePeriodLength();
 					}
 				}
 				else
@@ -100,7 +100,7 @@ namespace Purity.Avalonia.ViewModels
 					if (PurityEvent.IsDateAfterDusk(_period.Begin))
 					{
 						_period.Begin = _period.Begin.AddHours(-12);
-						UpdateFullPeriodLength();
+						UpdatePeriodLength();
 					}
 				}
 				this.RaisePropertyChanged(nameof(SelectedBeginDateIsAfterDusk));
