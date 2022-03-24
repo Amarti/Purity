@@ -21,5 +21,4 @@ Current TODOs:
  - Port to linux
  - More icons
  - Better styling
- - Confirm on deleting non-empty period
- - Add reports
+ - Add reports (csv export)

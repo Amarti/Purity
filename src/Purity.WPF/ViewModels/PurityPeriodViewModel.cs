@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Windows;
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
 
@@ -8,10 +9,10 @@ namespace Purity.WPF.ViewModels
 {
 	public class PurityPeriodViewModel : MvxViewModel, IDisposable
 	{
-		public PurityPeriodViewModel(PurityPeriod period, MainWindowViewModel owner)
+		public PurityPeriodViewModel(PurityPeriod period, MainWindowViewModel ownerVM)
 		{
 			_period = period;
-			_owner = owner;
+			_ownerVM = ownerVM;
 			UpdateFullPeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
@@ -28,8 +29,8 @@ namespace Purity.WPF.ViewModels
 
 		private void UpdateFullPeriodLength()
 		{
-			var idx = _owner.Data.IndexOf(_period);
-			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_owner.Data[idx - 1], _period) : 0;
+			var idx = _ownerVM.Data.IndexOf(_period);
+			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
 			RaisePropertyChanged(() => SkipPeriodLength);
 		}
 
@@ -54,14 +55,17 @@ namespace Purity.WPF.ViewModels
 		public IMvxCommand AcceptPeriodCommand { get; }
 		internal void AcceptPeriod()
 		{
-			_owner.AcceptPeriod(_period);
+			_ownerVM.AcceptPeriod(_period);
 			UpdateFullPeriodLength();
 			Refresh();
 		}
 		public IMvxCommand RemovePeriodCommand { get; private set; }
 		internal void RemovePeriod()
 		{
-			_owner.RemovePeriod(_period);
+			if (!IsClosed
+			||	 MessageBox.Show("Are you sure you want to remove this period?", LogEntry.ProductName,
+								 MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+				_ownerVM.RemovePeriod(_period);
 		}
 
 
@@ -137,11 +141,11 @@ namespace Purity.WPF.ViewModels
 		}
 		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
 		public bool IsClosed => _period.Closed;
-		public bool IsLast => _owner.Data.Count > 0 && _owner.Data[^1] == _period;
+		public bool IsLast => _ownerVM.Data.Count > 0 && _ownerVM.Data[^1] == _period;
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
 
 		private readonly PurityPeriod _period;
-		private readonly MainWindowViewModel _owner;
+		private readonly MainWindowViewModel _ownerVM;
 		private int _periodFullLength;
 	}
 }

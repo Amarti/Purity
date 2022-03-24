@@ -8,9 +8,9 @@ namespace Purity.Avalonia.ViewModels
 {
 	public class SettingsWindowViewModel : ViewModelBase
 	{
-		public SettingsWindowViewModel(Window owner, Settings settings, Action<string> dataSaver)
+		public SettingsWindowViewModel(Window ownerWindow, Settings settings, Action<string> dataSaver)
 		{
-			_owner = owner;
+			_ownerWindow = ownerWindow;
 			_settings = settings;
 			_dataSaver = dataSaver;
 			PickFileCommand = ReactiveCommand.Create(PickFile);
@@ -28,7 +28,7 @@ namespace Purity.Avalonia.ViewModels
 		private async void PickFile()
 		{
 			var dialog = new OpenFileDialog() { Directory = Environment.CurrentDirectory };
-			var res = await dialog.ShowAsync(_owner);
+			var res = await dialog.ShowAsync(_ownerWindow);
 			if (res != null && res.Length > 0)
 				DataFilePath = res[0];
 		}
@@ -40,12 +40,12 @@ namespace Purity.Avalonia.ViewModels
 		public ICommand OkCommand { get; }
 		private void Ok()
 		{
-			_owner.Close(true);
+			_ownerWindow.Close(true);
 		}
 		public ICommand CancelCommand { get; }
 		private void Cancel()
 		{
-			_owner.Close(false);
+			_ownerWindow.Close(false);
 		}
 
 
@@ -71,7 +71,7 @@ namespace Purity.Avalonia.ViewModels
 			}
 		}
 
-		private readonly Window _owner;
+		private readonly Window _ownerWindow;
 		private readonly Settings _settings;
 		private readonly Action<string> _dataSaver;
 	}

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Avalonia.Controls;
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.Enums;
 using ReactiveUI;
 
 
@@ -8,10 +11,11 @@ namespace Purity.Avalonia.ViewModels
 {
 	public class PurityPeriodViewModel : ViewModelBase
 	{
-		public PurityPeriodViewModel(PurityPeriod period, MainWindowViewModel owner)
+		public PurityPeriodViewModel(PurityPeriod period, MainWindowViewModel ownerVM, Window ownerWindow)
 		{
 			_period = period;
-			_owner = owner;
+			_ownerVM = ownerVM;
+			_ownerWindow = ownerWindow;
 			UpdateFullPeriodLength();
 			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
@@ -24,8 +28,8 @@ namespace Purity.Avalonia.ViewModels
 
 		private void UpdateFullPeriodLength()
 		{
-			var idx = _owner.Data.IndexOf(_period);
-			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_owner.Data[idx - 1], _period) : 0;
+			var idx = _ownerVM.Data.IndexOf(_period);
+			_periodFullLength = idx > 0 ? PurityPeriod.GetFullPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
 			this.RaisePropertyChanged(nameof(SkipPeriodLength));
 		}
 
@@ -53,14 +57,18 @@ namespace Purity.Avalonia.ViewModels
 		public ICommand AcceptPeriodCommand { get; }
 		internal void AcceptPeriod()
 		{
-			_owner.AcceptPeriod(_period);
+			_ownerVM.AcceptPeriod(_period);
 			UpdateFullPeriodLength();
 			Refresh();
 		}
 		public ICommand RemovePeriodCommand { get; }
-		internal void RemovePeriod()
+		internal async void RemovePeriod()
 		{
-			_owner.RemovePeriod(_period);
+			if (!IsClosed
+			||	 await MessageBoxManager.GetMessageBoxStandardWindow(LogEntry.ProductName, "Are you sure you want to remove this period?",
+																	 ButtonEnum.YesNo, Icon.Warning, WindowStartupLocation.CenterOwner, Style.RoundButtons)
+										.ShowDialog(_ownerWindow) == ButtonResult.Yes)
+				_ownerVM.RemovePeriod(_period);
 		}
 
 
@@ -136,11 +144,12 @@ namespace Purity.Avalonia.ViewModels
 		}
 		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
 		public bool IsClosed => _period.Closed;
-		public bool IsLast => _owner.Data.Count > 0 && _owner.Data[^1] == _period;
+		public bool IsLast => _ownerVM.Data.Count > 0 && _ownerVM.Data[^1] == _period;
 		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
 
 		private readonly PurityPeriod _period;
-		private readonly MainWindowViewModel _owner;
+		private readonly MainWindowViewModel _ownerVM;
+		private readonly Window _ownerWindow;
 		private int _periodFullLength;
 	}
 }

@@ -31,7 +31,7 @@ namespace Purity
 		public static void ConfigureLogging()
 		{
 			var config = new LoggingConfiguration();
-			var productName = GetProductName();
+			var productName = ProductName;
 			var traceTarget = new TraceTarget("tracerTarget") { Layout = "[${threadid}] ${level:uppercase=true} ${logger}:> ${message}", RawWrite = true };
 			var fileTarget = new FileTarget("fileTarget")
 			{
@@ -53,34 +53,45 @@ namespace Purity
 			config.Variables.Add(HOSTNAME_ID, "${hostname}");
 			LogManager.Configuration = config;
 		}
-		public static string GetProductName()
+		private static string GetProductName()
 		{
 			var assembly = Assembly.GetEntryAssembly();
 			var productAttribute = assembly?.GetCustomAttributes(typeof(AssemblyProductAttribute)).SingleOrDefault() as AssemblyProductAttribute;
 			return productAttribute?.Product ?? assembly?.GetName().Name ?? string.Empty;
 		}
 
-		public static string? CurrentSystemVersion
+		public static string? ProductName
 		{
 			get
 			{
-				if (string.IsNullOrWhiteSpace(_systemVersion))
+				if (string.IsNullOrEmpty(_productName))
+					_productName = GetProductName();
+
+				return _productName;
+			}
+		}
+		public static string ProductVersion
+		{
+			get
+			{
+				if (string.IsNullOrWhiteSpace(_productVersion))
 				{
 					var assembly = Assembly.GetExecutingAssembly();
-					_systemVersion = "dev";
+					_productVersion = "dev";
 					if (assembly?.Location != null)
 					{
 						var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-						_systemVersion = fvi.ProductVersion;
+						_productVersion = fvi.ProductVersion ?? _productVersion;
 					}
 				}
-				return _systemVersion;
+				return _productVersion;
 			}
 		}
 
 
 		private const string HOSTNAME_ID = "hostname";
 
-		private static string? _systemVersion;
+		private static string _productName = string.Empty;
+		private static string _productVersion = string.Empty;
 	}
 }

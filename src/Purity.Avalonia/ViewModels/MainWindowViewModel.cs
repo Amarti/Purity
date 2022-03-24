@@ -13,9 +13,9 @@ namespace Purity.Avalonia.ViewModels
 {
 	public class MainWindowViewModel : ViewModelBase
 	{
-		public MainWindowViewModel(Window owner, Settings settings)
+		public MainWindowViewModel(Window ownerWindow, Settings settings)
 		{
-			_owner = owner;
+			_ownerWindow = ownerWindow;
 			Settings = settings;
 			Data = new List<PurityPeriod>();
 			PurityPeriods = new ObservableCollection<PurityPeriodViewModel>();
@@ -35,7 +35,7 @@ namespace Purity.Avalonia.ViewModels
 			Data = rawData.OrderBy(el => el.Begin).ToList();
 			BakeData(false);
 			foreach (var period in Data)
-				PurityPeriods.Add(new PurityPeriodViewModel(period, this));
+				PurityPeriods.Add(new PurityPeriodViewModel(period, this, _ownerWindow));
 		}
 		/// <summary>
 		/// Performs consistency calculations on whole data set
@@ -82,7 +82,7 @@ namespace Purity.Avalonia.ViewModels
 			var settingsCopy = new Settings(Settings);
 			var w = new SettingsWindow();
 			w.InitDataContext(settingsCopy, path => DataSerializer.SerializeData(Data, path));
-			if (await w.ShowDialog<bool?>(_owner) == true)
+			if (await w.ShowDialog<bool?>(_ownerWindow) == true)
 			{
 				Settings = settingsCopy;
 				InitData();
@@ -101,7 +101,7 @@ namespace Purity.Avalonia.ViewModels
 
 			var period = new PurityPeriod(beg, end);
 			Data.Add(period);
-			PurityPeriods.Add(new PurityPeriodViewModel(period, this));
+			PurityPeriods.Add(new PurityPeriodViewModel(period, this, _ownerWindow));
 			RefreshItems();
 		}
 
@@ -160,7 +160,7 @@ namespace Purity.Avalonia.ViewModels
 
 		public Settings Settings;
 		public List<PurityPeriod> Data;
-		private readonly Window _owner;
+		private readonly Window _ownerWindow;
 		private readonly List<int> _recentPeriodsStreak = new();
 
 		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
