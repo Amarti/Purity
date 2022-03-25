@@ -4,20 +4,21 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
+using Purity.ViewModels;
 using ReactiveUI;
 
 
 namespace Purity.Avalonia.ViewModels
 {
-	public class PurityPeriodViewModel : ViewModelBase
+	public class PurityPeriodViewModel : ViewModelBase, IPurityPeriodViewModel, IDisposable
 	{
-		public PurityPeriodViewModel(PurityPeriod period, MainWindowViewModel ownerVM, Window ownerWindow)
+		public PurityPeriodViewModel(PurityPeriod period, IMainWindowViewModel ownerVM, Window ownerWindow)
 		{
 			_period = period;
 			_ownerVM = ownerVM;
 			_ownerWindow = ownerWindow;
+			_impl = new PurityPeriodViewModelImpl(_period, _ownerVM);
 			UpdatePeriodLength();
-			SubEvents = new ObservableCollection<PurityEvent>(_period.SubEvents);
 
 			SelectedBeginDateHalfDayCommand = ReactiveCommand.Create(SelectedBeginDateHalfDay);
 			SelectedEndDateHalfDayCommand = ReactiveCommand.Create(SelectedEndDateHalfDay);
@@ -26,10 +27,15 @@ namespace Purity.Avalonia.ViewModels
 		}
 
 
+		public void Dispose()
+		{
+			_impl.Dispose();
+		}
+
+
 		private void UpdatePeriodLength()
 		{
-			var idx = _ownerVM.Data.IndexOf(_period);
-			_periodFullLength = idx > 0 ? PurityPeriod.GetPeriodLength(_ownerVM.Data[idx - 1], _period) : 0;
+			_impl.UpdatePeriodLength();
 			this.RaisePropertyChanged(nameof(SkipPeriodLength));
 		}
 
@@ -38,10 +44,7 @@ namespace Purity.Avalonia.ViewModels
 			this.RaisePropertyChanged(nameof(SkipPeriodLength));
 			this.RaisePropertyChanged(nameof(IsClosed));
 			this.RaisePropertyChanged(nameof(IsLast));
-
-			SubEvents.Clear();
-			foreach (var p in _period.SubEvents)
-				SubEvents.Add(p);
+			_impl.Refresh();
 		}
 
 		public ICommand SelectedBeginDateHalfDayCommand { get; }
@@ -72,84 +75,65 @@ namespace Purity.Avalonia.ViewModels
 		}
 
 
-		public DateTimeOffset SelectedBeginDate
+		public DateTimeOffset SelectedBeginDateOffset
 		{
-			get => new(_period.Begin);
+			get => new(_impl.SelectedBeginDate);
 			set
 			{
-				_period.Begin = new DateTime(value.Ticks);
+				_impl.SelectedBeginDate = new DateTime(value.Ticks);
 				UpdatePeriodLength();
-				this.RaisePropertyChanged(nameof(SelectedBeginDate));
+				this.RaisePropertyChanged(nameof(SelectedBeginDateOffset));
 			}
+		}
+		public DateTime SelectedBeginDate
+		{
+			get => _impl.SelectedBeginDate;
 		}
 		public bool SelectedBeginDateIsAfterDusk
 		{
-			get => PurityEvent.IsDateAfterDusk(_period.Begin);
+			get => _impl.SelectedBeginDateIsAfterDusk;
 			set
 			{
-				if (value)
-				{
-					if (!PurityEvent.IsDateAfterDusk(_period.Begin))
-					{
-						_period.Begin = _period.Begin.AddHours(12);
-						UpdatePeriodLength();
-					}
-				}
-				else
-				{
-					if (PurityEvent.IsDateAfterDusk(_period.Begin))
-					{
-						_period.Begin = _period.Begin.AddHours(-12);
-						UpdatePeriodLength();
-					}
-				}
+				_impl.SelectedBeginDateIsAfterDusk = value;
+				UpdatePeriodLength();
 				this.RaisePropertyChanged(nameof(SelectedBeginDateIsAfterDusk));
 			}
 		}
-		public DateTimeOffset SelectedEndDate
+		public DateTimeOffset SelectedEndDateOffset
 		{
-			get => new(_period.End);
+			get => new(_impl.SelectedEndDate);
 			set
 			{
-				_period.End = new DateTime(value.Ticks);
-				this.RaisePropertyChanged(nameof(SelectedEndDate));
+				_impl.SelectedEndDate = new DateTime(value.Ticks);
+				this.RaisePropertyChanged(nameof(SelectedEndDateOffset));
 			}
 		}
 		public bool SelectedEndDateIsAfterDusk
 		{
-			get => PurityEvent.IsDateAfterDusk(_period.End);
+			get => _impl.SelectedEndDateIsAfterDusk;
 			set
 			{
-				if (value)
-				{
-					if (!PurityEvent.IsDateAfterDusk(_period.End))
-						_period.End = _period.End.AddHours(12);
-				}
-				else
-				{
-					if (PurityEvent.IsDateAfterDusk(_period.End))
-						_period.End = _period.End.AddHours(-12);
-				}
+				_impl.SelectedEndDateIsAfterDusk = value;
 				this.RaisePropertyChanged(nameof(SelectedEndDateIsAfterDusk));
 			}
 		}
 		public bool SkipStreak
 		{
-			get => _period.SkipStreak;
+			get => _impl.SkipStreak;
 			set
 			{
-				_period.SkipStreak = value;
+				_impl.SkipStreak = value;
 				this.RaisePropertyChanged(nameof(SkipStreak));
 			}
 		}
-		public string SkipPeriodLength => $"Skip" + (_periodFullLength > 0 ? $" ({_periodFullLength})" : string.Empty);
-		public bool IsClosed => _period.Closed;
-		public bool IsLast => _ownerVM.Data.Count > 0 && _ownerVM.Data[^1] == _period;
-		public ObservableCollection<PurityEvent> SubEvents { get; private set; }
+		public string SkipPeriodLength => _impl.SkipPeriodLength;
+		public bool IsClosed => _impl.IsClosed;
+		public bool IsLast => _impl.IsLast;
+		public ObservableCollection<PurityEvent> SubEvents => _impl.SubEvents;
 
 		private readonly PurityPeriod _period;
-		private readonly MainWindowViewModel _ownerVM;
+		private readonly IMainWindowViewModel _ownerVM;
 		private readonly Window _ownerWindow;
-		private int _periodFullLength;
+		private readonly PurityPeriodViewModelImpl _impl;
 	}
 }

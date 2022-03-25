@@ -54,11 +54,11 @@
                     <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={StaticResource BoolToBorderBrushConverter}}">
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
                             <Grid ColumnDefinitions="305, 40, 305, 40, 90, 40, 40">
-                                <DatePicker Grid.Column="0" Margin="5,0,0,0" Header="Begin" Height="45" Width="300" SelectedDate="{Binding SelectedBeginDate}"/>
+                                <DatePicker Grid.Column="0" Margin="5,0,0,0" Header="Begin" Height="45" Width="300" SelectedDate="{Binding SelectedBeginDateOffset}"/>
                                 <Button Grid.Column="1" Margin="5,21,10,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedBeginDateHalfDayCommand}">
                                     <Rectangle Margin="1,1,0,0" Height="17" Width="17" Fill="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
                                 </Button>
-                                <DatePicker Grid.Column="2" Margin="5,0,0,0" Header="End" Height="45" Width="300" SelectedDate="{Binding SelectedEndDate}"/>
+                                <DatePicker Grid.Column="2" Margin="5,0,0,0" Header="End" Height="45" Width="300" SelectedDate="{Binding SelectedEndDateOffset}"/>
                                 <Button Grid.Column="3" Margin="5,21,10,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedEndDateHalfDayCommand}">
                                     <Rectangle Margin="1,1,0,0" Height="17" Width="17" Fill="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
                                 </Button>
