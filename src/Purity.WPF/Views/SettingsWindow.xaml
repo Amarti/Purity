@@ -37,14 +37,14 @@
 
         <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,2,0,0" Height="23" Text="Data file path:"/>
         <TextBox x:Name="tbFilePath" Grid.Column="2" Grid.Row="1" Height="23" Text="{Binding DataFilePath}"/>
-        <Button Grid.Column="3" Grid.Row="1" Margin="6,0,0,0" Content="..." Click="PickFile_OnClick" Height="23" Width="23"/>
+        <Button Grid.Column="3" Grid.Row="1" Margin="6,0,0,0" Height="23" Width="23" Content="..." Click="PickFile_OnClick"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Content="Save data" Command="{Binding SaveDataCommand}" Height="30" HorizontalAlignment="Stretch"
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2" Height="30" HorizontalAlignment="Stretch" Content="Save data" Command="{Binding SaveDataCommand}"
                 Visibility="{Binding IsDebug, Converter={StaticResource Bool2VisibilityCollapsedConverter}}"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Content="Create periods lengths report" Command="{Binding SaveReportCommand}" Height="30" HorizontalAlignment="Stretch"/>
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Height="30" HorizontalAlignment="Stretch" Content="Create periods lengths report" Command="{Binding SaveReportCommand}"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="6" Content="OK" Click="Ok_OnClick" Height="30" Width="150" HorizontalAlignment="Left"/>
-        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="6" Content="Cancel" Click="Cancel_OnClick" Height="30" Width="150" HorizontalAlignment="Right"/>
+        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="6" Height="30" Width="150" Content="OK" Click="Ok_OnClick" HorizontalAlignment="Left"/>
+        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="6" Height="30" Width="150" Content="Cancel" Click="Cancel_OnClick" HorizontalAlignment="Right"/>
     </Grid>
 </Window>

@@ -73,7 +73,21 @@ namespace Purity
 			return res;
 		}
 
+		/// <summary>
+		/// This is a temporary solution for bug in Avalonia (v.10) that reverses order of hebrew words in the string<br/>
+		/// It also reverses letters of the first word (day, since it always containt " sign? which confuses Avalonia even further)
+		/// </summary>
+		/// <param name="repr">Input to be reversed</param>
+		/// <returns>Input with reversed words order</returns>
+		private static string ReverseHebrewWords(string repr)
+		{
+			var tks = repr.Split('\u0020');	// aka space, just for kicks, really
+			tks[0] = new string(tks[0].Reverse().ToArray());
+			return string.Join('\u0020', tks.Reverse());
+		}
+
 		public static bool IsDateAfterDusk(DateTime d) => d.Hour == 12;
+
 
 		public PurityEventType Type { get; set; }
 		/// <summary>
@@ -122,6 +136,8 @@ namespace Purity
 				return es.ToString("d MMMM", CultureHolder.Instance.HebrewCulture);
 			}
 		}
+		[JsonIgnore]
+		public string StampHebReprAvalonia => ReverseHebrewWords(StampHebRepr);
 		[JsonIgnore]
 		public string StampGrgRepr
 		{
@@ -214,7 +230,7 @@ namespace Purity
 			foreach (var p in recentPeriodsStreak)
 			{
 				var tm = End.AddHours(12 * p);				// adding p half-calendar days
-				AddEvent(tm, PurityEventType.VesetAflaga, $"[{p}]");
+				AddEvent(tm, PurityEventType.VesetAflaga, $"({p})");
 			}
 		}
 		private void AddEvent(DateTime tm, PurityEventType typ, string? note = null)
