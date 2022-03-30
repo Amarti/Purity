@@ -17,8 +17,9 @@ namespace Purity
 		public static void SetCurrentDirectoryToEntryAssemblyLocation()
 		{
 			Environment.CurrentDirectory = GetCurrentPath();
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))     // running from <>.app/Contents/MacOS
-				Environment.CurrentDirectory = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? Environment.CurrentDirectory;
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))     // checking for running from '<>.app/Contents/MacOS' and acting accordingly
+				if (Environment.CurrentDirectory.Contains("Contents/MacOS"))
+					Environment.CurrentDirectory = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? Environment.CurrentDirectory;
 		}
 		public static string GetCurrentPath()
 		{
@@ -90,6 +91,7 @@ namespace Purity
 
 		private const string HOSTNAME_ID = "hostname";
 
+		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 		private static string _productName = string.Empty;
 		private static string _productVersion = string.Empty;
 	}

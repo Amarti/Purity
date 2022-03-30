@@ -51,12 +51,18 @@
                                 <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
                                 <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
                                 <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedBeginDateHalfDayCommand}" ToolTip="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnTooltipConverter}}">
-                                    <Rectangle Height="17" Width="17" Fill="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
+                                    <Grid>
+                                        <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" Visibility="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2VisibilityHiddenConverter}}" VerticalAlignment="Center"/>
+                                        <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" Visibility="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2NotVisibilityHiddenConverter}}" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </Button>
                                 <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
                                 <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
-                                <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedEndDateHalfDayCommand}" ToolTip="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnTooltipConverter}}">
-                                    <Rectangle Height="17" Width="17" Fill="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnBrushConverter}}" Stroke="Gray"/>
+                                <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedEndDateHalfDayCommand}" ToolTip="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnTooltipConverter}}">
+                                    <Grid>
+                                        <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" Visibility="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2VisibilityHiddenConverter}}" VerticalAlignment="Center"/>
+                                        <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" Visibility="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2NotVisibilityHiddenConverter}}" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </Button>
                                 <CheckBox Margin="10,8,0,0" Height="25" Width="80" IsChecked="{Binding SkipStreak}" Content="{Binding SkipPeriodLength}" ToolTip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)"/>
                                 <Button Margin="15,0,0,0" Height="25" Width="25" ToolTip="Accept period" Command="{Binding AcceptPeriodCommand}" Visibility="{Binding IsClosed, Converter={StaticResource Bool2NotVisibilityHiddenConverter}}">

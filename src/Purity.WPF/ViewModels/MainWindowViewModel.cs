@@ -40,7 +40,7 @@ namespace Purity.WPF.ViewModels
 			var settingsCopy = new Settings(Settings);
 			var w = new SettingsWindow(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), path => DataSerializer.SerializeData(Data, path));
 			if (w.ShowDialog() == true)
-				_impl.SetSetings(settingsCopy);
+				_impl.SetSettings(settingsCopy);
 		}
 
 		public ICommand AddPeriodCommand { get; }

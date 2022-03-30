@@ -9,8 +9,8 @@ Current TODOs:
 	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
  - Port to macOS (avalonia)
-	- better styling
 	- calendar/reminders integration
+	- compel the listbox control to put last item fully
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
@@ -18,5 +18,3 @@ Current TODOs:
 	- external storage file path (dropbox/google drive integration)
 	- calendar/reminders integration
  - Port to linux
- - More icons
- - Better styling

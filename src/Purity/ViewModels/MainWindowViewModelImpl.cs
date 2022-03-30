@@ -130,7 +130,7 @@ namespace Purity.ViewModels
 				vm.Refresh();
 		}
 
-		public void SetSetings(Settings settings)
+		public void SetSettings(Settings settings)
 		{
 			Settings = settings;
 			InitData();

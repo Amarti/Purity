@@ -42,7 +42,7 @@ namespace Purity.Avalonia.ViewModels
 			var w = new SettingsWindow();
 			w.InitDataContext(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), path => DataSerializer.SerializeData(Data, path));
 			if (await w.ShowDialog<bool?>(_ownerWindow) == true)
-				_impl.SetSetings(settingsCopy);
+				_impl.SetSettings(settingsCopy);
 		}
 
 		public ICommand AddPeriodCommand { get; }
