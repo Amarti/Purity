@@ -75,7 +75,7 @@ namespace Purity
 
 		/// <summary>
 		/// This is a temporary solution for bug in Avalonia (v.10) that reverses order of hebrew words in the string<br/>
-		/// It also reverses letters of the first word (day, since it always containt " sign? which confuses Avalonia even further)
+		/// It also reverses letters of the first word (day, since it always contains " sign, which confuses Avalonia even further)
 		/// </summary>
 		/// <param name="repr">Input to be reversed</param>
 		/// <returns>Input with reversed words order</returns>

@@ -16,8 +16,8 @@
 		
 
 		/// <summary>
-		/// Absolute path to the data file.<br/>
-		/// Optional.
+		/// Absolute path to the data file<br/>
+		/// Optional
 		/// </summary>
 		public string DataFilePath { get; set; }
 	}
