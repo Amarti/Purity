@@ -18,7 +18,7 @@ namespace Purity
 
 	public class PurityEvent
 	{
-		public PurityEvent(PurityEventType type, DateTime stamp, string? note = null)
+		public PurityEvent(PurityEventType type, DateTimeOffset stamp, string? note = null)
 		{
 			Type = type;
 			Stamp = stamp;
@@ -86,7 +86,7 @@ namespace Purity
 			return string.Join('\u0020', tks.Reverse());
 		}
 
-		public static bool IsDateAfterDusk(DateTime d) => d.Hour == 12;
+		public static bool IsDateAfterDusk(DateTimeOffset d) => d.Hour == 12;
 
 
 		public PurityEventType Type { get; set; }
@@ -95,7 +95,7 @@ namespace Purity
 		/// <para/>00 stands for beginning of light half of calendar day (more aligned with beginning of gregorian calendar day)
 		/// <para/>12 stands for beginning of dark half of calendar day (more aligned with beginning of hebrew calendar day)
 		/// </summary>
-		public DateTime Stamp { get; set; }
+		public DateTimeOffset Stamp { get; set; }
 		/// <summary>
 		/// Information for optional presentation
 		/// </summary>
@@ -161,7 +161,7 @@ namespace Purity
 		{
 			SubEvents = new List<PurityEvent>();
 		}
-		public PurityPeriod(DateTime begin, DateTime end)
+		public PurityPeriod(DateTimeOffset begin, DateTimeOffset end)
 			: this()
 		{
 			Begin = begin;
@@ -177,7 +177,7 @@ namespace Purity
 		/// <param name="b">Second period</param>
 		public static int GetPeriodLength(PurityPeriod a, PurityPeriod b)
 		{
-			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue || b.SkipStreak)	// skipping streak calculation only to upcoming period
+			if (a.End == DateTimeOffset.MinValue || b.Begin == DateTimeOffset.MinValue || b.SkipStreak)	// skipping streak calculation only to upcoming period
 				return 0;
 			var l = (int)((b.Begin - a.EffectiveEnd).TotalHours / 12) - 1;
 			return l;
@@ -189,7 +189,7 @@ namespace Purity
 		/// <param name="b">Second period</param>
 		public static float GetFullPeriodLength(PurityPeriod a, PurityPeriod b)
 		{
-			if (a.End == DateTime.MinValue || b.Begin == DateTime.MinValue)
+			if (a.End == DateTimeOffset.MinValue || b.Begin == DateTimeOffset.MinValue)
 				return 0;
 			var l = (float)((b.Begin - a.Begin).TotalHours / 24) - 1;
 			return l;
@@ -222,8 +222,8 @@ namespace Purity
 		}
 		private void AddVesetHodesh(HebrewCalendar hec)
 		{
-			var tm = hec.AddMonths(Begin, 1);				// adding full hebrew month
-			AddEvent(tm, PurityEventType.VesetHodesh);
+			var tm = hec.AddMonths(Begin.UtcDateTime, 1);	// adding full hebrew month
+			AddEvent(new(tm, TimeSpan.Zero), PurityEventType.VesetHodesh);
 		}
 		private void AddVesetAflaga(List<int> recentPeriodsStreak)
 		{
@@ -233,21 +233,21 @@ namespace Purity
 				AddEvent(tm, PurityEventType.VesetAflaga, $"({p})");
 			}
 		}
-		private void AddEvent(DateTime tm, PurityEventType typ, string? note = null)
+		private void AddEvent(DateTimeOffset tm, PurityEventType typ, string? note = null)
 		{
 			if (!SubEvents.Any(el => el.Stamp == tm && el.Type == typ))
 				SubEvents.Add(new PurityEvent(typ, tm, note));
 		}
 
 
-		public DateTime Begin { get; set; }
-		public DateTime End { get; set; }
+		public DateTimeOffset Begin { get; set; }
+		public DateTimeOffset End { get; set; }
 		/// <summary>
 		/// End date corrected to beginning of next hebrew calendar day.
 		/// <para/>If verification (bdikah) is made after dusk, it is considered next hebrew date, since all bdikah is counted in the light of day
 		/// </summary>
 		[JsonIgnore]
-		public DateTime EffectiveEnd => PurityEvent.IsDateAfterDusk(End) ? End.AddHours(12) : End;
+		public DateTimeOffset EffectiveEnd => PurityEvent.IsDateAfterDusk(End) ? End.AddHours(12) : End;
 		/// <summary>
 		/// Period is closed and needs calculation
 		/// </summary>

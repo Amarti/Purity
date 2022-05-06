@@ -45,13 +45,11 @@ namespace Purity.ViewModels
 			PurityPeriod? lastPeriod = null;
 			foreach (var period in Data)
 			{
-				period.Begin = new DateTime(period.Begin.Ticks, DateTimeKind.Utc);	// force-converting all incoming dates to utc
-				period.End = new DateTime(period.End.Ticks, DateTimeKind.Utc);		//
 				UpdateRecentPeriodsStreak(lastPeriod, period);
 				if (full)
 				{
 					period.SubEvents.Clear();
-					if (period.End != DateTime.MinValue && period.Closed)
+					if (period.End != DateTimeOffset.MinValue && period.Closed)
 						period.Commit(CultureHolder.Instance.HebrewCalendar, _recentPeriodsStreak);
 				}
 				lastPeriod = period;
@@ -78,10 +76,10 @@ namespace Purity.ViewModels
 
 		public void AddPeriod()
 		{
-			var today = DateTime.UtcNow.Date;	// ensures zero time offset
+			var today = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
 			AddPeriod(today, today.AddDays(7));
 		}
-		private void AddPeriod(DateTime beg, DateTime end)
+		private void AddPeriod(DateTimeOffset beg, DateTimeOffset end)
 		{
 			if (Data.Any(el => el.Begin == beg))
 				return;
@@ -100,7 +98,7 @@ namespace Purity.ViewModels
 
 		public void AcceptPeriod(PurityPeriod period)
 		{
-			if (period == null || period.End == DateTime.MinValue)
+			if (period == null || period.End == DateTimeOffset.MinValue)
 				return;
 
 			period.Closed = true;

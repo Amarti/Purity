@@ -32,7 +32,7 @@ namespace Purity.ViewModels
 		}
 
 
-		public DateTime SelectedBeginDate
+		public DateTimeOffset SelectedBeginDate
 		{
 			get => _period.Begin;
 			set => _period.Begin = value;
@@ -54,7 +54,7 @@ namespace Purity.ViewModels
 				}
 			}
 		}
-		public DateTime SelectedEndDate
+		public DateTimeOffset SelectedEndDate
 		{
 			get => _period.End;
 			set => _period.End = value;

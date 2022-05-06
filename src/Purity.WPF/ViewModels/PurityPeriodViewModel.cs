@@ -70,7 +70,7 @@ namespace Purity.WPF.ViewModels
 		}
 
 
-		public DateTime SelectedBeginDate
+		public DateTimeOffset SelectedBeginDate
 		{
 			get => _impl.SelectedBeginDate;
 			set
@@ -79,6 +79,11 @@ namespace Purity.WPF.ViewModels
 				UpdatePeriodLength();
 				RaisePropertyChanged(() => SelectedBeginDate);
 			}
+		}
+		public DateTime SelectedBeginDateWPF
+		{
+			get => SelectedBeginDate.UtcDateTime;
+			set => SelectedBeginDate = new(value, TimeSpan.Zero);
 		}
 		public bool SelectedBeginDateIsAfterDusk
 		{
@@ -90,7 +95,7 @@ namespace Purity.WPF.ViewModels
 				RaisePropertyChanged(() => SelectedBeginDateIsAfterDusk);
 			}
 		}
-		public DateTime SelectedEndDate
+		public DateTimeOffset SelectedEndDate
 		{
 			get => _impl.SelectedEndDate;
 			set
@@ -98,6 +103,11 @@ namespace Purity.WPF.ViewModels
 				_impl.SelectedEndDate = value;
 				RaisePropertyChanged(() => SelectedEndDate);
 			}
+		}
+		public DateTime SelectedEndDateWPF
+		{
+			get => SelectedEndDate.UtcDateTime;
+			set => SelectedEndDate = new (value, TimeSpan.Zero);
 		}
 		public bool SelectedEndDateIsAfterDusk
 		{

@@ -49,7 +49,7 @@
                         <StackPanel Margin="0,5,0,5" Orientation="Vertical" HorizontalAlignment="Center">
                             <StackPanel Height="Auto" Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
-                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDate}"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedBeginDateWPF}"/>
                                 <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedBeginDateHalfDayCommand}" ToolTip="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnTooltipConverter}}">
                                     <Grid>
                                         <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" Visibility="{Binding SelectedBeginDateIsAfterDusk, Converter={StaticResource Bool2NotVisibilityHiddenConverter}}" VerticalAlignment="Center"/>
@@ -57,7 +57,7 @@
                                     </Grid>
                                 </Button>
                                 <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
-                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDate}"/>
+                                <DatePicker Margin="5,0,0,0" Height="25" Width="150" SelectedDateFormat="Long" SelectedDate="{Binding SelectedEndDateWPF}"/>
                                 <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding SelectedEndDateHalfDayCommand}" ToolTip="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2DuskDawnTooltipConverter}}">
                                     <Grid>
                                         <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" Visibility="{Binding SelectedEndDateIsAfterDusk, Converter={StaticResource Bool2NotVisibilityHiddenConverter}}" VerticalAlignment="Center"/>

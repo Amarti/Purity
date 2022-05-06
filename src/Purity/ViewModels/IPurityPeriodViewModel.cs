@@ -14,6 +14,6 @@ namespace Purity.ViewModels
 		void Refresh();
 
 
-		DateTime SelectedBeginDate { get; }
+		DateTimeOffset SelectedBeginDate { get; }
 	}
 }
