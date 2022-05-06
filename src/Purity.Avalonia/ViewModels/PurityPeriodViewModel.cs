@@ -77,10 +77,10 @@ namespace Purity.Avalonia.ViewModels
 
 		public DateTimeOffset SelectedBeginDateOffset
 		{
-			get => new(_impl.SelectedBeginDate);
+			get => new(_impl.SelectedBeginDate, TimeSpan.Zero);
 			set
 			{
-				_impl.SelectedBeginDate = new DateTime(value.Ticks);
+				_impl.SelectedBeginDate = new DateTime(value.Ticks, DateTimeKind.Utc);
 				UpdatePeriodLength();
 				this.RaisePropertyChanged(nameof(SelectedBeginDateOffset));
 			}
@@ -101,10 +101,10 @@ namespace Purity.Avalonia.ViewModels
 		}
 		public DateTimeOffset SelectedEndDateOffset
 		{
-			get => new(_impl.SelectedEndDate);
+			get => new(_impl.SelectedEndDate, TimeSpan.Zero);
 			set
 			{
-				_impl.SelectedEndDate = new DateTime(value.Ticks);
+				_impl.SelectedEndDate = new DateTime(value.Ticks, DateTimeKind.Utc);
 				this.RaisePropertyChanged(nameof(SelectedEndDateOffset));
 			}
 		}

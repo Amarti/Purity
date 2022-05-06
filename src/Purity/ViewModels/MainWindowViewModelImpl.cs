@@ -45,6 +45,8 @@ namespace Purity.ViewModels
 			PurityPeriod? lastPeriod = null;
 			foreach (var period in Data)
 			{
+				period.Begin = new DateTime(period.Begin.Ticks, DateTimeKind.Utc);	// force-converting all incoming dates to utc
+				period.End = new DateTime(period.End.Ticks, DateTimeKind.Utc);		//
 				UpdateRecentPeriodsStreak(lastPeriod, period);
 				if (full)
 				{
@@ -76,7 +78,8 @@ namespace Purity.ViewModels
 
 		public void AddPeriod()
 		{
-			AddPeriod(DateTime.Today, DateTime.Today.AddDays(7));
+			var today = DateTime.UtcNow.Date;	// ensures zero time offset
+			AddPeriod(today, today.AddDays(7));
 		}
 		private void AddPeriod(DateTime beg, DateTime end)
 		{
