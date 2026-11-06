@@ -1,0 +1,137 @@
+name: Calculation parity
+
+# Proves the engine gives exactly the same dates on every platform. The repo is public, so logs and
+# artifacts must never contain real dates: real-data tests report positions only, and this workflow
+# uploads nothing.
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    name: ${{ matrix.os }} ${{ matrix.tz }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, windows-11-arm, ubuntu-24.04, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+        tz: [UTC]
+        include:
+          - { os: ubuntu-24.04, tz: Asia/Jerusalem }
+          - { os: ubuntu-24.04, tz: America/Los_Angeles }
+          - { os: ubuntu-24.04, tz: Pacific/Kiritimati }
+          - { os: ubuntu-24.04, tz: Pacific/Pago_Pago }
+          - { os: ubuntu-24.04, tz: Asia/Kathmandu }
+          - { os: macos-latest, tz: Asia/Jerusalem }
+    env:
+      TZ: ${{ matrix.tz }}
+      DOTNET_NOLOGO: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Decrypt real data
+        id: fixture
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        env:
+          PURITY_FIXTURE_PASSPHRASE: ${{ secrets.PURITY_FIXTURE_PASSPHRASE }}
+        run: |
+          if [ -n "$PURITY_FIXTURE_PASSPHRASE" ] && [ -f tests/fixtures/private.tar.gz.gpg ]; then
+            bash tools/fixture.sh decrypt
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Encrypted fixture isn't set up: real-data tests will skip"
+          fi
+
+      - name: Build
+        run: dotnet build tests/Purity.Parity/Purity.Parity.csproj -c Release
+
+      - name: Test on .NET 10
+        shell: bash
+        env:
+          PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
+          PURITY_RANDOM_SEED: ${{ github.event_name == 'schedule' && github.run_number || '' }}
+        run: dotnet run --no-build -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+
+      - name: Test on .NET 8
+        shell: bash
+        env:
+          PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
+        run: dotnet run --no-build -c Release -f net8.0 --project tests/Purity.Parity/Purity.Parity.csproj
+
+      - name: Remove decrypted data
+        if: always()
+        shell: bash
+        run: rm -rf tests/private
+
+  debian:
+    name: debian 13
+    runs-on: ubuntu-24.04
+    container: debian:13
+    steps:
+      - name: Install prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git libicu76
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test on .NET 10
+        run: dotnet run -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+
+  no-os-culture:
+    name: no OS culture data
+    runs-on: ubuntu-24.04
+    env:
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test on .NET 10
+        run: dotnet run -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+
+  nls:
+    name: windows NLS
+    runs-on: windows-latest
+    env:
+      DOTNET_SYSTEM_GLOBALIZATION_USENLS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test on .NET 10
+        run: dotnet run -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+
+  golden-guard:
+    name: approved output changes need a rules bump
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check
+        shell: bash
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          if git diff --name-only "$base" HEAD | grep -q '^tests/Purity.Parity/Golden/'; then
+            git diff "$base" HEAD -- src/Purity.Core/PeriodLedger.cs | grep -q '^+.*RulesVersion = ' || {
+              echo "Approved output changed without bumping PeriodLedger.RulesVersion"
+              exit 1
+            }
+          fi
