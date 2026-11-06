@@ -42,22 +42,28 @@ jobs:
             8.0.x
             10.0.x
 
+      - name: Build
+        run: dotnet build tests/Purity.Parity/Purity.Parity.csproj -c Release
+
+      # After the build, so the plain data isn't on disk during package restore. Forks and fork
+      # pull requests have no secret and skip this; here a missing secret must fail, not skip.
       - name: Decrypt real data
         id: fixture
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        if: ${{ github.repository == 'Amarti/Purity' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         shell: bash
         env:
           PURITY_FIXTURE_PASSPHRASE: ${{ secrets.PURITY_FIXTURE_PASSPHRASE }}
         run: |
-          if [ -n "$PURITY_FIXTURE_PASSPHRASE" ] && [ -f tests/fixtures/private.tar.gz.gpg ]; then
-            bash tools/fixture.sh decrypt
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Encrypted fixture isn't set up: real-data tests will skip"
+          if [ ! -f tests/fixtures/private.tar.gz.gpg ]; then
+            echo "Encrypted fixture isn't committed yet: real-data tests will skip"
+            exit 0
           fi
-
-      - name: Build
-        run: dotnet build tests/Purity.Parity/Purity.Parity.csproj -c Release
+          if [ -z "$PURITY_FIXTURE_PASSPHRASE" ]; then
+            echo "::error::The encrypted fixture is committed but the PURITY_FIXTURE_PASSPHRASE secret is missing"
+            exit 1
+          fi
+          bash tools/fixture.sh decrypt
+          echo "available=true" >> "$GITHUB_OUTPUT"
 
       - name: Test on .NET 10
         shell: bash

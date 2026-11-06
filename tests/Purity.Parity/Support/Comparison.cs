@@ -43,6 +43,8 @@ namespace Purity.Parity
 
 				Assert.Fail($"{context}: differs at line {i + 1}, field {field} (values withheld: real data)");
 			}
+
+			Assert.Fail($"{context}: differs in trailing blank lines");
 		}
 
 		/// <summary>Canonical text for comparing with a live reference run on this platform.</summary>

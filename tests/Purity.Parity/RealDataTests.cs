@@ -10,6 +10,13 @@ namespace Purity.Parity
 	/// </summary>
 	public class RealDataTests
 	{
+		/// <summary>
+		/// Snapshots that hold periods. The rest predate the current file format, and both engines
+		/// read them as empty. An unreadable file also reads as empty on both sides, so the
+		/// comparison alone can't notice one.
+		/// </summary>
+		private const int ReadableSnapshots = 22;
+
 		public static TheoryData<string> BothEngines => ["reference", "candidate"];
 
 
@@ -118,12 +125,18 @@ namespace Purity.Parity
 			var files = Directory.GetFiles(RealData.HistoryFolder, "*.json").Order(StringComparer.Ordinal).ToList();
 			Assert.NotEmpty(files);
 
+			var readable = 0;
 			for (var i = 0; i < files.Count; i++)
 			{
 				var reference = Engines.Reference.RoundTripFile(files[i]);
 				var candidate = Engines.Candidate.RoundTripFile(files[i]);
 				Assert.True(Normalized(reference) == Normalized(candidate), $"snapshot {i} differs");
+
+				if (Normalized(candidate).Trim() != "[]")
+					readable++;
 			}
+
+			Assert.True(readable >= ReadableSnapshots, $"only {readable} snapshots could be read, expected at least {ReadableSnapshots}");
 		}
 
 		/// <summary>Layer 9: the old app reads what the new one writes and calculates the same.</summary>

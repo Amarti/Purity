@@ -18,7 +18,7 @@ Tests that need real data skip when `tests/private/` is missing. Set `PURITY_REQ
 
 ## Real data
 
-`tests/private/` holds a snapshot of `pureData.json` and older copies, and it is gitignored. The repo is public, so only the encrypted file `tests/fixtures/private.tar.gz.gpg` may be committed. Use `tools/fixture.sh` to create or unpack it.
+`tests/private/` holds a snapshot of `pureData.json` and older copies, and it is gitignored. The repo is public, so only the encrypted file `tests/fixtures/private.tar.gz.gpg` may be committed. Use `tools/fixture.sh` to create or unpack it. Once that file is committed, CI fails if the `PURITY_FIXTURE_PASSPHRASE` secret is missing, so the real-data tests can't quietly stop running. Forks and fork pull requests skip them.
 
 Keep real dates out of test code, commit messages and CI output. Real-data failures report a position only, and public edge-case tests use synthetic dates of the same kind.
 

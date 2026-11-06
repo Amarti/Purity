@@ -1,5 +1,6 @@
 # The frozen reference engine must stay byte-identical on every platform
 tests/Purity.Reference.V1/Source/** -text
 tests/oracle/** binary
+tests/fixtures/** binary
 tests/Purity.Parity/Golden/** -text
 *.sh text eol=lf
