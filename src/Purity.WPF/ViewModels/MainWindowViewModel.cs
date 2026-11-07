@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
@@ -31,6 +32,12 @@ namespace Purity.WPF.ViewModels
 		public void InitData()
 		{
 			_impl.InitData();
+			WarnIfDataUnreadable();
+		}
+		private void WarnIfDataUnreadable()
+		{
+			if (_impl.LoadFailed)
+				MessageBox.Show(DataSerializer.LOAD_FAILED_MESSAGE, "Purity", MessageBoxButton.OK, MessageBoxImage.Warning);
 		}
 
 
@@ -38,9 +45,12 @@ namespace Purity.WPF.ViewModels
 		private void OpenSettings()
 		{
 			var settingsCopy = new Settings(Settings);
-			var w = new SettingsWindow(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), path => DataSerializer.SerializeData(Data, path));
+			var w = new SettingsWindow(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), _impl.SaveDataTo);
 			if (w.ShowDialog() == true)
+			{
 				_impl.SetSettings(settingsCopy);
+				WarnIfDataUnreadable();
+			}
 		}
 
 		public ICommand AddPeriodCommand { get; }
