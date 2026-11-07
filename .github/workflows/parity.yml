@@ -45,6 +45,9 @@ jobs:
       - name: Build
         run: dotnet build tests/Purity.Parity/Purity.Parity.csproj -c Release
 
+      - name: Build storage tests
+        run: dotnet build tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj -c Release
+
       # After the build, so the plain data isn't on disk during package restore. Forks and fork
       # pull requests have no secret and skip this; here a missing secret must fail, not skip.
       - name: Decrypt real data
@@ -77,6 +80,18 @@ jobs:
         env:
           PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
         run: dotnet run --no-build -c Release -f net8.0 --project tests/Purity.Parity/Purity.Parity.csproj
+
+      - name: Test storage on .NET 10
+        shell: bash
+        env:
+          PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
+        run: dotnet run --no-build -c Release -f net10.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
+
+      - name: Test storage on .NET 8
+        shell: bash
+        env:
+          PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
+        run: dotnet run --no-build -c Release -f net8.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
 
       - name: Remove decrypted data
         if: always()
