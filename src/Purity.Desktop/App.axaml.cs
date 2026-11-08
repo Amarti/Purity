@@ -1,0 +1,38 @@
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Markup.Xaml;
+using Purity.Desktop.Views;
+
+
+namespace Purity.Desktop
+{
+	public partial class App : Application
+	{
+		public override void Initialize() => AvaloniaXamlLoader.Load(this);
+
+		public override void OnFrameworkInitializationCompleted()
+		{
+			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+				desktop.MainWindow = new MainWindow(StartOptions.Parse(desktop.Args ?? Array.Empty<string>()));
+
+			base.OnFrameworkInitializationCompleted();
+		}
+	}
+
+
+	/// <summary>Command line options</summary>
+	/// <param name="DataFile">A data file to open instead of the one in the settings, for this run only</param>
+	public sealed record StartOptions(string? DataFile)
+	{
+		/// <summary>Reads <c>--data &lt;file&gt;</c> and ignores anything else, such as the arguments older macOS adds</summary>
+		public static StartOptions Parse(IReadOnlyList<string> args)
+		{
+			string? dataFile = null;
+			for (var i = 0; i < args.Count - 1; i++)
+				if (args[i] == "--data")
+					dataFile = args[i + 1];
+
+			return new StartOptions(dataFile);
+		}
+	}
+}

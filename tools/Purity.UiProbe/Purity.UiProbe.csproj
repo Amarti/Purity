@@ -4,8 +4,7 @@
     A small window that checks a UI stack on a real machine. Built per candidate for the platform
     check kit (tools/platform-check): this project is Avalonia 12 on .NET 8 and 10, and
     ../Purity.UiProbe.Avalonia11 is the Avalonia 11.3 fallback built from the same source.
-    Until the desktop app exists, CI's macOS 12 check (.github/workflows/macos-minimum.yml)
-    publishes this project, so keep its Avalonia version the one the app will ship.
+    Keep its Avalonia version the same as src/Purity.Desktop's, so the kit tests what ships.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>

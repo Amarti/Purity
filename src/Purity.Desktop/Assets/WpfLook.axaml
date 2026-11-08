@@ -1,0 +1,37 @@
+<!-- WPF's default look on Windows 10 and 11, so the app matches the WPF app it replaces -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="Window">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+
+    <Style Selector="ListBox, TextBox">
+        <Setter Property="BorderBrush" Value="#FFABADB3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    <Style Selector="ListBox">
+        <Setter Property="Padding" Value="1"/>
+    </Style>
+    <!-- WPF's text boxes are one line high; without this the Simple theme squeezes in a scroll bar -->
+    <Style Selector="TextBox">
+        <Setter Property="Padding" Value="2,1"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+    </Style>
+
+    <!-- WPF lines a list's items up on the left unless told otherwise; only the list of periods stretches them -->
+    <Style Selector="ListBox.Events ListBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+
+    <!-- The long date the WPF app shows on the production machine, fixed so every machine shows the same -->
+    <Style Selector="CalendarDatePicker.Wpf">
+        <Setter Property="SelectedDateFormat" Value="Custom"/>
+        <Setter Property="CustomDateFormatString" Value="dddd, d MMMM yyyy"/>
+    </Style>
+
+</Styles>

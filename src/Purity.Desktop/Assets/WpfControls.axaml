@@ -1,0 +1,175 @@
+<!--
+  Controls drawn the way WPF draws them on Windows 10 and 11 (its Aero2 theme), with the same sizes
+  and colors, so the app matches the WPF app it replaces. Everything else comes from the Simple theme.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+        <Setter Property="Background" Value="#FFDDDDDD"/>
+        <Setter Property="BorderBrush" Value="#FF707070"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  RecognizesAccessKey="True"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#FFBEE6FD"/>
+            <Setter Property="BorderBrush" Value="#FF3C7FB1"/>
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#FFC4E5F6"/>
+            <Setter Property="BorderBrush" Value="#FF2C628B"/>
+        </Style>
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#FFF4F4F4"/>
+            <Setter Property="BorderBrush" Value="#FFADB2B5"/>
+            <Setter Property="Foreground" Value="#FF838383"/>
+        </Style>
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter > Image">
+            <Setter Property="Opacity" Value="0.4"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#FF707070"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Padding" Value="4,-1,0,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,*" Background="Transparent">
+                    <Border Name="box" Width="13" Height="13" Margin="1"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <Path Name="mark" Margin="1" Stretch="Uniform" Fill="#FF212121" IsVisible="False"
+                              Data="F1 M 9.97498,1.22334L 4.6983,9.09834L 4.52164,9.09834L 0,5.19331L 1.27664,3.52165L 4.255,6.08833L 8.33331,1.52588e-005L 9.97498,1.22334 Z"/>
+                    </Border>
+                    <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1"
+                                      Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      RecognizesAccessKey="True"/>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:checked /template/ Path#mark">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^:pointerover /template/ Border#box">
+            <Setter Property="Background" Value="#FFF3F9FF"/>
+            <Setter Property="BorderBrush" Value="#FF5593FF"/>
+        </Style>
+        <Style Selector="^:pressed /template/ Border#box">
+            <Setter Property="Background" Value="#FFD9ECFF"/>
+            <Setter Property="BorderBrush" Value="#FF3C77DD"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type ListBoxItem}" TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="4,1"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1F26A0DA"/>
+            <Setter Property="BorderBrush" Value="#A826A0DA"/>
+        </Style>
+        <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#3DDADADA"/>
+            <Setter Property="BorderBrush" Value="#FFDADADA"/>
+        </Style>
+        <Style Selector="^:selected:focus-within /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#3D26A0DA"/>
+            <Setter Property="BorderBrush" Value="#FF26A0DA"/>
+        </Style>
+    </ControlTheme>
+
+    <!-- WPF's date field: a text box and a small calendar page showing 15 -->
+    <ControlTheme x:Key="{x:Type CalendarDatePicker}" TargetType="CalendarDatePicker">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#FFABADB3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="4,0,2,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Name="PART_TextBox"
+                                 Padding="{TemplateBinding Padding}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 MinHeight="0"
+                                 VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                 PlaceholderText="{TemplateBinding PlaceholderText}"/>
+                        <Button Name="PART_Button" Grid.Column="1" Focusable="False" Margin="2,0" VerticalAlignment="Center">
+                            <Button.Template>
+                                <ControlTemplate>
+                                    <Grid Width="17" Height="17" Background="Transparent">
+                                        <Border Background="White" BorderBrush="#FF718597" BorderThickness="1">
+                                            <Grid RowDefinitions="4,*">
+                                                <Border Background="#FF6E9ED0"/>
+                                                <Ellipse Width="2" Height="2" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Row="1" Text="15" FontSize="9" Foreground="#FF2F3640"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
+                            <Calendar Name="PART_Calendar"
+                                      DisplayDate="{TemplateBinding DisplayDate}"
+                                      DisplayDateStart="{TemplateBinding DisplayDateStart}"
+                                      DisplayDateEnd="{TemplateBinding DisplayDateEnd}"
+                                      FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
+                                      IsTodayHighlighted="{TemplateBinding IsTodayHighlighted}"
+                                      SelectedDate="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate, Mode=TwoWay}"/>
+                        </Popup>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

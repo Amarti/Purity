@@ -8,6 +8,9 @@ These tests prove the port gives exactly the same dates as the production engine
 | `Purity.Parity` | Compares `src/Purity.Core` with the reference, approved files and the real history |
 | `oracle/` | The compiled 2022 production `Purity.dll`, used to prove the frozen source behaves the same |
 | `Purity.Storage.Tests` | Proves saving and merging can't lose the history, by making each failure happen on purpose |
+| `Purity.Desktop.Tests` | The desktop app's behavior through its view models: what it saves, what it asks, and that it never writes over a file it couldn't read |
+
+For screenshots or a side-by-side run of the apps, `dotnet run tools/make-sample-data.cs -- <file>` writes a made-up history. Point a test run at it with `--data <file>`, and set `PURITY_APP_DATA` to a scratch folder so the app's own settings and local copies stay out of the real ones.
 
 ## Running
 

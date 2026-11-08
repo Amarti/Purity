@@ -1,0 +1,18 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Purity.Desktop.App"
+             Name="Purity"
+             RequestedThemeVariant="Light">
+    <Application.Styles>
+        <SimpleTheme />
+        <StyleInclude Source="avares://Purity/Assets/WpfLook.axaml" />
+    </Application.Styles>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Purity/Assets/Icons.axaml" />
+                <ResourceInclude Source="avares://Purity/Assets/WpfControls.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
