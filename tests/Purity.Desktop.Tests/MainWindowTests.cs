@@ -11,7 +11,7 @@ namespace Purity.Desktop.Tests
 	/// tests share the process's PURITY_APP_DATA setting, so they run one at a time.
 	/// </summary>
 	[Collection(AppDataCollection.Name)]
-	public sealed class MainWindowTests : IDisposable
+	public sealed partial class MainWindowTests : IDisposable
 	{
 		public MainWindowTests()
 		{
@@ -216,7 +216,7 @@ namespace Purity.Desktop.Tests
 		[Fact]
 		public async Task WithoutADataFileItAsksForOne()
 		{
-			var window = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Add);
+			var window = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue);
 			_viewModel = window;
 
 			await window.StartAsync();
@@ -248,7 +248,7 @@ namespace Purity.Desktop.Tests
 
 		private async Task<MainWindowViewModel> OpenAsync()
 		{
-			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, new FixedClock(), _pending.Add);
+			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, new FixedClock(), _pending.Enqueue);
 			await _viewModel.StartAsync();
 			return _viewModel;
 		}
@@ -259,8 +259,8 @@ namespace Purity.Desktop.Tests
 		private readonly string _root = Path.Combine(Path.GetTempPath(), $"purity-desktop-{Guid.NewGuid():N}");
 		private string _dataFile => Path.Combine(_root, "pureData.json");
 		private readonly FakeDialogs _dialogs = new();
-		/// <summary>File watcher notices, which these tests don't run</summary>
-		private readonly List<Func<Task>> _pending = new();
+		/// <summary>File watcher notices, which arrive on the watcher's thread and only run when a test runs them</summary>
+		private readonly System.Collections.Concurrent.ConcurrentQueue<Func<Task>> _pending = new();
 		private MainWindowViewModel? _viewModel;
 
 
@@ -271,11 +271,16 @@ namespace Purity.Desktop.Tests
 
 		private sealed class FakeDialogs : IAppDialogs
 		{
-			public Task<int?> AskAsync(string text, params string[] buttons)
+			public async Task<int?> AskAsync(string text, params string[] buttons)
 			{
 				Shown.Add(text);
-				return Task.FromResult(Answers.TryDequeue(out var answer) ? answer : (int?)null);
+				if (WhileAsking != null)
+					await WhileAsking(text);
+				return Answers.TryDequeue(out var answer) ? answer : null;
 			}
+
+			/// <summary>Runs while a question is on screen, before it's answered</summary>
+			public Func<string, Task>? WhileAsking { get; set; }
 
 			public Task<bool> ShowSettingsAsync(SettingsWindowViewModel settings)
 			{

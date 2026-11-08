@@ -110,16 +110,20 @@ namespace Purity.Desktop.ViewModels
 			UpdateCommands();
 		}
 
-		/// <summary>Recalculates every period. A question about two versions of the history comes first.</summary>
+		/// <summary>
+		/// Recalculates every period. A question about two versions of the history comes first, and
+		/// copies left by a sync app are offered again, even ones put off before.
+		/// </summary>
 		[RelayCommand(CanExecute = nameof(HasDataFile))]
 		private async Task Recalculate()
 		{
 			if (_session?.State == SessionState.NeedsResolution)
 			{
-				await ResolveAsync();
+				await ResolvePendingAsync();
 				return;
 			}
 
+			await BringInCopiesAsync(askAgain: true);
 			Ledger.Recalculate();
 			RefreshAll();
 		}
@@ -166,7 +170,8 @@ namespace Purity.Desktop.ViewModels
 
 			var path = Path.GetFullPath(DataFilePath);
 			_store = new FileDataStore(path);
-			_session = new DataSession(_store, new LocalVault(AppPaths.VaultFor(path)));
+			_vault = new LocalVault(AppPaths.VaultFor(path));
+			_session = new DataSession(_store, _vault);
 			_session.HistoryReplaced += OnHistoryReplaced;
 			UpdateCommands();
 
@@ -175,6 +180,7 @@ namespace Purity.Desktop.ViewModels
 			_store.Changed += OnFileChanged;			// starts watching for changes made elsewhere
 
 			await AfterSyncAsync();
+			await CheckForCopiesAsync();
 		}
 
 		private void CloseDataFile()
@@ -189,8 +195,10 @@ namespace Purity.Desktop.ViewModels
 
 			_session = null;
 			_store = null;
+			_vault = null;
 			_saveFailed = false;
 			_toldUnreadable = false;
+			ForgetCopies();
 			Periods.Clear();
 			UpdateCommands();
 		}
@@ -222,6 +230,7 @@ namespace Purity.Desktop.ViewModels
 				_saveFailed = true;
 			}
 			await AfterSyncAsync();
+			await CheckForCopiesAsync();				// a sync app often leaves a copy as it replaces the file
 		}
 
 		private async Task SaveAsync()
@@ -251,7 +260,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			else if (_session?.State == SessionState.NeedsResolution)
 			{
-				await ResolveAsync();
+				await ResolvePendingAsync();
 			}
 
 			if (_session?.State == SessionState.Ready)
@@ -259,42 +268,96 @@ namespace Purity.Desktop.ViewModels
 			UpdateWarning();
 		}
 
-		/// <summary>Asks about each period both sides changed, then saves the answer</summary>
-		private async Task ResolveAsync()
+		/// <summary>
+		/// Asks about each period both sides changed, then saves the answer. The other side is the data
+		/// file, or a copy being brought in.
+		/// </summary>
+		/// <returns>
+		/// Whether the first question, the one waiting when this was called, is answered, applied and
+		/// saved. Only then may a copy that raised it be set aside.
+		/// </returns>
+		private async Task<bool> ResolveAsync()
 		{
-			for (var round = 0; round < 3 && _session?.State == SessionState.NeedsResolution; round++)
+			// A change from the sync app arriving while a question is on screen must not open a second
+			// one on top: the question being answered notices the change and asks afresh
+			if (_resolving)
+				return false;
+
+			_resolving = true;
+			try
 			{
-				UpdateWarning();
-				var answers = new Dictionary<MergeConflict, MergeSide>();
-				foreach (var conflict in _session.PendingMerge!.Conflicts)
+				var first = true;
+				var applied = false;
+				for (var round = 0; round < 3 && _session?.State == SessionState.NeedsResolution; round++)
 				{
-					var answer = await _dialogs.AskAsync(ConflictText(conflict), "Keep this computer's", "Keep the file's");
-					if (answer == null)
-						return;						// asked again on Refresh; nothing is saved until then
+					UpdateWarning();
+					var other = _resolvingCopy == null ? "In the data file" : $"In the copy \"{_resolvingCopy.Name}\"";
+					var keepOther = _resolvingCopy == null ? "Keep the file's" : "Keep the copy's";
+					var question = _session.PendingMerge!;
+					var answers = new Dictionary<MergeConflict, MergeSide>();
+					foreach (var conflict in question.Conflicts)
+					{
+						var answer = await _dialogs.AskAsync(ConflictText(conflict, other), "Keep this computer's", keepOther);
+						if (answer == null)
+							return false;			// asked again on Refresh; nothing is saved until then
 
-					answers[conflict] = answer == 0 ? MergeSide.Local : MergeSide.Remote;
-				}
+						answers[conflict] = answer == 0 ? MergeSide.Local : MergeSide.Remote;
+					}
 
-				try
-				{
-					var status = await _session.ResolveAsync(conflict => answers[conflict]);
-					_saveFailed = status == SaveStatus.TryAgain;
+					// The change may have settled or replaced the question meanwhile. Answers to a
+					// question that's gone must not be applied, and a new question is about the file.
+					if (_session?.PendingMerge != question)
+					{
+						_resolvingCopy = null;
+						first = false;
+						continue;
+					}
+
+					var expected = question.Resolve(conflict => answers[conflict]);
+					try
+					{
+						var status = await _session.ResolveAsync(conflict => answers[conflict]);
+						_saveFailed = status == SaveStatus.TryAgain;
+					}
+					catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+					{
+						_saveFailed = true;
+					}
+
+					// If the history changed some other way, the session compared again with the data
+					// file instead of applying the answers
+					applied = first && _session.State == SessionState.Ready && !_session.HasUnsavedChanges && Holds(expected);
+					if (!applied)
+					{
+						_resolvingCopy = null;
+						first = false;
+					}
 				}
-				catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-				{
-					_saveFailed = true;
-				}
+				return applied;
+			}
+			finally
+			{
+				_resolving = false;
 			}
 		}
 
+		private bool Holds(IReadOnlyList<PeriodRecord> expected) =>
+			expected.Count == Ledger.Data.Count && expected.Zip(Ledger.Data).All(el => el.First.SameAs(PeriodRecord.From(el.Second)));
+
 		private void UpdateWarning()
 		{
+			if (_session?.State != SessionState.NeedsResolution)
+				_resolvingCopy = null;				// the question it raised is gone
+
 			Warning = _session?.State switch
 			{
 				null => "Choose your data file in Settings.",
 				SessionState.Unreadable => "The data file can't be read. Nothing is written to it until it can be; your entries are kept on this computer.",
 				SessionState.NeedsResolution => "Two versions of your history disagree. Press Refresh to choose which to keep. Nothing is saved until then.",
 				_ when _saveFailed => "The data file couldn't be written. Your entries are kept on this computer and saved on the next change.",
+				_ when _copiesWaiting > 0 && !_checkingCopies => (_copiesWaiting == 1
+					? "A copy of the data file left by your sync app is beside it and not brought in yet. Press Refresh to bring it in."
+					: $"{_copiesWaiting} copies of the data file left by your sync app are beside it and not brought in yet. Press Refresh to bring them in."),
 				_ when _session.VaultFailed => "This computer's backup copy couldn't be written or read. Saving to the data file still works.",
 				_ => null,
 			};
@@ -314,11 +377,13 @@ namespace Purity.Desktop.ViewModels
 				item.Refresh();
 		}
 
-		private static string ConflictText(MergeConflict conflict)
+		/// <param name="conflict">The periods the two sides disagree on</param>
+		/// <param name="other">Names the other side: the data file or a copy</param>
+		private static string ConflictText(MergeConflict conflict, string other)
 		{
-			var text = new StringBuilder("Your history was changed both on this computer and in the data file, and the two versions disagree here.\n\nOn this computer:\n");
+			var text = new StringBuilder("Your history was changed in two places, and the two versions disagree here.\n\nOn this computer:\n");
 			Describe(text, conflict.Local);
-			text.Append("\nIn the data file:\n");
+			text.Append('\n').Append(other).Append(":\n");
 			Describe(text, conflict.Remote);
 			text.Append("\nWhich version do you want to keep?");
 			return text.ToString();
@@ -381,8 +446,10 @@ namespace Purity.Desktop.ViewModels
 		private readonly DesktopSettings _settings;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;
+		private LocalVault? _vault;
 		private DataSession? _session;
 		private bool _saveFailed;
 		private bool _toldUnreadable;
+		private bool _resolving;
 	}
 }

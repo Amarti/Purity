@@ -31,6 +31,8 @@ namespace Purity.Desktop.Views
 				if (options.PictureFile is { } picture)
 					DispatcherTimer.RunOnce(() => TakePictureAndClose(picture), TimeSpan.FromSeconds(1.5));
 			};
+			// A sync app can leave a copy beside the data file at any time; coming back to the window is a good moment to look
+			Activated += async (_, _) => await _viewModel.CheckForCopiesAsync();
 			Closing += OnClosing;
 		}
 
