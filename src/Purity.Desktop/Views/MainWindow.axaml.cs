@@ -69,6 +69,7 @@ namespace Purity.Desktop.Views
 			{
 				("screen for windows", screen == null ? "unknown" : $"{screen.WorkingArea.Width / screen.Scaling:0} x {screen.WorkingArea.Height / screen.Scaling:0}"),
 				("window", $"{ClientSize.Width:0} x {ClientSize.Height:0}{(_fitted ? ", made shorter to fit" : "")}"),
+				("font", FontFamily.Name),
 				("periods", _viewModel.Periods.Count),
 				("warning", _viewModel.Warning ?? "none"),
 			});

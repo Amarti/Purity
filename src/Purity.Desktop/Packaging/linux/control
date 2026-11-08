@@ -1,0 +1,13 @@
+Package: purity
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: Amarti <Amarti@users.noreply.github.com>
+Installed-Size: @SIZE@
+Section: utils
+Priority: optional
+Homepage: https://github.com/Amarti/Purity
+Depends: libc6, libgcc-s1, libstdc++6, libfontconfig1, libx11-6, libice6, libsm6, libxi6, libxrandr2, libxcursor1
+Recommends: fonts-liberation | fonts-liberation2
+Description: Hebrew calendar tracker
+ Records periods and shows the halachic dates that follow from them. The app
+ is self-contained in /opt/purity and needs no .NET or ICU installed.

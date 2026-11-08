@@ -48,6 +48,8 @@ dotnet run tools/check-macos-minimum.cs -- <publish folder> 12.0
 
 That catches the usual way an update drops a macOS version. It can't catch a library calling something newer only at run time, which is why the kit is still the real test.
 
+For Linux, `bash tools/package-linux.sh` builds `out/linux/purity_<version>_<arch>.deb` for amd64 and arm64 (on Windows its last step runs in WSL). The Linux package workflow installs each package in clean Debian 12 and 13 and Ubuntu 22.04 and 24.04 containers, then opens the app on a made-up history on a virtual screen, which proves the package's dependencies are enough. `tools/test-linux-package.sh` does the same locally in a Docker container.
+
 ## Real data
 
 `tests/private/` holds a snapshot of `pureData.json` and older copies, and it is gitignored. The repo is public, so only the encrypted file `tests/fixtures/private.tar.gz.gpg` may be committed. Use `tools/fixture.sh` to create or unpack it. Once that file is committed, CI fails if the `PURITY_FIXTURE_PASSPHRASE` secret is missing, so the real-data tests can't quietly stop running. Forks and fork pull requests skip them.

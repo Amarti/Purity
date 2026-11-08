@@ -1,0 +1,47 @@
+name: Linux package
+
+# Builds the Debian package of the desktop app for amd64 and arm64, then installs it in clean
+# Debian and Ubuntu containers and opens the app on a made-up history on a virtual screen. That
+# proves the package's dependencies are enough on each system. Nothing is uploaded.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, rid: linux-x64, arch: amd64, systems: 'debian:13 debian:12 ubuntu:22.04 ubuntu:24.04' }
+          - { runner: ubuntu-24.04-arm, rid: linux-arm64, arch: arm64, systems: 'debian:13 ubuntu:24.04' }
+    env:
+      DOTNET_NOLOGO: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build the package
+        run: bash tools/package-linux.sh ${{ matrix.rid }}
+
+      - name: Make a made-up history
+        run: dotnet run tools/make-sample-data.cs -- out/linux/sample.json
+
+      - name: Install and open it on each system
+        run: |
+          for system in ${{ matrix.systems }}; do
+            echo "::group::$system"
+            docker run --rm -v "$PWD:/repo" -w /repo "$system" bash tools/test-linux-package.sh out/linux/purity_*_${{ matrix.arch }}.deb out/linux/sample.json
+            echo "::endgroup::"
+          done

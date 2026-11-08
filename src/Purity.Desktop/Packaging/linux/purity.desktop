@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Purity
+Comment=Hebrew calendar tracker
+Exec=purity
+Icon=purity
+Terminal=false
+Categories=Office;Calendar;
+StartupWMClass=Purity
