@@ -23,6 +23,11 @@
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     </Style>
 
+    <!-- Not in WPF, whose buttons never turned off: a button that is off shows its icon faded, approved by the owner -->
+    <Style Selector="Button:disabled Image">
+        <Setter Property="Opacity" Value="0.35"/>
+    </Style>
+
     <!-- WPF lines a list's items up on the left unless told otherwise; only the list of periods stretches them -->
     <Style Selector="ListBox.Events ListBoxItem">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
