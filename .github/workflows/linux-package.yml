@@ -38,10 +38,16 @@ jobs:
       - name: Make a made-up history
         run: dotnet run tools/make-sample-data.cs -- out/linux/sample.json
 
+      # Every system gets its turn even after one fails, so a run shows all of them
       - name: Install and open it on each system
         run: |
+          failed=""
           for system in ${{ matrix.systems }}; do
             echo "::group::$system"
-            docker run --rm -v "$PWD:/repo" -w /repo "$system" bash tools/test-linux-package.sh out/linux/purity_*_${{ matrix.arch }}.deb out/linux/sample.json
+            docker run --rm -v "$PWD:/repo" -w /repo "$system" bash tools/test-linux-package.sh out/linux/purity_*_${{ matrix.arch }}.deb out/linux/sample.json || failed="$failed $system"
             echo "::endgroup::"
           done
+          if [ -n "$failed" ]; then
+            echo "::error::The package failed on:$failed"
+            exit 1
+          fi
