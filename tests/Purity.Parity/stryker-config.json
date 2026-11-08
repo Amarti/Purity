@@ -1,0 +1,15 @@
+{
+  "stryker-config": {
+    "project": "Purity.Core.csproj",
+    "target-framework": "net10.0",
+    "mutation-level": "Complete",
+    "coverage-analysis": "perTest",
+    "test-runner": "mtp",
+    "reporters": [ "cleartext", "html", "json" ],
+    "thresholds": {
+      "high": 100,
+      "low": 95,
+      "break": 95
+    }
+  }
+}

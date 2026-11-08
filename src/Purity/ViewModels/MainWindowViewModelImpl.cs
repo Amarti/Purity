@@ -27,9 +27,11 @@ namespace Purity.ViewModels
 		/// </summary>
 		public void InitData()
 		{
-			var rawData = DataSerializer.DeserializeData(Settings.DataFilePath);
+			var rawData = DataSerializer.DeserializeData(Settings.DataFilePath, out var loadFailed, out _fileAtLoad);
+			LoadFailed = loadFailed;
 			Data = rawData.OrderBy(el => el.Begin).ToList();
 			BakeData(false);
+			_dataAtLoad = DataSerializer.ToJson(Data);
 
 			PurityPeriods.Clear();
 			foreach (var period in Data)
@@ -140,8 +142,45 @@ namespace Purity.ViewModels
 		{
 			DataSerializer.SerializeSettings(Settings);
 #if !DEBUG
-			DataSerializer.SerializeData(Data, Settings.DataFilePath);
+			SaveData();
 #endif
+		}
+		/// <summary>
+		/// Saves the data to a chosen file, which is normally the data file itself
+		/// </summary>
+		public void SaveDataTo(string? filePath)
+		{
+			if (LoadFailed)
+				return;
+
+			if (DataSerializer.IsSameFile(filePath, Settings.DataFilePath))
+				SaveData();
+			else
+				DataSerializer.SerializeData(Data, filePath);
+		}
+		/// <summary>
+		/// Writes the data file, unless that would lose something. With nothing changed here there is nothing to write,
+		/// so a window left open can't undo work done elsewhere. If the file changed elsewhere and the data changed here,
+		/// both are kept: the file stays, and this session's data goes into a conflicted copy beside it
+		/// </summary>
+		private void SaveData()
+		{
+			ConflictedCopyPath = null;
+			var json = DataSerializer.ToJson(Data);
+			if (LoadFailed || json == _dataAtLoad)
+				return;
+
+			if (DataSerializer.ReadDataText(Settings.DataFilePath) == _fileAtLoad)
+			{
+				DataSerializer.SerializeData(Data, Settings.DataFilePath);
+				_fileAtLoad = DataSerializer.ReadDataText(Settings.DataFilePath);
+			}
+			else
+			{
+				ConflictedCopyPath = DataSerializer.SerializeConflictedCopy(Data, Settings.DataFilePath);
+				Logger.Warn($"{nameof(SaveData)}: data file changed elsewhere, kept this session's data beside it");
+			}
+			_dataAtLoad = json;
 		}
 
 
@@ -151,6 +190,16 @@ namespace Purity.ViewModels
 		private readonly Func<PurityPeriod, IMainWindowViewModel, T> _periodVMCreator;
 
 		public List<PurityPeriod> Data { get; private set; }
+		/// <summary>
+		/// The data file couldn't be read, so <see cref="Data"/> is not the history and must never be saved over it
+		/// </summary>
+		public bool LoadFailed { get; private set; }
+		/// <summary>
+		/// Where this session's data went when it couldn't go into a data file changed elsewhere
+		/// </summary>
+		public string? ConflictedCopyPath { get; private set; }
+		private string? _fileAtLoad;
+		private string? _dataAtLoad;
 		private readonly List<int> _recentPeriodsStreak = new();
 
 		private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();

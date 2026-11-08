@@ -55,3 +55,12 @@ var/logs/
 var/versions/
 var/debug/
 var/output/
+
+# Private data: never commit plaintext (the repo is public)
+tests/private/
+pureData*.json
+pureSettings*.json
+*.age.key
+
+# Build output of tools such as the platform check kit
+/out/

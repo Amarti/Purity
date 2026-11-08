@@ -32,6 +32,11 @@ namespace Purity.Avalonia.ViewModels
 		public void InitData()
 		{
 			_impl.InitData();
+			ShowDataState();
+		}
+		private void ShowDataState()
+		{
+			_ownerWindow.Title = _impl.LoadFailed ? "Purity - data file unreadable, nothing will be saved" : "Purity";
 		}
 
 
@@ -40,9 +45,12 @@ namespace Purity.Avalonia.ViewModels
 		{
 			var settingsCopy = new Settings(Settings);
 			var w = new SettingsWindow();
-			w.InitDataContext(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), path => DataSerializer.SerializeData(Data, path));
+			w.InitDataContext(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), _impl.SaveDataTo);
 			if (await w.ShowDialog<bool?>(_ownerWindow) == true)
+			{
 				_impl.SetSettings(settingsCopy);
+				ShowDataState();
+			}
 		}
 
 		public ICommand AddPeriodCommand { get; }
