@@ -34,9 +34,9 @@ jobs:
       TZ: ${{ matrix.tz }}
       DOTNET_NOLOGO: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
             8.0.x
@@ -107,8 +107,8 @@ jobs:
     steps:
       - name: Install prerequisites
         run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git libicu76
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - name: Test on .NET 10
@@ -120,8 +120,8 @@ jobs:
     env:
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - name: Test on .NET 10
@@ -133,8 +133,8 @@ jobs:
     env:
       DOTNET_SYSTEM_GLOBALIZATION_USENLS: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - name: Test on .NET 10
@@ -145,7 +145,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check
