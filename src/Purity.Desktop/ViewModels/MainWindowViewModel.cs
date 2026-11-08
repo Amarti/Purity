@@ -90,10 +90,16 @@ namespace Purity.Desktop.ViewModels
 
 		private string? BuildReport() => Ledger.Data.Count < 1 ? null : PurityFile.PeriodLengthsReport(Ledger.Data);
 
-		/// <summary>Adds an open period starting today, as the WPF app does. "Today" is the UTC date there too.</summary>
-		[RelayCommand(CanExecute = nameof(HasDataFile))]
+		/// <summary>
+		/// Adds an open period starting today, as the WPF app does. "Today" is the UTC date there too.
+		/// Unlike WPF, only while no other period is open: that one must be accepted or removed first.
+		/// </summary>
+		[RelayCommand(CanExecute = nameof(CanAddPeriod))]
 		private void AddPeriod()
 		{
+			if (!CanAddPeriod)
+				return;
+
 			var today = new DateTimeOffset(_clock.GetUtcNow().UtcDateTime.Date, TimeSpan.Zero);
 			var period = Ledger.AddPeriod(today, today.AddDays(7));
 			if (period == null)
@@ -101,6 +107,7 @@ namespace Purity.Desktop.ViewModels
 
 			Periods.Add(new PeriodViewModel(period, this));
 			RefreshAll();
+			UpdateCommands();
 		}
 
 		/// <summary>Recalculates every period. A question about two versions of the history comes first.</summary>
@@ -126,6 +133,7 @@ namespace Purity.Desktop.ViewModels
 			foreach (var item in ordered)
 				Periods.Add(item);
 			RefreshAll();
+			UpdateCommands();
 
 			await SaveAsync();
 		}
@@ -139,6 +147,7 @@ namespace Purity.Desktop.ViewModels
 
 			Periods.Remove(period);
 			RefreshAll();
+			UpdateCommands();
 
 			await SaveAsync();
 		}
@@ -159,7 +168,7 @@ namespace Purity.Desktop.ViewModels
 			_store = new FileDataStore(path);
 			_session = new DataSession(_store, new LocalVault(AppPaths.VaultFor(path)));
 			_session.HistoryReplaced += OnHistoryReplaced;
-			NotifyDataFileChanged();
+			UpdateCommands();
 
 			await _session.OpenAsync();
 			Rebuild();
@@ -183,13 +192,14 @@ namespace Purity.Desktop.ViewModels
 			_saveFailed = false;
 			_toldUnreadable = false;
 			Periods.Clear();
-			NotifyDataFileChanged();
+			UpdateCommands();
 		}
 
-		private void NotifyDataFileChanged()
+		private void UpdateCommands()
 		{
 			AddPeriodCommand.NotifyCanExecuteChanged();
 			RecalculateCommand.NotifyCanExecuteChanged();
+			OnPropertyChanged(nameof(AddPeriodTip));
 		}
 
 		private void OnHistoryReplaced(object? sender, EventArgs e) => Rebuild();
@@ -295,6 +305,7 @@ namespace Purity.Desktop.ViewModels
 			Periods.Clear();
 			foreach (var period in Ledger.Data)
 				Periods.Add(new PeriodViewModel(period, this));
+			UpdateCommands();
 		}
 
 		private void RefreshAll()
@@ -345,6 +356,14 @@ namespace Purity.Desktop.ViewModels
 		internal PeriodLedger Ledger => _session?.Ledger ?? NoLedger;
 
 		private bool HasDataFile => _session != null;
+
+		/// <summary>A period that is still open, with the pink frame, waiting to be accepted or removed</summary>
+		private bool HasOpenPeriod => Ledger.Data.Any(el => !el.Closed);
+
+		private bool CanAddPeriod => HasDataFile && !HasOpenPeriod;
+
+		/// <summary>Says why the add button is off, since nothing else on screen does</summary>
+		public string AddPeriodTip => HasDataFile && HasOpenPeriod ? "Accept or remove the open period first" : "Add period";
 
 
 		private const string UnreadableMessage =

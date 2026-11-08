@@ -40,9 +40,6 @@
             <Setter Property="BorderBrush" Value="#FFADB2B5"/>
             <Setter Property="Foreground" Value="#FF838383"/>
         </Style>
-        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter > Image">
-            <Setter Property="Opacity" Value="0.4"/>
-        </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">

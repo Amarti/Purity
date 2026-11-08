@@ -81,6 +81,49 @@ namespace Purity.Desktop.Tests
 		}
 
 		[Fact]
+		public async Task OnlyOnePeriodCanBeOpenAtATime()
+		{
+			WriteHistory();
+			var window = await OpenAsync();
+			Assert.True(window.AddPeriodCommand.CanExecute(null));
+			Assert.Equal("Add period", window.AddPeriodTip);
+
+			window.AddPeriodCommand.Execute(null);
+			Assert.False(window.AddPeriodCommand.CanExecute(null));
+			Assert.Equal("Accept or remove the open period first", window.AddPeriodTip);
+
+			window.Periods[^1].BeginDate = Today.AddDays(1);	// a different day, which WPF would have let through
+			window.AddPeriodCommand.Execute(null);
+			Assert.Equal(4, window.Periods.Count);
+
+			await window.Periods[^1].RemoveCommand.ExecuteAsync(null);	// an open period goes without asking
+			Assert.Equal(3, window.Periods.Count);
+			Assert.True(window.AddPeriodCommand.CanExecute(null));
+
+			window.AddPeriodCommand.Execute(null);
+			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			Assert.True(window.AddPeriodCommand.CanExecute(null));
+			Assert.Equal("Add period", window.AddPeriodTip);
+			Assert.Empty(_dialogs.Shown);
+		}
+
+		[Fact]
+		public async Task AnOpenPeriodInTheFileBlocksAddingUntilAccepted()
+		{
+			var ledger = new PeriodLedger();
+			ledger.Load(PurityFile.Parse(History()));
+			ledger.AddPeriod(Stamps.FromDate(new DateTime(2031, 4, 29), false), Stamps.FromDate(new DateTime(2031, 5, 4), false));
+			File.WriteAllText(_dataFile, PurityFile.Format(ledger.Data), new UTF8Encoding(false));
+
+			var window = await OpenAsync();
+			Assert.False(window.Periods[^1].IsClosed);
+			Assert.False(window.AddPeriodCommand.CanExecute(null));
+
+			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			Assert.True(window.AddPeriodCommand.CanExecute(null));
+		}
+
+		[Fact]
 		public async Task PickingADateKeepsTheNightChoice()
 		{
 			WriteHistory();
