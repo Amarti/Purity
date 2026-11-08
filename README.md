@@ -25,17 +25,15 @@ The app keeps its settings and local copies per user: in `%LOCALAPPDATA%\Purity`
 
 Current TODOs:
 
- - Implement configuration window, consisting:
+ - Add options to the settings window:
 	- Language option (en, heb)
 	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
- - Port to macOS (avalonia)
+ - Desktop (Windows, macOS, Linux)
 	- calendar/reminders integration
-	- compel the listbox control to put last item fully
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
  - Port to android
 	- external storage file path (dropbox/google drive integration)
 	- calendar/reminders integration
- - Port to linux
