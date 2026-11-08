@@ -21,19 +21,32 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="dataFileOverride">A data file to use instead of the settings' one, for this run only</param>
 		/// <param name="clock">Sets "today" for a new period</param>
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread)
+		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride;
 			_clock = clock;
 			_runOnUiThread = runOnUiThread;
+			_selfTest = selfTest ?? SelfTest.Run;
 			_settings = DesktopSettings.Load();
 		}
 
 
-		/// <summary>Opens the data file, first asking for one if none was chosen yet</summary>
+		/// <summary>
+		/// Checks the date calculations, then opens the data file, first asking for one if none was
+		/// chosen yet. If the check fails, nothing is opened: no dates are shown and nothing can be saved.
+		/// </summary>
 		public async Task StartAsync()
 		{
+			SelfTestResult = _selfTest();
+			if (!SelfTestResult.Passed)
+			{
+				UpdateWarning();
+				await _dialogs.AskAsync(SelfTestFailedMessage + SelfTestResult, "OK");
+				return;
+			}
+
 			if (string.IsNullOrWhiteSpace(DataFilePath))
 				await OpenSettings();
 			else
@@ -162,7 +175,7 @@ namespace Purity.Desktop.ViewModels
 		private async Task OpenDataFileAsync()
 		{
 			CloseDataFile();
-			if (string.IsNullOrWhiteSpace(DataFilePath))
+			if (SelfTestResult is { Passed: false } || string.IsNullOrWhiteSpace(DataFilePath))
 			{
 				UpdateWarning();
 				return;
@@ -351,6 +364,7 @@ namespace Purity.Desktop.ViewModels
 
 			Warning = _session?.State switch
 			{
+				_ when SelfTestResult is { Passed: false } => "Purity's check of its date calculations failed on this computer, so it shows no dates. Don't rely on this copy of the app.",
 				null => "Choose your data file in Settings.",
 				SessionState.Unreadable => "The data file can't be read. Nothing is written to it until it can be; your entries are kept on this computer.",
 				SessionState.NeedsResolution => "Two versions of your history disagree. Press Refresh to choose which to keep. Nothing is saved until then.",
@@ -418,6 +432,9 @@ namespace Purity.Desktop.ViewModels
 
 		public string DataFilePath => _dataFileOverride ?? _settings.DataFilePath;
 
+		/// <summary>How the check of this machine's date calculations went, once it has run</summary>
+		public SelfTestResult? SelfTestResult { get; private set; }
+
 		internal PeriodLedger Ledger => _session?.Ledger ?? NoLedger;
 
 		private bool HasDataFile => _session != null;
@@ -435,6 +452,11 @@ namespace Purity.Desktop.ViewModels
 			"The data file couldn't be read, so you're seeing the copy this computer kept last time, if it has one. Recent entries may be missing.\n\n" +
 			"Nothing will be written to the data file until it can be read. Anything you enter now is kept on this computer and added once it can be read, for example when your sync finishes.";
 
+		private const string SelfTestFailedMessage =
+			"Purity checks its date calculations every time it starts, and on this computer they came out different from the approved ones. " +
+			"So it shows no dates, and it hasn't opened your data file, so nothing in it can change.\n\n" +
+			"Please don't rely on this copy of the app, and let the developer know what the check found:\n\n";
+
 		private const string UnsavedOnCloseMessage =
 			"Some entries couldn't be saved to the data file yet.\n\nThey're kept on this computer, and Purity saves them the next time it opens. Close anyway?";
 
@@ -443,6 +465,7 @@ namespace Purity.Desktop.ViewModels
 		private readonly IAppDialogs _dialogs;
 		private readonly TimeProvider _clock;
 		private readonly Action<Func<Task>> _runOnUiThread;
+		private readonly Func<SelfTestResult> _selfTest;
 		private readonly DesktopSettings _settings;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;

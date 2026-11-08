@@ -158,9 +158,11 @@ jobs:
           fetch-depth: 0
       - name: Check
         shell: bash
+        # Only changed, renamed or removed approved files count: a new one adds a check without
+        # changing any approved date, and the tests prove it came from the production engine
         run: |
           base="${{ github.event.pull_request.base.sha }}"
-          if git diff --name-only "$base" HEAD | grep -q '^tests/Purity.Parity/Golden/'; then
+          if git diff --name-only --diff-filter=MDR "$base" HEAD | grep -q '^tests/Purity.Parity/Golden/'; then
             git diff "$base" HEAD -- src/Purity.Core/PeriodLedger.cs | grep -q '^+.*RulesVersion = ' || {
               echo "Approved output changed without bumping PeriodLedger.RulesVersion"
               exit 1

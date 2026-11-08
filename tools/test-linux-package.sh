@@ -23,6 +23,7 @@ cat "$work/app.txt"
 [ -n "$keep" ] && mkdir -p "$keep" && cp "$work/app.png" "$work/app.txt" "$keep/"
 
 grep -q '^result: passed' "$work/app.txt"
+grep -q '^self-test: passed' "$work/app.txt" || { echo "The app's check of its date calculations didn't pass"; exit 1; }
 grep -q '^font: Liberation Sans' "$work/app.txt" || { echo "The package didn't bring in Liberation Sans"; exit 1; }
 cmp -s "$sample" "$work/sample.json" || { echo "Opening the app changed the data file"; exit 1; }
 echo "The package works on $system"

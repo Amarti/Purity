@@ -85,13 +85,16 @@ run_app_picture() {
 	run_limited 90 "$results/app.log" env PURITY_APP_DATA="$check/app data" "$app" --data "$check/picture.json" --picture "$results/app.png"
 	code=$?
 	result=$(sed -n 's/^result: //p' "$results/app.txt" 2> /dev/null)
-	if [ $code -eq 0 ] && [ "$result" = passed ]; then
+	selftest=$(sed -n 's/^self-test: //p' "$results/app.txt" 2> /dev/null)
+	if [ $code -eq 0 ] && [ "$result" = passed ] && [ "$selftest" = passed ]; then
 		echo passed
 		note "app window" "passed, $(sed -n 's/^window: //p' "$results/app.txt")"
+		note "app self-test" "passed"
 		return 0
 	fi
 	echo "FAILED (exit $code)"
 	note "app window" "FAILED (exit $code, ${result:-no report})"
+	note "app self-test" "${selftest:-not run}"
 	return 1
 }
 

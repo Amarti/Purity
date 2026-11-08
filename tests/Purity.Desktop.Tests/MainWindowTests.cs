@@ -50,6 +50,7 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(new[] { "Skip", engine.SkipLabel(engine.Data[1]), engine.SkipLabel(engine.Data[2]) }, window.Periods.Select(el => el.SkipLabel));
 			Assert.StartsWith("Skip (", window.Periods[1].SkipLabel);
 			Assert.Null(window.Warning);
+			Assert.True(window.SelfTestResult?.Passed, window.SelfTestResult?.ToString());
 			Assert.Empty(_dialogs.Shown);
 			Assert.Equal(content, File.ReadAllBytes(_dataFile));
 		}
@@ -78,6 +79,25 @@ namespace Purity.Desktop.Tests
 			Assert.True(window.Periods[^1].IsClosed);
 			Assert.Equal(expected.Data[^1].SubEvents.Count, window.Periods[^1].SubEvents.Count);
 			Assert.Null(window.Warning);
+		}
+
+		[Fact]
+		public async Task AFailedSelfTestShowsNoDatesAndLeavesTheFileAlone()
+		{
+			var content = WriteHistory();
+			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, new FixedClock(), _pending.Enqueue,
+				() => new SelfTestResult(false, 7, "E|1|2033-05-14T12:00:00.0000000+00:00", "E|1|2033-05-15T12:00:00.0000000+00:00"));
+
+			await _viewModel.StartAsync();
+
+			Assert.Contains("date calculations", Assert.Single(_dialogs.Shown));
+			Assert.Contains("line 7", _dialogs.Shown[0]);
+			Assert.Contains("date calculations failed", _viewModel.Warning);
+			Assert.Empty(_viewModel.Periods);
+			Assert.False(_viewModel.AddPeriodCommand.CanExecute(null));
+			Assert.False(_viewModel.RecalculateCommand.CanExecute(null));
+			Assert.False(Directory.Exists(Path.Combine(_root, "app data", "vaults")));		// the data file was never opened
+			Assert.Equal(content, File.ReadAllBytes(_dataFile));
 		}
 
 		[Fact]

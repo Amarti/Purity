@@ -60,7 +60,9 @@ Keep real dates out of test code, commit messages and CI output. Real-data failu
 
 `Purity.Parity/Golden/` holds output approved from the reference on Windows. Run with `PURITY_UPDATE_GOLDEN=1` to regenerate it.
 
-A golden file changes only with a bump of `PeriodLedger.RulesVersion` and a reviewed list of every changed date. Halachic changes also need the rav's sign-off recorded. CI rejects a golden change without the bump.
+A golden file changes only with a bump of `PeriodLedger.RulesVersion` and a reviewed list of every changed date. Halachic changes also need the rav's sign-off recorded. CI rejects a golden change without the bump; adding a new golden file doesn't count as a change.
+
+`Golden/self-test.txt` is what the apps check themselves against at every start. `Purity.Core` embeds it, and `SelfTest.Run()` calculates the same 13 made-up histories and compares. If anything differs, the desktop app shows no dates and doesn't open the data file. The histories reach every rule and the known issues H1 to H4; `SelfTestTests` proves the file came from the reference and that the engine and the embedded copy match it.
 
 ## Mutation testing
 

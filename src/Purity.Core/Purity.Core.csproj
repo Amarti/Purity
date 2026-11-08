@@ -13,4 +13,10 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The self-test's approved output. It lives with the other approved files, so it changes only
+         with a rules-version bump; the parity tests make it from the frozen production engine. -->
+    <EmbeddedResource Include="..\..\tests\Purity.Parity\Golden\self-test.txt" LogicalName="Purity.Core.SelfTest.expected.txt" Link="SelfTest.expected.txt" />
+  </ItemGroup>
+
 </Project>
