@@ -17,6 +17,7 @@ namespace Purity.Desktop.Views
 		public MainWindow(StartOptions options)
 		{
 			AvaloniaXamlLoader.Load(this);
+			Title = "Purity " + AppVersion.Number;			// WPF's title was "Purity" alone
 			_periods = this.FindControl<ListBox>("Periods")!;
 
 			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()));
@@ -79,6 +80,7 @@ namespace Purity.Desktop.Views
 			var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
 			var saved = WindowPicture.Save(this, file, new (string, object?)[]
 			{
+				("version", AppVersion.Number),
 				("screen for windows", screen == null ? "unknown" : $"{screen.WorkingArea.Width / screen.Scaling:0} x {screen.WorkingArea.Height / screen.Scaling:0}"),
 				("window", $"{ClientSize.Width:0} x {ClientSize.Height:0}{(_fitted ? ", made shorter to fit" : "")}"),
 				("font", FontFamily.Name),

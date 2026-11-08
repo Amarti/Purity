@@ -9,6 +9,8 @@ set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 out="$root/out/platform-check"
 if [ $# -gt 0 ]; then rids=("$@"); else rids=(osx-x64 osx-arm64); fi
+# The app's version is set once, in its project file
+version=$(tr -d '\r' < "$root/src/Purity.Desktop/Purity.Desktop.csproj" | sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' | head -1)
 
 publish() { # project rid folder
 	echo "  $(basename "$1" .csproj)"
@@ -51,7 +53,7 @@ for rid in "${rids[@]}"; do
 			app="$kit/Purity.app/Contents/MacOS"
 			publish src/Purity.Desktop/Purity.Desktop.csproj "$rid" "$app"
 			mkdir -p "$kit/Purity.app/Contents/Resources"
-			tr -d '\r' < "$root/src/Purity.Desktop/Packaging/macOS/Info.plist" > "$kit/Purity.app/Contents/Info.plist"
+			tr -d '\r' < "$root/src/Purity.Desktop/Packaging/macOS/Info.plist" | sed "s/@VERSION@/$version/g" > "$kit/Purity.app/Contents/Info.plist"
 			cp "$root/src/Purity.Desktop/Packaging/macOS/Purity.icns" "$kit/Purity.app/Contents/Resources/"
 			;;
 		*)

@@ -2,7 +2,7 @@
 # Installs a Purity package in a clean Debian or Ubuntu container and opens the app on a made-up
 # history, on a virtual screen. Proves the package's dependencies are enough. As CI runs it:
 #   docker run --rm -v "$PWD:/repo" -w /repo debian:13 \
-#     bash tools/test-linux-package.sh out/linux/purity_2.0.0_amd64.deb out/linux/sample.json
+#     bash tools/test-linux-package.sh out/linux/purity_<version>_amd64.deb out/linux/sample.json
 # Needs root, so only ever run it in a throwaway container. A third argument copies the
 # picture and report of the window there.
 set -euo pipefail

@@ -15,8 +15,8 @@
     <RootNamespace>Purity.Desktop</RootNamespace>
     <AssemblyName>Purity</AssemblyName>
     <Product>Purity</Product>
-    <!-- Also stamped into the Linux package. Packaging/macOS/Info.plist carries it by hand -->
-    <Version>2.0.0</Version>
+    <!-- The one place the version is set: the window title, the Mac bundle and the Linux package all take it from here -->
+    <Version>2.1.0</Version>
     <ApplicationIcon>Assets\Purity.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>

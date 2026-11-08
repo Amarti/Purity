@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- Info.plist of Purity.app. A different identifier from the old app's com.peigin, so both can be installed side by side -->
+<!-- Info.plist of Purity.app, with the version filled in from Purity.Desktop.csproj when the bundle is built. A different identifier from the old app's com.peigin, so both can be installed side by side -->
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
@@ -18,9 +18,9 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleShortVersionString</key>
-    <string>2.0.0</string>
+    <string>@VERSION@</string>
     <key>CFBundleVersion</key>
-    <string>2.0.0</string>
+    <string>@VERSION@</string>
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>NSPrincipalClass</key>
