@@ -27,9 +27,9 @@ namespace Purity.Storage.Tests
 		}
 
 
-		private byte[] Stored() => File.ReadAllBytes(_folder.DataFile);
+		private byte[] Stored() => _folder.ReadData();
 
-		private void Store(params PeriodRecord[] records) => File.WriteAllBytes(_folder.DataFile, FileFor(records));
+		private void Store(params PeriodRecord[] records) => _folder.WriteData(FileFor(records));
 
 		private async Task<DataSession> OpenedWith(params PeriodRecord[] records)
 		{
@@ -88,7 +88,7 @@ namespace Purity.Storage.Tests
 		[Fact]
 		public async Task AFileWithAByteOrderMarkOpens()
 		{
-			File.WriteAllBytes(_folder.DataFile, [0xEF, 0xBB, 0xBF, .. FileFor(Cycles(2))]);
+			_folder.WriteData([0xEF, 0xBB, 0xBF, .. FileFor(Cycles(2))]);
 
 			await _session.OpenAsync();
 
@@ -104,7 +104,7 @@ namespace Purity.Storage.Tests
 			ledger.Load(Core.PurityFile.Parse(Encoding.UTF8.GetString(ordered)));
 			ledger.Data[0].SubEvents[0].Note = "as stored";
 			ledger.Data.Reverse();
-			File.WriteAllText(_folder.DataFile, Core.PurityFile.Format(ledger.Data));
+			_folder.WriteText(Core.PurityFile.Format(ledger.Data));
 
 			await _session.OpenAsync();
 
@@ -234,7 +234,7 @@ namespace Purity.Storage.Tests
 		{
 			var session = await OpenedWith(Cycles(3));
 			var inProgress = session.Ledger.AddPeriod(Cycle(5).Begin, Cycle(5).End);
-			File.WriteAllText(_folder.DataFile, Encoding.UTF8.GetString(FileFor(Cycles(3))).Replace("\r\n", "\n"));
+			_folder.WriteText(Encoding.UTF8.GetString(FileFor(Cycles(3))).Replace("\r\n", "\n"));
 
 			await session.RefreshAsync();
 
@@ -457,6 +457,72 @@ namespace Purity.Storage.Tests
 
 			Assert.Equal(SaveStatus.Saved, await session.ResolveAsync(_ => MergeSide.Remote));
 			Assert.Equal(FileFor(Cycles(3)[..2].Append(Cycle(2, length: 6)).Append(Cycle(5)).ToArray()), Stored());
+		}
+
+		[Fact]
+		public async Task AConflictedCopyAddsWhatOnlyItHas()
+		{
+			var session = await OpenedWith(Cycles(3));
+
+			Assert.Equal(SaveStatus.Saved, await session.MergeCopyAsync(FileFor(Cycles(4))));
+
+			Assert.Equal(FileFor(Cycles(4)), Stored());
+		}
+
+		/// <summary>The copy forked before later entries, so what it lacks isn't a removal.</summary>
+		[Fact]
+		public async Task AConflictedCopyCantRemoveAnything()
+		{
+			var session = await OpenedWith(Cycles(4));
+
+			Assert.Equal(SaveStatus.Unchanged, await session.MergeCopyAsync(FileFor(Cycles(2))));
+
+			Assert.Equal(FileFor(Cycles(4)), Stored());
+		}
+
+		[Fact]
+		public async Task AConflictedCopyAddsBesideLaterEntries()
+		{
+			var session = await OpenedWith(Cycles(3));
+			Enter(session, Cycle(5));
+			await session.SaveAsync();
+
+			Assert.Equal(SaveStatus.Saved, await session.MergeCopyAsync(FileFor(Cycles(4))));
+
+			Assert.Equal(FileFor(Cycles(4).Append(Cycle(5)).ToArray()), Stored());
+		}
+
+		[Fact]
+		public async Task AConflictedCopyThatDisagreesNeedsADecision()
+		{
+			var session = await OpenedWith(Cycles(3));
+			var copy = Cycles(3)[..2].Append(Cycle(2, length: 7)).ToArray();
+
+			Assert.Equal(SaveStatus.NeedsResolution, await session.MergeCopyAsync(FileFor(copy)));
+			Assert.Equal(FileFor(Cycles(3)), Stored());
+
+			Assert.Equal(SaveStatus.Saved, await session.ResolveAsync(_ => MergeSide.Remote));
+			Assert.Equal(FileFor(copy), Stored());
+		}
+
+		[Fact]
+		public async Task AConflictedCopyIsRefusedWhileTheFileIsUnreadable()
+		{
+			_folder.WriteText("[{");
+			await _session.OpenAsync();
+
+			Assert.Equal(SaveStatus.Refused, await _session.MergeCopyAsync(FileFor(Cycles(3))));
+		}
+
+		[Fact]
+		public async Task ADamagedConflictedCopyChangesNothing()
+		{
+			var session = await OpenedWith(Cycles(3));
+
+			await Assert.ThrowsAsync<InvalidDataException>(() => session.MergeCopyAsync(Encoding.UTF8.GetBytes("[{")));
+
+			Assert.Equal(SessionState.Ready, session.State);
+			Assert.Equal(FileFor(Cycles(3)), Stored());
 		}
 
 		[Fact]

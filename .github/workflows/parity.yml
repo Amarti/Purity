@@ -83,12 +83,14 @@ jobs:
 
       - name: Test storage on .NET 10
         shell: bash
+        timeout-minutes: 15
         env:
           PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
         run: dotnet run --no-build -c Release -f net10.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
 
       - name: Test storage on .NET 8
         shell: bash
+        timeout-minutes: 15
         env:
           PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
         run: dotnet run --no-build -c Release -f net8.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj

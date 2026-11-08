@@ -32,9 +32,9 @@ namespace Purity.Storage.Tests
 		}
 
 
-		private byte[] Stored() => File.ReadAllBytes(_folder.DataFile);
+		private byte[] Stored() => _folder.ReadData();
 
-		private void Store(byte[] content) => File.WriteAllBytes(_folder.DataFile, content);
+		private void Store(byte[] content) => _folder.WriteData(content);
 
 		private async Task OpenWith(params PeriodRecord[] records)
 		{
@@ -577,6 +577,172 @@ namespace Purity.Storage.Tests
 			Assert.Equal(FileFor(Cycles(5)), Stored());
 		}
 
+		/// <summary>The entry is only in memory when the save fails, so closing the app mustn't take it along.</summary>
+		[Fact]
+		public async Task AnEntryThatFailedToSaveSurvivesARestart()
+		{
+			await OpenWith(Cycles(3));
+			Enter(Cycle(3));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => _session.SaveAsync());
+			_files.DiskFull = false;
+
+			var restarted = new DataSession(_store, _vault);
+			await restarted.OpenAsync();
+
+			Assert.Equal(FileFor(Cycles(4)), Stored());
+			Assert.False(restarted.HasUnsavedChanges);
+			Assert.Null(_vault.ReadHeld());
+		}
+
+		[Fact]
+		public async Task AnEntryRefusedByADamagedFileSurvivesARestart()
+		{
+			await OpenWith(Cycles(3));
+			Enter(Cycle(3));
+			var whole = Stored();
+			Store(whole[..(whole.Length / 2)]);
+			Assert.Equal(SaveStatus.Refused, await _session.SaveAsync());
+
+			var whileDamaged = new DataSession(_store, _vault);
+			await whileDamaged.OpenAsync();
+			Assert.Equal(SessionState.Unreadable, whileDamaged.State);
+			Assert.True(SameInputs(Cycles(4), whileDamaged.Ledger.Inputs()), "the held entry must be shown");
+
+			Store(whole);
+			var repaired = new DataSession(_store, _vault);
+			await repaired.OpenAsync();
+
+			Assert.Equal(FileFor(Cycles(4)), Stored());
+		}
+
+		[Fact]
+		public async Task AHeldEntryStaysHeldWhileSavingStillFails()
+		{
+			await OpenWith(Cycles(3));
+			Enter(Cycle(3));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => _session.SaveAsync());
+
+			var restarted = new DataSession(_store, _vault);
+			await restarted.OpenAsync();
+
+			Assert.Equal(SessionState.Ready, restarted.State);
+			Assert.True(restarted.HasUnsavedChanges);
+			Assert.NotNull(_vault.ReadHeld());
+			Assert.True(SameInputs(Cycles(4), restarted.Ledger.Inputs()), "the held entry must be shown");
+		}
+
+		/// <summary>A cleanup tool can empty app data while the app runs, vault folder and all</summary>
+		[Fact]
+		public async Task AnEntryIsHeldEvenAfterTheVaultFolderWasRemoved()
+		{
+			await OpenWith(Cycles(3));
+			Directory.Delete(_folder.VaultFolder, true);
+			Enter(Cycle(3));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => _session.SaveAsync());
+
+			Assert.False(_session.VaultFailed);
+			var restarted = new DataSession(_store, _vault);
+			await restarted.OpenAsync();
+			Assert.True(SameInputs(Cycles(4), restarted.Ledger.Inputs()), "the held entry must be shown");
+		}
+
+		[Fact]
+		public async Task AHeldEntryMeetsAnotherDevicesEntryWithoutLosingEither()
+		{
+			await OpenWith(Cycles(3));
+			Enter(Cycle(4));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => _session.SaveAsync());
+			_files.DiskFull = false;
+			Store(FileFor(Cycles(4)));
+
+			var restarted = new DataSession(_store, _vault);
+			await restarted.OpenAsync();
+
+			Assert.Equal(FileFor(Cycles(5)), Stored());
+		}
+
+		[Fact]
+		public async Task AHeldEntryThatClashesRaisesTheQuestionAtStartup()
+		{
+			await OpenWith(Cycles(3));
+			Enter(Cycle(3));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => _session.SaveAsync());
+			_files.DiskFull = false;
+			Store(FileFor([.. Cycles(3), Cycle(3, night: true)]));
+
+			var restarted = new DataSession(_store, _vault);
+			await restarted.OpenAsync();
+
+			Assert.Equal(SessionState.NeedsResolution, restarted.State);
+			Assert.Equal(SaveStatus.Saved, await restarted.ResolveAsync(_ => MergeSide.Local));
+			Assert.Equal(FileFor(Cycles(4)), Stored());
+			Assert.Null(_vault.ReadHeld());
+		}
+
+		[Fact]
+		public async Task AnUnreadableHeldCopyIsReportedAndOpeningStillWorks()
+		{
+			await OpenWith(Cycles(3));
+			_vault.WriteHeld(Encoding.UTF8.GetBytes("[{"));
+
+			var restarted = new DataSession(_store, _vault);
+			await restarted.OpenAsync();
+
+			Assert.Equal(SessionState.Ready, restarted.State);
+			Assert.True(restarted.VaultFailed);
+			Assert.True(SameInputs(Cycles(3), restarted.Ledger.Inputs()), "inputs");
+		}
+
+		[Fact]
+		public async Task ASuccessfulSaveLeavesNothingHeld()
+		{
+			await OpenWith(Cycles(3));
+			Enter(Cycle(3));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => _session.SaveAsync());
+			Assert.NotNull(_vault.ReadHeld());
+			_files.DiskFull = false;
+
+			await _session.SaveAsync();
+
+			Assert.Null(_vault.ReadHeld());
+		}
+
+		/// <summary>A held copy left behind would come back at the next opening, so failing to remove it is reported</summary>
+		[Fact]
+		public async Task AHeldCopyThatCantBeRemovedIsReported()
+		{
+			var vaultFiles = new InjectedFiles();
+			var vault = new LocalVault(_folder.VaultFolder, vaultFiles, TimeProvider.System);
+			var session = new DataSession(_store, vault);
+			Store(FileFor(Cycles(3)));
+			await session.OpenAsync();
+			session.Ledger.AcceptPeriod(session.Ledger.AddPeriod(Cycle(3).Begin, Cycle(3).End));
+			_files.DiskFull = true;
+			await Assert.ThrowsAsync<IOException>(() => session.SaveAsync());
+			_files.DiskFull = false;
+			vaultFiles.LockedDeletes = true;
+
+			Assert.Equal(SaveStatus.Saved, await session.SaveAsync());
+
+			Assert.True(session.VaultFailed);
+			Assert.NotNull(vault.ReadHeld());
+		}
+
+		[Fact]
+		public async Task NothingIsHeldWhenThereIsNothingToHold()
+		{
+			Store(Encoding.UTF8.GetBytes("[{"));
+			Assert.Equal(SaveStatus.Refused, await _session.SaveAsync());
+
+			Assert.Null(_vault.ReadHeld());
+		}
+
 		[Fact]
 		public async Task AnEntryThatFailedToSaveIsWrittenByTheNextRefresh()
 		{
@@ -665,10 +831,11 @@ namespace Purity.Storage.Tests
 			Assert.Equal(before, Stored());
 			Assert.Single(_folder.LeftoverTemporaryFiles());
 
-			var restarted = new DataSession(new FileDataStore(_folder.DataFile), _vault);
-			await restarted.OpenAsync();
-			Assert.Equal(SessionState.Ready, restarted.State);
-			Assert.True(SameInputs(Cycles(3), restarted.Ledger.Inputs()), "inputs");
+			using var store = new FileDataStore(_folder.DataFile);
+			var anotherDevice = new DataSession(store, new LocalVault(Path.Combine(_folder.Root, "other")));
+			await anotherDevice.OpenAsync();
+			Assert.Equal(SessionState.Ready, anotherDevice.State);
+			Assert.True(SameInputs(Cycles(3), anotherDevice.Ledger.Inputs()), "inputs");
 		}
 
 		[Fact]
@@ -681,6 +848,62 @@ namespace Purity.Storage.Tests
 			_files.PowerCut = false;
 
 			Assert.Empty(_store.FindConflictedCopies());
+		}
+
+		[Fact]
+		public async Task AnOldLeftoverIsRemovedByTheNextSave()
+		{
+			await OpenWith(Cycles(3));
+			var leftover = Path.Combine(_folder.Root, "~pureData.json.old.tmp");
+			File.WriteAllBytes(leftover, Stored());
+			File.SetLastWriteTimeUtc(leftover, DateTime.UtcNow.AddDays(-2));
+			Enter(Cycle(3));
+
+			await _session.SaveAsync();
+
+			Assert.False(File.Exists(leftover));
+		}
+
+		[Fact]
+		public async Task AFreshTemporaryFileIsLeftAlone()
+		{
+			await OpenWith(Cycles(3));
+			var inProgress = Path.Combine(_folder.Root, "~pureData.json.other.tmp");
+			File.WriteAllBytes(inProgress, Stored());
+			Enter(Cycle(3));
+
+			await _session.SaveAsync();
+
+			Assert.True(File.Exists(inProgress));
+		}
+
+		[Fact]
+		public async Task ALeftoverOfAnotherFileIsLeftAlone()
+		{
+			await OpenWith(Cycles(3));
+			var other = Path.Combine(_folder.Root, "~pureSettings.json.old.tmp");
+			File.WriteAllBytes(other, [1]);
+			File.SetLastWriteTimeUtc(other, DateTime.UtcNow.AddDays(-2));
+			Enter(Cycle(3));
+
+			await _session.SaveAsync();
+
+			Assert.True(File.Exists(other));
+		}
+
+		[Fact]
+		public async Task ALeftoverThatCantBeRemovedDoesNotFailTheSave()
+		{
+			await OpenWith(Cycles(3));
+			var leftover = Path.Combine(_folder.Root, "~pureData.json.old.tmp");
+			File.WriteAllBytes(leftover, Stored());
+			File.SetLastWriteTimeUtc(leftover, DateTime.UtcNow.AddDays(-2));
+			Enter(Cycle(3));
+			_files.LockedDeletes = true;
+
+			Assert.Equal(SaveStatus.Saved, await _session.SaveAsync());
+
+			Assert.Equal(FileFor(Cycles(4)), Stored());
 		}
 
 		/// <summary>The real rename on this platform: anyone reading during a save gets a whole file.</summary>

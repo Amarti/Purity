@@ -45,12 +45,23 @@ namespace Purity.WPF.ViewModels
 		private void OpenSettings()
 		{
 			var settingsCopy = new Settings(Settings);
-			var w = new SettingsWindow(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), _impl.SaveDataTo);
+			var w = new SettingsWindow(settingsCopy, () => DataSerializer.ExportPeriodsLengthsReport(Data), SaveDataTo);
 			if (w.ShowDialog() == true)
 			{
 				_impl.SetSettings(settingsCopy);
 				WarnIfDataUnreadable();
 			}
+		}
+
+		private void SaveDataTo(string path)
+		{
+			_impl.SaveDataTo(path);
+			WarnIfDataWentToACopy();
+		}
+		private void WarnIfDataWentToACopy()
+		{
+			if (_impl.ConflictedCopyPath != null)
+				MessageBox.Show(string.Format(DataSerializer.CONFLICT_MESSAGE, _impl.ConflictedCopyPath), "Purity", MessageBoxButton.OK, MessageBoxImage.Warning);
 		}
 
 		public ICommand AddPeriodCommand { get; }
@@ -69,6 +80,7 @@ namespace Purity.WPF.ViewModels
 		public void SaveState()
 		{
 			_impl.SaveState();
+			WarnIfDataWentToACopy();
 		}
 
 

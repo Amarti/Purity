@@ -15,7 +15,8 @@ namespace Purity.Storage
 
 	/// <summary>
 	/// This device's private copies, kept in its app data folder and never synced: the last version
-	/// it agreed with the stored file on, and rolling backups. Use one vault per data file.
+	/// it agreed with the stored file on, entries still waiting to reach that file, and rolling
+	/// backups. Use one vault per data file.
 	/// </summary>
 	public sealed class LocalVault
 	{
@@ -42,6 +43,21 @@ namespace Purity.Storage
 		{
 			CreatePrivateFolder(_folder);
 			AtomicFile.Replace(_files, LastSyncedPath, content, () => true);
+		}
+
+		/// <summary>The entries that couldn't reach the stored file, or null if there are none</summary>
+		public byte[]? ReadHeld() => AtomicFile.Retrying(_files, () => _files.Read(HeldPath));
+
+		public void WriteHeld(ReadOnlyMemory<byte> content)
+		{
+			CreatePrivateFolder(_folder);
+			AtomicFile.Replace(_files, HeldPath, content, () => true);
+		}
+
+		public void ClearHeld()
+		{
+			if (File.Exists(HeldPath))
+				_files.Delete(HeldPath);
 		}
 
 		/// <summary>Keeps a copy of the content, unless the newest backup already holds it</summary>
@@ -101,6 +117,7 @@ namespace Purity.Storage
 
 
 		private string LastSyncedPath => Path.Combine(_folder, "last-synced.json");
+		private string HeldPath => Path.Combine(_folder, "held.json");
 
 		private const string Prefix = "pureData-";
 		private const string StampFormat = "yyyyMMdd'T'HHmmssfff'Z'";

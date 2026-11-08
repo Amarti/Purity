@@ -51,10 +51,10 @@ namespace Purity.Storage.Tests
 
 			Assert.True(session.State == SessionState.Ready, "the real file didn't open");
 			Assert.NotEmpty(session.Ledger.Data);
-			return (session, store, File.ReadAllBytes(_folder.DataFile));
+			return (session, store, _folder.ReadData());
 		}
 
-		private bool FileIs(byte[] expected) => File.ReadAllBytes(_folder.DataFile).AsSpan().SequenceEqual(expected);
+		private bool FileIs(byte[] expected) => _folder.ReadData().AsSpan().SequenceEqual(expected);
 
 		private static PeriodRecord FarFuture(DataSession session, int cycles)
 		{
@@ -119,7 +119,7 @@ namespace Purity.Storage.Tests
 			var remote = history.Append(theirs).ToArray();
 
 			session.Ledger.AcceptPeriod(session.Ledger.AddPeriod(mine.Begin, mine.End));
-			File.WriteAllBytes(_folder.DataFile, FileFor(remote));
+			_folder.WriteData(FileFor(remote));
 
 			Assert.True(await session.SaveAsync() == SaveStatus.Saved, "the merge didn't save");
 
@@ -134,7 +134,7 @@ namespace Purity.Storage.Tests
 		{
 			var (_, store, original) = await OpenRealCopy();
 			using var __ = store;
-			File.WriteAllBytes(_folder.DataFile, FileFor());
+			_folder.WriteData(FileFor());
 
 			var restarted = new DataSession(store, new LocalVault(_folder.VaultFolder));
 			await restarted.OpenAsync();
@@ -143,7 +143,7 @@ namespace Purity.Storage.Tests
 
 			await restarted.ResolveAsync(_ => MergeSide.Local);
 
-			var recovered = File.ReadAllBytes(_folder.DataFile);
+			var recovered = _folder.ReadData();
 			Assert.True(recovered.Length > original.Length / 2, "the history didn't come back");
 			Assert.True(SameInputs(
 				Core.PurityFile.Parse(System.Text.Encoding.UTF8.GetString(original)).Select(PeriodRecord.From),

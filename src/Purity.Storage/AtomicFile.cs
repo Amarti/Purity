@@ -24,7 +24,7 @@ namespace Purity.Storage
 				files.WriteDurably(temp, content, files.UnixMode(path));
 
 				// checked on every attempt: whoever held the file may have been changing it
-				return Retrying(files, () =>
+				var replaced = Retrying(files, () =>
 				{
 					if (!mayReplace())
 						return false;
@@ -32,6 +32,10 @@ namespace Purity.Storage
 					files.Move(temp, path);
 					return true;
 				});
+
+				if (replaced)
+					RemoveLeftovers(files, path);
+				return replaced;
 			}
 			finally
 			{
@@ -59,6 +63,28 @@ namespace Purity.Storage
 		}
 
 
+		/// <summary>
+		/// A crash leaves its temporary file behind, and that holds a whole copy of the history.
+		/// Only old ones go, because a fresh one may be another program's save in progress.
+		/// </summary>
+		private static void RemoveLeftovers(FileOperations files, string path)
+		{
+			var pattern = $"~{Path.GetFileName(path)}.*.tmp";
+			var cutoff = DateTime.UtcNow - LeftoverAge;
+			try
+			{
+				foreach (var leftover in Directory.GetFiles(Path.GetDirectoryName(path)!, pattern))
+				{
+					if (File.GetLastWriteTimeUtc(leftover) < cutoff)
+						TryDelete(files, leftover);
+				}
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// tidying up must never fail a save that already succeeded
+			}
+		}
+
 		private static void TryDelete(FileOperations files, string path)
 		{
 			try
@@ -77,5 +103,7 @@ namespace Purity.Storage
 		/// has it open, but most such locks last only milliseconds, so the first waits are short.
 		/// </summary>
 		private static readonly int[] RetryDelays = { 20, 40, 80, 160, 320, 500, 500, 500, 500 };
+
+		private static readonly TimeSpan LeftoverAge = TimeSpan.FromDays(1);
 	}
 }

@@ -44,7 +44,9 @@ dotnet stryker --config-file stryker-config.json
 
 Read the JSON report, not the printed summary. Stryker counts a timeout as caught, and with this test runner a timeout can mean nothing ran: in the first run, 19 timeouts hid real gaps, including an untested method. Apply each timed-out change by hand and confirm a test fails. The summary table also lists skipped mutants under "survived".
 
-`Purity.Storage.Tests` has its own `stryker-config.json`, run the same way. Two more things to check there:
+`Purity.Storage.Tests` has its own `stryker-config.json`, run the same way. Four more things to check there:
 
 - Search the log for `Safe Mode`. Stryker gives up on a whole method when it can't compile a mutant, then reports those mutants as compile errors. Declaring a variable before a `try` and assigning it inside causes this, and it once removed the entire merge logic from a run without lowering the score.
 - Its threshold is lower than the engine's because Windows can't run the Unix permission code, and some lines can't be tested: the disk flush, `Dispose`, overlapping watcher events and message wording. Run the Unix-only mutants on Linux by hand.
+- Run it on a copy with `CrashTests.cs` removed. Those tests start and kill real processes, which says nothing about a single mutant, and with them a run didn't finish in 45 minutes. Without them it takes about an hour.
+- Timeouts need the same hand check. In one run, 18 of 48 were changes no test noticed and 3 hung the whole suite, which only the time limit on the CI step catches.

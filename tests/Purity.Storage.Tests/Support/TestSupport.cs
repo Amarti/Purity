@@ -29,6 +29,27 @@ namespace Purity.Storage.Tests
 
 		public string[] LeftoverTemporaryFiles() => Directory.GetFiles(Root, "*.tmp");
 
+		public byte[] ReadData() => Patiently(() => File.ReadAllBytes(DataFile));
+
+		public Task<byte[]> ReadDataAsync() => Task.Run(ReadData);
+
+		public void WriteData(byte[] content) => Patiently(() =>
+		{
+			File.WriteAllBytes(DataFile, content);
+			return true;
+		});
+
+		public Task WriteDataAsync(byte[] content) => Task.Run(() => WriteData(content));
+
+		public void WriteText(string content) => WriteData(Encoding.UTF8.GetBytes(content));
+
+
+		/// <summary>
+		/// A virus scanner can grab a file right after a save. The app waits that out, so a test
+		/// touching the data file directly has to as well, or it fails for no reason.
+		/// </summary>
+		private static T Patiently<T>(Func<T> action) => AtomicFile.Retrying(new FileOperations(), action);
+
 
 		public string Root { get; } = Path.Combine(Path.GetTempPath(), $"purity-storage-{Guid.NewGuid():N}");
 		public string DataFile { get; }
@@ -89,12 +110,12 @@ namespace Purity.Storage.Tests
 		{
 			Moves++;
 			if (PowerCut)
-				throw new IOException("Power lost");
+				throw Injected("Power lost");
 			if (LockedMoves > 0)
 			{
 				LockedMoves--;
 				AfterLockedMove?.Invoke();
-				throw new IOException("The process cannot access the file because it is being used by another process");
+				throw Injected(FileInUse);
 			}
 
 			base.Move(source, target);
@@ -110,28 +131,74 @@ namespace Purity.Storage.Tests
 
 		public override byte[]? Read(string path)
 		{
-			if (LockedReads > 0)
-			{
-				LockedReads--;
-				throw new IOException("The process cannot access the file because it is being used by another process");
-			}
+			if (TakeLockedRead())
+				throw Injected(FileInUse);
 
 			return base.Read(path);
 		}
 
-		public override void Pause(TimeSpan time) => Pauses++;
+		/// <summary>Only a failure faked here can skip the wait. A real lock needs the time it gets in the app.</summary>
+		public override void Pause(TimeSpan time)
+		{
+			Pauses++;
+			if (!_injected)
+				base.Pause(time);
+
+			_injected = false;
+		}
+
+
+		private static IOException Injected(string message)
+		{
+			_injected = true;
+			return new IOException(message);
+		}
+
+		/// <summary>Atomic, because a test can lift the lock while a watcher's timer is counting it down</summary>
+		private bool TakeLockedRead()
+		{
+			lock (_readLocks)
+			{
+				if (_lockedReads == 0)
+					return false;
+
+				_lockedReads--;
+				return true;
+			}
+		}
 
 
 		public bool DiskFull { get; set; }
 		public bool PowerCut { get; set; }
 		public bool LockedDeletes { get; set; }
 		public int LockedMoves { get; set; }
-		public int LockedReads { get; set; }
+		public int LockedReads
+		{
+			get
+			{
+				lock (_readLocks)
+					return _lockedReads;
+			}
+			set
+			{
+				lock (_readLocks)
+					_lockedReads = value;
+			}
+		}
 		public Action? AfterWrite { get; set; }
 		public Action? AfterLockedMove { get; set; }
 		public int Writes { get; private set; }
 		public int Moves { get; private set; }
 		public int Pauses { get; private set; }
+
+
+		private const string FileInUse = "The process cannot access the file because it is being used by another process";
+
+		[ThreadStatic]
+		private static bool _injected;
+
+		private readonly object _readLocks = new();
+		private int _lockedReads;
 	}
 
 

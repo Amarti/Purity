@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -58,8 +59,7 @@ namespace Purity
 				if (backup && File.Exists(filePath))
 					File.Copy(filePath, filePath + BACKUP_EXTENSION, true);
 
-				var json = JsonSerializer.Serialize(data, DEFAULT_SERIALIZATION_OPTIONS);
-				WriteAtomically(filePath, json);
+				WriteAtomically(filePath, ToJson(data));
 			}
 			catch (Exception e)
 			{
@@ -72,16 +72,19 @@ namespace Purity
 		/// </summary>
 		/// <param name="filePath">Path to the data file</param>
 		/// <param name="loadFailed">The file couldn't be read. The result is then empty, and must never be saved over the file</param>
-		public static List<PurityPeriod> DeserializeData(string? filePath, out bool loadFailed)
+		/// <param name="fileText">The file as it was read, to notice later whether someone else changed it</param>
+		public static List<PurityPeriod> DeserializeData(string? filePath, out bool loadFailed, out string? fileText)
 		{
 			loadFailed = false;
+			fileText = null;
 			var data = new List<PurityPeriod>();
 			try
 			{
 				if (string.IsNullOrWhiteSpace(filePath))
 					filePath = GetDefaultDataFilePath();
 
-				var json = File.ReadAllText(filePath);
+				var json = ReadWhenFree(filePath);
+				fileText = json;
 				var v = GetDataVersion(json);
 				data = JsonSerializer.Deserialize<List<PurityPeriod>>(json, DEFAULT_SERIALIZATION_OPTIONS) ?? data;
 
@@ -97,6 +100,51 @@ namespace Purity
 
 			return data;
 		}
+		/// <summary>
+		/// The data file's text right now, or null if it's missing or can't be read at the moment
+		/// </summary>
+		public static string? ReadDataText(string? filePath)
+		{
+			try
+			{
+				return ReadWhenFree(DataFilePathOrDefault(filePath));
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// The data as it would be written
+		/// </summary>
+		public static string ToJson(List<PurityPeriod> data) => JsonSerializer.Serialize(data, DEFAULT_SERIALIZATION_OPTIONS);
+
+		public static bool IsSameFile(string? a, string? b) =>
+			string.Equals(Path.GetFullPath(DataFilePathOrDefault(a)), Path.GetFullPath(DataFilePathOrDefault(b)), StringComparison.OrdinalIgnoreCase);
+
+		/// <summary>
+		/// Writes the data beside the data file, named the way sync clients name a conflicted copy, so the new apps find it
+		/// </summary>
+		/// <returns>Path of the copy, or null if it couldn't be written</returns>
+		public static string? SerializeConflictedCopy(List<PurityPeriod> data, string? filePath)
+		{
+			try
+			{
+				var path = Path.GetFullPath(DataFilePathOrDefault(filePath));
+				var stamp = DateTime.Now.ToString("yyyy-MM-dd HHmmss", CultureInfo.InvariantCulture);
+				var copy = Path.Combine(Path.GetDirectoryName(path)!, $"{Path.GetFileNameWithoutExtension(path)} (conflicted copy {stamp}){Path.GetExtension(path)}");
+
+				WriteAtomically(copy, ToJson(data));
+				return copy;
+			}
+			catch (Exception e)
+			{
+				Logger.Error($"{nameof(SerializeConflictedCopy)}: {e.Message}\n{e.StackTrace}");
+				return null;
+			}
+		}
+
 		/// <summary>
 		/// Replaces the file in one step, so a crash or a full disk leaves the old content whole.<br/>
 		/// If the rename keeps failing, the new content stays in the temporary file beside it
@@ -117,12 +165,31 @@ namespace Purity
 					File.Move(tempPath, filePath, true);
 					return;
 				}
-				catch (Exception e) when (attempt < MOVE_ATTEMPTS && e is IOException or UnauthorizedAccessException)
+				catch (Exception e) when (attempt < LOCK_ATTEMPTS && e is IOException or UnauthorizedAccessException)
 				{
-					Thread.Sleep(MOVE_RETRY_DELAY_MS);	// Windows refuses while a sync client or a scanner has the file open
+					Thread.Sleep(LOCK_RETRY_DELAY_MS);	// Windows refuses while a sync client or a scanner has the file open
 				}
 			}
 		}
+		/// <summary>
+		/// Reads a file, waiting out a sync client or a scanner that has it open for a moment. A missing file is reported at once
+		/// </summary>
+		private static string ReadWhenFree(string path)
+		{
+			for (var attempt = 1; ; attempt++)
+			{
+				try
+				{
+					return File.ReadAllText(path);
+				}
+				catch (Exception e) when (attempt < LOCK_ATTEMPTS && e is not (FileNotFoundException or DirectoryNotFoundException) && e is IOException or UnauthorizedAccessException)
+				{
+					Thread.Sleep(LOCK_RETRY_DELAY_MS);
+				}
+			}
+		}
+		private static string DataFilePathOrDefault(string? filePath) =>
+			string.IsNullOrWhiteSpace(filePath) ? GetDefaultDataFilePath() : filePath;
 		private static string GetDefaultDataFilePath()
 		{
 			return DATA_FILE_NAME;
@@ -176,9 +243,10 @@ namespace Purity
 		private const string BACKUP_EXTENSION = ".bck";
 		private const string TEMP_EXTENSION = ".tmp";
 		private const string VERSION_TOKEN = "\"Version\":";
-		private const int MOVE_ATTEMPTS = 10;
-		private const int MOVE_RETRY_DELAY_MS = 300;
+		private const int LOCK_ATTEMPTS = 10;
+		private const int LOCK_RETRY_DELAY_MS = 300;
 
+		public const string CONFLICT_MESSAGE = "The data file was changed elsewhere while the app was open, so it wasn't overwritten.\n\nYour entries from this session are in a copy beside it:\n{0}";
 		public const string LOAD_FAILED_MESSAGE = "The data file couldn't be read, so your history isn't shown.\n\nNothing will be saved until it can be read, and anything you enter now will be lost. Close the app, let your sync finish, and open it again.";
 
 		public static readonly JsonSerializerOptions DEFAULT_SERIALIZATION_OPTIONS = new JsonSerializerOptions

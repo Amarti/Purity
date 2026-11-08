@@ -46,7 +46,7 @@ namespace Purity.Storage.Tests
 			var result = await _store.SaveAsync(First, null);
 
 			Assert.False(result.IsConflict);
-			Assert.Equal(First, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(First, await _folder.ReadDataAsync());
 		}
 
 		[Fact]
@@ -77,30 +77,30 @@ namespace Purity.Storage.Tests
 			var second = await _store.SaveAsync(Second, first.Version);
 
 			Assert.False(second.IsConflict);
-			Assert.Equal(Second, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(Second, await _folder.ReadDataAsync());
 		}
 
 		[Fact]
 		public async Task SavingOverANewerVersionChangesNothing()
 		{
 			var first = await _store.SaveAsync(First, null);
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 
 			var result = await _store.SaveAsync(First, first.Version);
 
 			Assert.True(result.IsConflict);
-			Assert.Equal(Second, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(Second, await _folder.ReadDataAsync());
 		}
 
 		[Fact]
 		public async Task CreatingAFileThatAppearedMeanwhileChangesNothing()
 		{
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 
 			var result = await _store.SaveAsync(First, null);
 
 			Assert.True(result.IsConflict);
-			Assert.Equal(Second, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(Second, await _folder.ReadDataAsync());
 		}
 
 		[Fact]
@@ -120,7 +120,7 @@ namespace Purity.Storage.Tests
 		{
 			var first = await _store.SaveAsync(First, null);
 			await _store.SaveAsync(Second, first.Version);
-			await File.WriteAllBytesAsync(_folder.DataFile, First);
+			await _folder.WriteDataAsync(First);
 			await _store.SaveAsync(Second, "stale");
 
 			Assert.Empty(_folder.LeftoverTemporaryFiles());
@@ -135,7 +135,7 @@ namespace Purity.Storage.Tests
 
 			await Assert.ThrowsAnyAsync<OperationCanceledException>(() => _store.SaveAsync(Second, first.Version, cancelled.Token));
 
-			Assert.Equal(First, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(First, await _folder.ReadDataAsync());
 		}
 
 		[Fact]
@@ -149,7 +149,7 @@ namespace Purity.Storage.Tests
 
 			await Assert.ThrowsAnyAsync<OperationCanceledException>(() => store.SaveAsync(Second, first.Version, cancelled.Token));
 
-			Assert.Equal(First, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(First, await _folder.ReadDataAsync());
 			Assert.Empty(_folder.LeftoverTemporaryFiles());
 		}
 
@@ -162,7 +162,7 @@ namespace Purity.Storage.Tests
 			var result = await store.SaveAsync(First, null);
 
 			Assert.False(result.IsConflict);
-			Assert.Equal(First, await File.ReadAllBytesAsync(_folder.DataFile));
+			Assert.Equal(First, await _folder.ReadDataAsync());
 		}
 
 		/// <summary>A sync client or an editor may hold the file open. On Windows that takes the right sharing.</summary>
@@ -213,7 +213,7 @@ namespace Purity.Storage.Tests
 			store.Changed += (_, _) => changed.TrySetResult();
 			await store.SaveAsync(First, null);
 
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 
 			await changed.Task.WaitAsync(TimeSpan.FromSeconds(30));
 		}
@@ -247,6 +247,23 @@ namespace Purity.Storage.Tests
 			await changed.Task.WaitAsync(TimeSpan.FromSeconds(30));
 		}
 
+		/// <summary>Sync clients often keep downloads in a cache folder and move them in. Linux reports that as a new file, not a rename.</summary>
+		[Fact]
+		public async Task AFileMovedInFromAnotherFolderRaisesChanged()
+		{
+			using var store = new FileDataStore(_folder.DataFile, new FileOperations(), TimeSpan.FromMilliseconds(50));
+			await store.SaveAsync(First, null);
+			var changed = new TaskCompletionSource();
+			store.Changed += (_, _) => changed.TrySetResult();
+			var cache = Directory.CreateDirectory(Path.Combine(_folder.Root, ".cache")).FullName;
+			var delivered = Path.Combine(cache, "delivered");
+			await File.WriteAllBytesAsync(delivered, Second);
+
+			File.Move(delivered, _folder.DataFile, overwrite: true);
+
+			await changed.Task.WaitAsync(TimeSpan.FromSeconds(30));
+		}
+
 		[Fact]
 		public async Task AnUnsubscribedHandlerHearsNothing()
 		{
@@ -257,7 +274,7 @@ namespace Purity.Storage.Tests
 			store.Changed -= handler;
 			await store.SaveAsync(First, null);
 
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 			await Task.Delay(TimeSpan.FromSeconds(1));
 
 			Assert.Equal(0, raised);
@@ -273,7 +290,7 @@ namespace Purity.Storage.Tests
 			store.Changed += (_, _) => changed.TrySetResult();
 			files.LockedReads = int.MaxValue;
 
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 			await Task.Delay(TimeSpan.FromMilliseconds(300));
 			Assert.False(changed.Task.IsCompleted);
 
@@ -296,7 +313,7 @@ namespace Purity.Storage.Tests
 			};
 			await store.SaveAsync(First, null);
 
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 			await repeated.Task.WaitAsync(TimeSpan.FromSeconds(30));
 
 			await store.LoadAsync();
@@ -307,6 +324,29 @@ namespace Purity.Storage.Tests
 			Assert.Equal(settled, Volatile.Read(ref raised));
 		}
 
+		/// <summary>While nobody loads a change it keeps being reported, but now and then, not in a tight loop</summary>
+		[Fact]
+		public async Task AnUnloadedChangeIsRepeatedOnlyNowAndThen()
+		{
+			using var store = new FileDataStore(_folder.DataFile, new FileOperations(), TimeSpan.FromMilliseconds(20));
+			var raised = 0;
+			var first = new TaskCompletionSource();
+			store.Changed += (_, _) =>
+			{
+				Interlocked.Increment(ref raised);
+				first.TrySetResult();
+			};
+			await store.SaveAsync(First, null);
+
+			await _folder.WriteDataAsync(Second);
+			await first.Task.WaitAsync(TimeSpan.FromSeconds(30));
+			await Task.Delay(TimeSpan.FromMilliseconds(300));
+
+			// one repeat is due in this time; the rest allows for late file events
+			var count = Volatile.Read(ref raised);
+			Assert.True(count <= 4, $"reported {count} times in 300 ms");
+		}
+
 		[Fact]
 		public async Task DisposingWhileAChangeIsSettlingIsSafe()
 		{
@@ -314,7 +354,7 @@ namespace Purity.Storage.Tests
 			store.Changed += (_, _) => { };
 			await store.SaveAsync(First, null);
 
-			await File.WriteAllBytesAsync(_folder.DataFile, Second);
+			await _folder.WriteDataAsync(Second);
 			store.Dispose();
 
 			await Task.Delay(TimeSpan.FromMilliseconds(200));

@@ -44,7 +44,7 @@ namespace Purity.Storage
 	/// <item>A file that changed since it was read is merged, never overwritten.</item>
 	/// <item>A closed period that changed or went missing in the file needs a person's decision.</item>
 	/// <item>Every replaced version stays in the local backups.</item>
-	/// <item>An entry not saved yet stays in <see cref="Ledger"/> through all of the above.</item>
+	/// <item>An entry that couldn't be saved stays in <see cref="Ledger"/>, and in the vault in case the app closes.</item>
 	/// </list>
 	/// Calls run one at a time. Change <see cref="Ledger"/> on the thread that awaits them: the
 	/// session reads it again after each wait, so entries made meanwhile are kept.
@@ -98,6 +98,16 @@ namespace Purity.Storage
 		public Task<SaveStatus> RestoreAsync(Backup backup, CancellationToken cancellation = default) =>
 			OneAtATime(() => RestoreCoreAsync(backup, cancellation), cancellation);
 
+		/// <summary>
+		/// Brings in what a conflicted copy holds. Periods only it has are added, and a period that
+		/// differs needs a person's decision. A copy can't remove anything, so it can't undo work.
+		/// </summary>
+		/// <param name="copy">The content of the copy, which is left for the app to deal with</param>
+		/// <param name="cancellation">Cancels the merge</param>
+		/// <exception cref="InvalidDataException">The copy can't be read. Nothing was changed</exception>
+		public Task<SaveStatus> MergeCopyAsync(byte[] copy, CancellationToken cancellation = default) =>
+			OneAtATime(() => MergeCopyCoreAsync(copy, cancellation), cancellation);
+
 
 		private async Task<T> OneAtATime<T>(Func<Task<T>> action, CancellationToken cancellation)
 		{
@@ -114,14 +124,34 @@ namespace Purity.Storage
 
 		private async Task<SessionState> OpenCoreAsync(CancellationToken cancellation)
 		{
-			Replace(ReadLastSynced());
-			_baseline = Records(Ledger.Data);
+			_lastSyncedLost = false;
+			var known = ReadFromVault(vault => vault.ReadLastSynced()) ?? new List<PurityPeriod>();
+			var held = ReadFromVault(vault => vault.ReadHeld());
+
+			_baseline = Records(known);
+			Replace(held ?? known);
 			_synced = null;
 			PendingMerge = null;
 			State = SessionState.Closed;
 
 			await SyncWithStoreAsync(cancellation);
+			if (held != null)
+				await TrySaveHeldAsync(cancellation);
+
 			return State;
+		}
+
+		/// <summary>Failing here isn't a failed opening: the entries just stay held</summary>
+		private async Task TrySaveHeldAsync(CancellationToken cancellation)
+		{
+			try
+			{
+				await SaveCoreAsync(cancellation);
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				// HasUnsavedChanges reports it
+			}
 		}
 
 		private async Task<SaveStatus> RefreshCoreAsync(CancellationToken cancellation)
@@ -184,7 +214,66 @@ namespace Purity.Storage
 			return await SaveSettledAsync(cancellation);
 		}
 
+		private async Task<SaveStatus> MergeCopyCoreAsync(byte[] copy, CancellationToken cancellation)
+		{
+			var periods = ParseHistory(copy);
+			if (State != SessionState.Ready)
+				return SaveStatus.Refused;
+
+			var local = Records(Ledger.Data);
+			var merge = HistoryMerge.Merge(Array.Empty<PeriodRecord>(), local, Records(periods));
+			if (merge.HasConflicts)
+			{
+				Ask(merge, local, _baseline);
+				return SaveStatus.NeedsResolution;
+			}
+
+			if (!HistoryMerge.Same(merge.Merged, local))
+				Apply(merge.Merged);
+
+			return await SaveCoreAsync(cancellation);
+		}
+
+		/// <summary>Saves, and keeps a copy in the vault for as long as that doesn't work out</summary>
 		private async Task<SaveStatus> SaveCoreAsync(CancellationToken cancellation)
+		{
+			try
+			{
+				var status = await WriteAsync(cancellation);
+				if (status is SaveStatus.Saved or SaveStatus.Unchanged)
+					ClearHeld();
+				else
+					HoldEntries();
+
+				return status;
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				HoldEntries();
+				throw;
+			}
+		}
+
+		/// <summary>Usually there is nothing to clear, which says nothing about the vault working</summary>
+		private void ClearHeld()
+		{
+			try
+			{
+				_vault.ClearHeld();
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				_vaultWriteFailed = true;
+			}
+		}
+
+		private void HoldEntries()
+		{
+			if (HasUnsavedChanges)
+				UseVault(vault => vault.WriteHeld(Encode(PurityFile.Format(Ledger.Data))));
+		}
+
+		private async Task<SaveStatus> WriteAsync(CancellationToken cancellation)
 		{
 			if (State != SessionState.Ready)
 				return State == SessionState.NeedsResolution ? SaveStatus.NeedsResolution : SaveStatus.Refused;
@@ -318,18 +407,17 @@ namespace Purity.Storage
 		private bool IsStored(byte[] content) =>
 			_synced == null ? Ledger.Data.Count == 0 : content.AsSpan().SequenceEqual(_synced.Content);
 
-		private List<PurityPeriod> ReadLastSynced()
+		private List<PurityPeriod>? ReadFromVault(Func<LocalVault, byte[]?> read)
 		{
-			_lastSyncedLost = false;
 			try
 			{
-				var content = _vault.ReadLastSynced();
-				return content == null ? new List<PurityPeriod>() : ParseHistory(content);
+				var content = read(_vault);
+				return content == null ? null : ParseHistory(content);
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
 			{
 				_lastSyncedLost = true;
-				return new List<PurityPeriod>();
+				return null;
 			}
 		}
 
