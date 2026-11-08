@@ -26,7 +26,7 @@ Tests that need real data skip when `tests/private/` is missing. Set `PURITY_REQ
 
 ## On machines CI can't reach
 
-Hosted CI has no Monterey Mac and no real Debian machine, so `tools/platform-check` builds a kit that needs nothing installed: both suites on .NET 10 and .NET 8, plus a small window for each UI candidate, all self-contained. The person at the machine runs one script and sends back the report. The kit's README explains how.
+Hosted CI has no Monterey Mac and no real Debian machine, so `tools/platform-check` builds a kit that needs nothing installed: the three test suites and the desktop app (a `Purity.app` bundle on a Mac), all self-contained on .NET 10. The script runs the suites, has the app save a picture of its window with a made-up history (`--picture`, which refuses to run without `--data`), then lets the person try the app and answer a few questions, and packs up a report to send back. The kit's README explains how. The .NET 8 build of the engine is still tested in CI, but the kit no longer carries it, since Monterey runs .NET 10.
 
 ```bash
 bash tools/platform-check/build-kit.sh                  # Mac, Intel and Apple Silicon
@@ -36,7 +36,7 @@ bash tools/platform-check/build-kit.sh                  # Mac, Intel and Apple S
 bash tools/platform-check/build-kit.sh linux-x64 linux-arm64
 ```
 
-The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the kit runs with globalization off and most calculation tests skip, so install `libicu` first for a full run.
+The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the tests run with globalization off and most calculation tests skip, so install `libicu` first for a full run. The app itself never needs ICU.
 
 The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon on Monterey hasn't been tried. Rerun the kit on a Monterey Mac after upgrading Avalonia or .NET.
 

@@ -4,3 +4,4 @@ tests/oracle/** binary
 tests/fixtures/** binary
 tests/Purity.Parity/Golden/** -text
 *.sh text eol=lf
+*.command text eol=lf
