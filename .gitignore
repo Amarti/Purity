@@ -61,3 +61,6 @@ tests/private/
 pureData*.json
 pureSettings*.json
 *.age.key
+
+# Build output of tools such as the platform check kit
+/out/

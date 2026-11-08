@@ -21,6 +21,30 @@ dotnet run -f net10.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.
 
 Tests that need real data skip when `tests/private/` is missing. Set `PURITY_REQUIRE_REAL_DATA=1` to make them fail instead, which release builds must do.
 
+## On machines CI can't reach
+
+Hosted CI has no Monterey Mac and no real Debian machine, so `tools/platform-check` builds a kit that needs nothing installed: both suites on .NET 10 and .NET 8, plus a small window for each UI candidate, all self-contained. The person at the machine runs one script and sends back the report. The kit's README explains how.
+
+```bash
+bash tools/platform-check/build-kit.sh                  # Mac, Intel and Apple Silicon
+```
+
+```bash
+bash tools/platform-check/build-kit.sh linux-x64 linux-arm64
+```
+
+The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the kit runs with globalization off and most calculation tests skip, so install `libicu` first for a full run.
+
+The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon on Monterey hasn't been tried. Rerun the kit on a Monterey Mac after upgrading Avalonia or .NET.
+
+Between runs, CI publishes the Mac build every night and on each push, and fails if any program or library in it needs a newer macOS than 12.0:
+
+```bash
+dotnet run tools/check-macos-minimum.cs -- <publish folder> 12.0
+```
+
+That catches the usual way an update drops a macOS version. It can't catch a library calling something newer only at run time, which is why the kit is still the real test.
+
 ## Real data
 
 `tests/private/` holds a snapshot of `pureData.json` and older copies, and it is gitignored. The repo is public, so only the encrypted file `tests/fixtures/private.tar.gz.gpg` may be committed. Use `tools/fixture.sh` to create or unpack it. Once that file is committed, CI fails if the `PURITY_FIXTURE_PASSPHRASE` secret is missing, so the real-data tests can't quietly stop running. Forks and fork pull requests skip them.
