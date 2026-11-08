@@ -39,6 +39,14 @@ namespace Purity.Desktop.Views
 
 		public Task<int?> AskAsync(string text, params string[] buttons) => MessageWindow.ShowAsync(this, text, buttons);
 
+		/// <summary>Another start of Purity asked for this window instead of opening a second one</summary>
+		public void BringToFront()
+		{
+			if (WindowState == WindowState.Minimized)
+				WindowState = WindowState.Normal;
+			Activate();
+		}
+
 		public Task<bool> ShowSettingsAsync(SettingsWindowViewModel settings) => new SettingsWindow(settings).ShowDialog<bool>(this);
 
 

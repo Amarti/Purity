@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Purity.Desktop.Views;
 
 
@@ -18,7 +19,12 @@ namespace Purity.Desktop
 		{
 			// Program.Main has already refused --picture without --data
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-				desktop.MainWindow = new MainWindow(StartOptions.Parse(desktop.Args ?? Array.Empty<string>()));
+			{
+				var window = new MainWindow(StartOptions.Parse(desktop.Args ?? Array.Empty<string>()));
+				desktop.MainWindow = window;
+				if (Program.Instance is { } instance)
+					instance.Show = () => Dispatcher.UIThread.Post(window.BringToFront);
+			}
 
 			base.OnFrameworkInitializationCompleted();
 		}

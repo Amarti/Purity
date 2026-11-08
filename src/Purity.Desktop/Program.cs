@@ -15,6 +15,12 @@ namespace Purity.Desktop
 				return 2;
 			}
 
+			using var instance = SingleInstance.TryAcquire(AppPaths.Folder);
+			if (instance == null && SingleInstance.AskRunningToShow(AppPaths.Folder))
+				return 0;								// Purity is already open, and its window came to the front
+			instance?.Listen();
+			Instance = instance;
+
 			var code = BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 			return code != 0 ? code : ExitCode;
 		}
@@ -27,5 +33,8 @@ namespace Purity.Desktop
 
 		/// <summary>Set when a check run fails, as closing the window gives no other way to say so</summary>
 		internal static int ExitCode;
+
+		/// <summary>This run's hold on being the only Purity, or null when that couldn't be told</summary>
+		internal static SingleInstance? Instance;
 	}
 }
