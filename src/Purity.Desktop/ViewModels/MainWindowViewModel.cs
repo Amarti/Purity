@@ -73,8 +73,14 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, BuildReport);
-			if (!await _dialogs.ShowSettingsAsync(settings))
+			var settings = new SettingsWindowViewModel(DataFilePath, BuildReport, HasBackups());
+			var ok = await _dialogs.ShowSettingsAsync(settings);
+			if (settings.RestoreRequested)
+			{
+				await ChooseAndRestoreAsync();
+				return;
+			}
+			if (!ok)
 			{
 				if (_session == null)
 					UpdateWarning();
@@ -211,6 +217,7 @@ namespace Purity.Desktop.ViewModels
 			_vault = null;
 			_saveFailed = false;
 			_toldUnreadable = false;
+			_restoringFrom = null;
 			ForgetCopies();
 			Periods.Clear();
 			UpdateCommands();
@@ -304,8 +311,12 @@ namespace Purity.Desktop.ViewModels
 				for (var round = 0; round < 3 && _session?.State == SessionState.NeedsResolution; round++)
 				{
 					UpdateWarning();
-					var other = _resolvingCopy == null ? "In the data file" : $"In the copy \"{_resolvingCopy.Name}\"";
-					var keepOther = _resolvingCopy == null ? "Keep the file's" : "Keep the copy's";
+					var (other, keepOther) = (_resolvingCopy, _restoringFrom) switch
+					{
+						({ } copy, _) => ($"In the copy \"{copy.Name}\"", "Keep the copy's"),
+						(null, { } when) => ($"In the backup from {when}", "Keep the backup's"),
+						_ => ("In the data file", "Keep the file's"),
+					};
 					var question = _session.PendingMerge!;
 					var answers = new Dictionary<MergeConflict, MergeSide>();
 					foreach (var conflict in question.Conflicts)
@@ -322,6 +333,7 @@ namespace Purity.Desktop.ViewModels
 					if (_session?.PendingMerge != question)
 					{
 						_resolvingCopy = null;
+						_restoringFrom = null;
 						first = false;
 						continue;
 					}
@@ -343,6 +355,7 @@ namespace Purity.Desktop.ViewModels
 					if (!applied)
 					{
 						_resolvingCopy = null;
+						_restoringFrom = null;
 						first = false;
 					}
 				}
@@ -361,6 +374,7 @@ namespace Purity.Desktop.ViewModels
 		{
 			if (_session?.State != SessionState.NeedsResolution)
 				_resolvingCopy = null;				// the question it raised is gone
+				_restoringFrom = null;
 
 			Warning = _session?.State switch
 			{

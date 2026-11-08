@@ -305,12 +305,25 @@ namespace Purity.Desktop.Tests
 			public Task<bool> ShowSettingsAsync(SettingsWindowViewModel settings)
 			{
 				SettingsShown++;
-				return Task.FromResult(false);
+				return Task.FromResult(InSettings?.Invoke(settings) ?? false);
+			}
+
+			public Task<Storage.Backup?> ChooseBackupAsync(IReadOnlyList<BackupChoice> choices)
+			{
+				Choices = choices;
+				return Task.FromResult(ChooseBackup?.Invoke(choices));
 			}
 
 			public List<string> Shown { get; } = new();
 			public Queue<int> Answers { get; } = new();
 			public int SettingsShown { get; private set; }
+
+			/// <summary>What the person does in the settings window; returns whether they press OK</summary>
+			public Func<SettingsWindowViewModel, bool>? InSettings { get; set; }
+
+			/// <summary>Which earlier version the person picks, if any</summary>
+			public Func<IReadOnlyList<BackupChoice>, Storage.Backup?>? ChooseBackup { get; set; }
+			public IReadOnlyList<BackupChoice>? Choices { get; private set; }
 		}
 	}
 }

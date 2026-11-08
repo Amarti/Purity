@@ -49,6 +49,8 @@ namespace Purity.Desktop.Views
 
 		public Task<bool> ShowSettingsAsync(SettingsWindowViewModel settings) => new SettingsWindow(settings).ShowDialog<bool>(this);
 
+		public Task<Storage.Backup?> ChooseBackupAsync(IReadOnlyList<BackupChoice> choices) => BackupsWindow.ShowAsync(this, choices);
+
 
 		private void ScrollToEnd()
 		{

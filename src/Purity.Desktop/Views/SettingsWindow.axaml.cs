@@ -58,6 +58,13 @@ namespace Purity.Desktop.Views
 			}
 		}
 
+		/// <summary>Closes the settings unchanged; the main window then lists the earlier versions</summary>
+		private void Restore(object? sender, RoutedEventArgs e)
+		{
+			_viewModel.RequestRestore();
+			Close(false);
+		}
+
 		private void Ok(object? sender, RoutedEventArgs e) => Close(true);
 
 		private void Cancel(object? sender, RoutedEventArgs e) => Close(false);
