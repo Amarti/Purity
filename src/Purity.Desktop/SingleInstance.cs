@@ -46,19 +46,33 @@ namespace Purity.Desktop
 			if (OperatingSystem.IsWindows())
 				AllowSetForegroundWindow(AnyProcess);		// Windows only lets the window come forward if this start allows it
 
-			// Only the open Purity's reply counts: the request getting through isn't enough to know
-			try
+			// Only the open Purity's reply counts: the request getting through isn't enough to know. On
+			// Linux and macOS the pipe is a socket, which takes a caller while the open Purity is still
+			// finishing with the previous one and then drops it unanswered, so a hang-up means try again.
+			using var timeout = new CancellationTokenSource(wait ?? TimeSpan.FromSeconds(5));
+			while (true)
 			{
-				using var timeout = new CancellationTokenSource(wait ?? TimeSpan.FromSeconds(5));
-				using var pipe = new NamedPipeClientStream(".", PipeName(folder), PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-				pipe.ConnectAsync(timeout.Token).GetAwaiter().GetResult();
-				pipe.WriteAsync(new[] { ShowRequest }, timeout.Token).AsTask().GetAwaiter().GetResult();
-				var reply = new byte[1];
-				return pipe.ReadAsync(reply, timeout.Token).AsTask().GetAwaiter().GetResult() == 1 && reply[0] == Showing;
-			}
-			catch (Exception e) when (e is OperationCanceledException or TimeoutException or IOException or UnauthorizedAccessException)
-			{
-				return false;
+				try
+				{
+					using var pipe = new NamedPipeClientStream(".", PipeName(folder), PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+					pipe.ConnectAsync(timeout.Token).GetAwaiter().GetResult();
+					pipe.WriteAsync(new[] { ShowRequest }, timeout.Token).AsTask().GetAwaiter().GetResult();
+					var reply = new byte[1];
+					if (pipe.ReadAsync(reply, timeout.Token).AsTask().GetAwaiter().GetResult() == 1 && reply[0] == Showing)
+						return true;
+				}
+				catch (IOException)
+				{
+					// dropped between callers
+				}
+				catch (Exception e) when (e is OperationCanceledException or TimeoutException or UnauthorizedAccessException)
+				{
+					return false;
+				}
+
+				if (timeout.IsCancellationRequested)
+					return false;
+				Thread.Sleep(50);
 			}
 		}
 
