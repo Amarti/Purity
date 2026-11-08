@@ -20,59 +20,76 @@
         <ListBox x:Name="Periods" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Periods}"
                  ScrollViewer.VerticalScrollBarVisibility="Visible"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <!-- A plain stack rather than a virtualizing one, so the list always knows its height; LazyPeriod builds each period only once it's near the screen -->
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:PeriodViewModel">
-                    <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={x:Static local:Converters.PeriodBorder}}">
-                        <StackPanel Margin="0,5,0,5" HorizontalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
-                                <views:DateField Classes="Wpf" Margin="5,0,0,0" Height="25" Width="150" SelectedDate="{Binding BeginDate}"/>
-                                <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="Begin day or night"
-                                        ToolTip.Tip="{Binding BeginIsAfterDusk, Converter={x:Static local:Converters.DuskDawnTooltip}}">
-                                    <Panel>
-                                        <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !BeginIsAfterDusk}"/>
-                                        <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding BeginIsAfterDusk}"/>
-                                    </Panel>
-                                </Button>
-                                <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
-                                <views:DateField Classes="Wpf" Margin="5,0,0,0" Height="25" Width="150" SelectedDate="{Binding EndDate}"/>
-                                <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="End day or night"
-                                        ToolTip.Tip="{Binding EndIsAfterDusk, Converter={x:Static local:Converters.DuskDawnTooltip}}">
-                                    <Panel>
-                                        <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !EndIsAfterDusk}"/>
-                                        <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding EndIsAfterDusk}"/>
-                                    </Panel>
-                                </Button>
-                                <CheckBox Margin="10,8,0,0" Height="25" Width="80" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
-                                          ToolTip.Tip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)"/>
-                                <!-- WPF hides these buttons without giving up their space -->
-                                <Panel Margin="15,0,0,0" Height="25" Width="25">
-                                    <Button Height="25" Width="25" ToolTip.Tip="Accept period" AutomationProperties.Name="Accept period" Command="{Binding AcceptCommand}" IsVisible="{Binding !IsClosed}">
-                                        <Image Height="18" Width="18" Source="{StaticResource AcceptIconDrawingImage}"/>
-                                    </Button>
-                                </Panel>
-                                <Panel Margin="15,0,5,0" Height="25" Width="25">
-                                    <Button Height="25" Width="25" ToolTip.Tip="Remove period" AutomationProperties.Name="Remove period" Command="{Binding RemoveCommand}" IsVisible="{Binding IsLast}">
-                                        <Image Height="18" Width="18" Source="{StaticResource RemoveIconDrawingImage}"/>
-                                    </Button>
-                                </Panel>
-                            </StackPanel>
-                            <ListBox Classes="Events" Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="core:PurityEvent">
-                                        <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="177" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
-                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding IsAfterDusk}" VerticalAlignment="Center"/>
-                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding IsAfterDawn}" VerticalAlignment="Center"/>
-                                            <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding IsFullDay}" VerticalAlignment="Center"/>
-                                            <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
-                                            <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
+                    <views:LazyPeriod>
+                        <views:LazyPeriod.PeriodTemplate>
+                            <DataTemplate x:DataType="vm:PeriodViewModel">
+                                <Border BorderThickness="2" BorderBrush="{Binding IsClosed, Converter={x:Static local:Converters.PeriodBorder}}">
+                                    <StackPanel Margin="0,5,0,5" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
+                                            <views:DateField Classes="Wpf" Margin="5,0,0,0" Height="25" Width="150" SelectedDate="{Binding BeginDate}"/>
+                                            <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="Begin day or night"
+                                                    ToolTip.Tip="{Binding BeginIsAfterDusk, Converter={x:Static local:Converters.DuskDawnTooltip}}">
+                                                <Panel>
+                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !BeginIsAfterDusk}"/>
+                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding BeginIsAfterDusk}"/>
+                                                </Panel>
+                                            </Button>
+                                            <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
+                                            <views:DateField Classes="Wpf" Margin="5,0,0,0" Height="25" Width="150" SelectedDate="{Binding EndDate}"/>
+                                            <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="End day or night"
+                                                    ToolTip.Tip="{Binding EndIsAfterDusk, Converter={x:Static local:Converters.DuskDawnTooltip}}">
+                                                <Panel>
+                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !EndIsAfterDusk}"/>
+                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding EndIsAfterDusk}"/>
+                                                </Panel>
+                                            </Button>
+                                            <CheckBox Margin="10,8,0,0" Height="25" Width="80" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
+                                                      ToolTip.Tip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)"/>
+                                            <!-- WPF hides these buttons without giving up their space -->
+                                            <Panel Margin="15,0,0,0" Height="25" Width="25">
+                                                <Button Height="25" Width="25" ToolTip.Tip="Accept period" AutomationProperties.Name="Accept period" Command="{Binding AcceptCommand}" IsVisible="{Binding !IsClosed}">
+                                                    <Image Height="18" Width="18" Source="{StaticResource AcceptIconDrawingImage}"/>
+                                                </Button>
+                                            </Panel>
+                                            <Panel Margin="15,0,5,0" Height="25" Width="25">
+                                                <Button Height="25" Width="25" ToolTip.Tip="Remove period" AutomationProperties.Name="Remove period" Command="{Binding RemoveCommand}" IsVisible="{Binding IsLast}">
+                                                    <Image Height="18" Width="18" Source="{StaticResource RemoveIconDrawingImage}"/>
+                                                </Button>
+                                            </Panel>
                                         </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </StackPanel>
-                    </Border>
+                                        <ListBox Classes="Events" Margin="0,5,0,0" ItemsSource="{Binding SubEvents}">
+                                            <ListBox.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ListBox.ItemsPanel>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="core:PurityEvent">
+                                                    <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <TextBlock Margin="5,5,5,0" Height="23" Width="177" Text="{Binding TypeRepr}" VerticalAlignment="Center"/>
+                                                        <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding IsAfterDusk}" VerticalAlignment="Center"/>
+                                                        <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding IsAfterDawn}" VerticalAlignment="Center"/>
+                                                        <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding IsFullDay}" VerticalAlignment="Center"/>
+                                                        <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
+                                                        <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </views:LazyPeriod.PeriodTemplate>
+                    </views:LazyPeriod>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

@@ -12,7 +12,7 @@ namespace Purity.Desktop.Views
 	{
 		/// <summary>For the XAML previewer</summary>
 		public SettingsWindow()
-			: this(new SettingsWindowViewModel(string.Empty, () => null))
+			: this(new SettingsWindowViewModel(string.Empty, null))
 		{}
 
 		public SettingsWindow(SettingsWindowViewModel viewModel)
@@ -24,13 +24,19 @@ namespace Purity.Desktop.Views
 
 		private async void PickFile(object? sender, RoutedEventArgs e)
 		{
-			var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-			{
-				Title = "Data file",
-				FileTypeFilter = new[] { new FilePickerFileType("Purity data") { Patterns = new[] { "*.json" } }, FilePickerFileTypes.All },
-			});
-			if (files.Count > 0 && files[0].TryGetLocalPath() is { } path)
+			if (await DataFilePicker.OpenAsync(StorageProvider) is { } path)
 				_viewModel.DataFilePath = path;
+		}
+
+		/// <summary>Not in the WPF app. Closes the settings unchanged; the main window then moves the history</summary>
+		private async void Move(object? sender, RoutedEventArgs e)
+		{
+			var name = Path.GetFileName(_viewModel.DataFilePath.Trim());
+			if (await DataFilePicker.ChooseNewPlaceAsync(StorageProvider, string.IsNullOrEmpty(name) ? "pureData.json" : name) is not { } path)
+				return;
+
+			_viewModel.RequestMove(path);
+			Close(false);
 		}
 
 		/// <summary>The WPF app wrote the report beside itself without asking. Here the person chooses where.</summary>

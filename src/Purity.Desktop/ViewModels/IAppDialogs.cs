@@ -17,6 +17,10 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>Lists the earlier versions of the history and lets the person pick one</summary>
 		/// <returns>The version picked, or null</returns>
 		Task<Backup?> ChooseBackupAsync(IReadOnlyList<BackupChoice> choices);
+
+		/// <summary>Lets the person pick a data file they already have</summary>
+		/// <returns>Its path, or null</returns>
+		Task<string?> PickDataFileAsync();
 	}
 
 

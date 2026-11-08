@@ -16,11 +16,22 @@
     <AssemblyName>Purity</AssemblyName>
     <Product>Purity</Product>
     <!-- The one place the version is set: the window title, the Mac bundle and the Linux package all take it from here -->
-    <Version>2.1.1</Version>
+    <Version>2.1.2</Version>
     <ApplicationIcon>Assets\Purity.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Windows gets a single Purity.exe, as the Mac gets one Purity.app and Linux one package. Its
+    native libraries unpack themselves into the temp folder on the first start. Compressed, it is
+    half the size and starts about as quickly.
+  -->
+  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>

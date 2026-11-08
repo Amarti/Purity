@@ -1,7 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Purity.Desktop.ViewModels;
 
 
@@ -19,6 +22,7 @@ namespace Purity.Desktop.Views
 			AvaloniaXamlLoader.Load(this);
 			Title = "Purity " + AppVersion.Number;			// WPF's title was "Purity" alone
 			_periods = this.FindControl<ListBox>("Periods")!;
+			_periods.AddHandler(KeyDownEvent, OnPeriodsKeyDown, RoutingStrategies.Tunnel);
 
 			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()));
 			DataContext = _viewModel;
@@ -28,7 +32,11 @@ namespace Purity.Desktop.Views
 			Opened += async (_, _) =>
 			{
 				FitToScreen();
-				await _viewModel.StartAsync();
+				if (!await _viewModel.StartAsync())
+				{
+					Close();								// the first question was closed: nothing was set, so it comes back next time
+					return;
+				}
 				if (options.PictureFile is { } picture)
 					DispatcherTimer.RunOnce(() => TakePictureAndClose(picture), TimeSpan.FromSeconds(1.5));
 			};
@@ -52,11 +60,33 @@ namespace Purity.Desktop.Views
 
 		public Task<Storage.Backup?> ChooseBackupAsync(IReadOnlyList<BackupChoice> choices) => BackupsWindow.ShowAsync(this, choices);
 
+		public Task<string?> PickDataFileAsync() => DataFilePicker.OpenAsync(StorageProvider);
+
 
 		private void ScrollToEnd()
 		{
 			if (_periods.Scroll is ScrollViewer viewer)
 				viewer.ScrollToEnd();
+		}
+
+		/// <summary>
+		/// Page Up and Page Down turn the list a screen at a time, wherever the focus is in it. A
+		/// period's list of events would otherwise take them, and do nothing visible.
+		/// </summary>
+		private void OnPeriodsKeyDown(object? sender, KeyEventArgs e)
+		{
+			// An open calendar is outside the list's own tree, and uses them to change month
+			if (e.KeyModifiers != KeyModifiers.None || _periods.Scroll is not ScrollViewer viewer
+				|| e.Source is not Visual source || source != _periods && !_periods.IsVisualAncestorOf(source))
+				return;
+
+			if (e.Key == Key.PageUp)
+				viewer.PageUp();
+			else if (e.Key == Key.PageDown)
+				viewer.PageDown();
+			else
+				return;
+			e.Handled = true;
 		}
 
 		/// <inheritdoc cref="WindowFit"/>

@@ -34,23 +34,28 @@ namespace Purity.Desktop.ViewModels
 
 
 		/// <summary>
-		/// Checks the date calculations, then opens the data file, first asking for one if none was
-		/// chosen yet. If the check fails, nothing is opened: no dates are shown and nothing can be saved.
+		/// Checks the date calculations, then opens the data file, first asking where to keep the
+		/// history if this computer has no data file yet. If the check fails, nothing is opened: no
+		/// dates are shown and nothing can be saved.
 		/// </summary>
-		public async Task StartAsync()
+		/// <returns>False when the person closed the first question, so the app should close too</returns>
+		public async Task<bool> StartAsync()
 		{
 			SelfTestResult = _selfTest();
 			if (!SelfTestResult.Passed)
 			{
 				UpdateWarning();
 				await _dialogs.AskAsync(SelfTestFailedMessage + SelfTestResult, "OK");
-				return;
+				return true;
 			}
 
-			if (string.IsNullOrWhiteSpace(DataFilePath))
-				await OpenSettings();
-			else
+			if (!string.IsNullOrWhiteSpace(DataFilePath))
 				await OpenDataFileAsync();
+			else if (await ChooseFirstDataFileAsync() is { } chosen)
+				await UseDataFileAsync(chosen);
+			else
+				return false;
+			return true;
 		}
 
 		/// <summary>Saves what can be saved, and asks before closing with entries the data file doesn't have yet</summary>
@@ -73,11 +78,16 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, BuildReport, HasBackups());
+			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove);
 			var ok = await _dialogs.ShowSettingsAsync(settings);
 			if (settings.RestoreRequested)
 			{
 				await ChooseAndRestoreAsync();
+				return;
+			}
+			if (settings.MoveTo is { } target)
+			{
+				await MoveDataFileAsync(target);
 				return;
 			}
 			if (!ok)
@@ -94,17 +104,7 @@ namespace Purity.Desktop.ViewModels
 			if (_session != null && _session.HasUnsavedChanges)
 				await SaveAsync();
 
-			_dataFileOverride = null;
-			_settings.DataFilePath = chosen;
-			try
-			{
-				_settings.Save();
-			}
-			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-			{
-				await _dialogs.AskAsync("The settings couldn't be saved, so Purity will ask for the data file again next time.\n\n" + e.Message, "OK");
-			}
-			await OpenDataFileAsync();
+			await UseDataFileAsync(chosen);
 		}
 
 		private string? BuildReport() => Ledger.Data.Count < 1 ? null : PurityFile.PeriodLengthsReport(Ledger.Data);

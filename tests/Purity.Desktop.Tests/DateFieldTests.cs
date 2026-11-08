@@ -83,7 +83,7 @@ namespace Purity.Desktop.Tests
 			Assert.All(periods.GetVisualDescendants().OfType<CalendarDatePicker>(), el => Assert.IsType<DateField>(el));
 
 			// Scroll up the list one notch at a time, always with the pointer over a date field. The
-			// list recycles fields as it scrolls, so the periods themselves are what's checked.
+			// list builds periods as they come near, so the periods themselves are what's checked.
 			var offsets = new HashSet<double>();
 			for (var notch = 0; notch < 6; notch++)
 			{

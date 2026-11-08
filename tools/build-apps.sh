@@ -32,8 +32,9 @@ for platform in "${platforms[@]}"; do
 	case $platform in
 		windows)
 			for arch in x64 arm64; do
-				publish "win-$arch" "$stage/win-$arch/Purity"
-				zip_folder "$stage/win-$arch/Purity" "$out/Purity-$version-windows-$arch.zip"
+				publish "win-$arch" "$stage/win-$arch"			# a single Purity.exe, as the project file sets for Windows
+				cp "$stage/win-$arch/Purity.exe" "$out/Purity-$version-windows-$arch.exe"
+				echo "  Purity-$version-windows-$arch.exe, $(du -h "$out/Purity-$version-windows-$arch.exe" | cut -f1)"
 			done
 			;;
 		mac)

@@ -233,20 +233,6 @@ namespace Purity.Desktop.Tests
 			Assert.Null(window.Warning);
 		}
 
-		[Fact]
-		public async Task WithoutADataFileItAsksForOne()
-		{
-			var window = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue);
-			_viewModel = window;
-
-			await window.StartAsync();
-
-			Assert.Equal(1, _dialogs.SettingsShown);
-			Assert.Equal("Choose your data file in Settings.", window.Warning);
-			Assert.False(window.AddPeriodCommand.CanExecute(null));
-			Assert.Empty(window.Periods);
-		}
-
 
 		/// <summary>Three accepted periods, one of them beginning after dusk</summary>
 		private static string History()
@@ -313,6 +299,16 @@ namespace Purity.Desktop.Tests
 				Choices = choices;
 				return Task.FromResult(ChooseBackup?.Invoke(choices));
 			}
+
+			public Task<string?> PickDataFileAsync()
+			{
+				FilesPicked++;
+				return Task.FromResult(PickDataFile?.Invoke());
+			}
+
+			/// <summary>The data file the person picks, if any</summary>
+			public Func<string?>? PickDataFile { get; set; }
+			public int FilesPicked { get; private set; }
 
 			public List<string> Shown { get; } = new();
 			public Queue<int> Answers { get; } = new();

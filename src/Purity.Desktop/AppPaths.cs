@@ -26,6 +26,9 @@ namespace Purity.Desktop
 
 		public static string SettingsFile => Path.Combine(Folder, "settings.json");
 
+		/// <summary>Where a new history goes when the person starts one on the first run: on this computer, never synced</summary>
+		public static string DefaultDataFile => Path.Combine(Folder, "pureData.json");
+
 		/// <summary>One vault per data file, as Purity.Storage requires</summary>
 		public static string VaultFor(string dataFile)
 		{
