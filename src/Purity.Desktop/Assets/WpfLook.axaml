@@ -16,11 +16,11 @@
     <Style Selector="ListBox">
         <Setter Property="Padding" Value="1"/>
     </Style>
-    <!-- WPF's text boxes are one line high; without this the Simple theme squeezes in a scroll bar -->
+    <!-- WPF's text boxes are one line high, with the text at the top; without this the Simple theme squeezes in a scroll bar -->
     <Style Selector="TextBox">
-        <Setter Property="Padding" Value="2,1"/>
+        <Setter Property="Padding" Value="2,0,2,1"/>
         <Setter Property="MinHeight" Value="0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     </Style>
 
