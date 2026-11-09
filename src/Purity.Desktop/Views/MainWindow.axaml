@@ -8,7 +8,8 @@
   2.2.3: all but the first period fold to one line (T2), a drop before each date replaces the Begin
   and End labels and shows whether the end is final, Remove is at the left, the wide button closes
   the open period, in place of the tick WPF has on each period (E4), that open period stays above
-  the list, and an empty list says what to do first (E3).
+  the list, and an empty list says what to do first (E3). For 2.2.4: a strip above the list shows
+  the next date (T1), and dates already past are greyed with a line marking today (T5).
 -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -52,25 +53,33 @@
                                   ToolTip.Tip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)"/>
                     </Grid>
                     <!-- A period still open has no dates worked out yet, so no line and nothing under it -->
-                    <ListBox Classes="Events" ItemsSource="{Binding SubEvents}" IsVisible="{Binding IsClosed}">
+                    <ListBox Classes="Events" ItemsSource="{Binding EventRows}" IsVisible="{Binding IsClosed}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="core:PurityEvent">
-                                <StackPanel Height="23" Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Panel Margin="5,0,5,0" Height="23" Width="177">
-                                        <views:EventChip Type="{Binding Type}">
-                                            <TextBlock Text="{Binding TypeRepr}"/>
-                                        </views:EventChip>
-                                    </Panel>
-                                    <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding IsAfterDusk}" VerticalAlignment="Center"/>
-                                    <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding IsAfterDawn}" VerticalAlignment="Center"/>
-                                    <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding IsFullDay}" VerticalAlignment="Center"/>
-                                    <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding StampHebRepr}" VerticalAlignment="Center"/>
-                                    <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding StampGrgRepr}" VerticalAlignment="Center"/>
+                            <DataTemplate x:DataType="vm:EventRow">
+                                <StackPanel>
+                                    <!-- Between the dates that have passed and those to come (T5) -->
+                                    <Grid Classes="TodayLine" ColumnDefinitions="*,Auto,*" IsVisible="{Binding TodayText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <Border/>
+                                        <TextBlock Grid.Column="1" Text="{Binding TodayText}"/>
+                                        <Border Grid.Column="2"/>
+                                    </Grid>
+                                    <StackPanel Classes="EventLine" Classes.Past="{Binding IsPast}" Height="23" Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Panel Margin="5,0,5,0" Height="23" Width="177">
+                                            <views:EventChip Type="{Binding Event.Type}">
+                                                <TextBlock Text="{Binding Event.TypeRepr}"/>
+                                            </views:EventChip>
+                                        </Panel>
+                                        <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding Event.IsAfterDusk}" VerticalAlignment="Center"/>
+                                        <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding Event.IsAfterDawn}" VerticalAlignment="Center"/>
+                                        <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding Event.IsFullDay}" VerticalAlignment="Center"/>
+                                        <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding Event.StampHebRepr}" VerticalAlignment="Center"/>
+                                        <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding Event.StampGrgRepr}" VerticalAlignment="Center"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -81,7 +90,7 @@
     </Window.Resources>
 
     <!-- The periods keep the width their longest line needs, and in a wider window stay in the middle -->
-    <Grid MaxWidth="620" ColumnDefinitions="20,*,20" RowDefinitions="Auto,Auto,*,Auto,20">
+    <Grid MaxWidth="620" ColumnDefinitions="20,*,20" RowDefinitions="Auto,Auto,Auto,*,Auto,20">
 
         <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" ColumnDefinitions="40,*,40">
             <Button Grid.Column="0" Margin="-10,10,0,0" Height="30" Width="30" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings" AutomationProperties.Name="Settings">
@@ -114,7 +123,24 @@
         <!-- A period still open stays in view under the button that closes it, whatever the list is showing. Its edges line up with the periods in the list. -->
         <ItemsControl Grid.Row="1" Grid.Column="1" Margin="4,0,22,8" ItemsSource="{Binding OpenPeriods}" ItemTemplate="{StaticResource PeriodCardTemplate}" IsVisible="{Binding HasOpenPeriod}"/>
 
-        <ListBox x:Name="Periods" Grid.Row="2" Grid.Column="1" ItemsSource="{Binding ClosedPeriods}" ItemContainerTheme="{StaticResource PeriodItemTheme}"
+        <!-- The next date (T1), in the colors of that kind of date's chip, while no period is open. In line with the periods below. -->
+        <views:EventChip Grid.Row="2" Grid.Column="1" Classes="Strip" Margin="4,0,22,8" Type="{Binding NextEvent.Type}" IsVisible="{Binding ShowsNextStrip}">
+            <!-- The kind, day or night icon and both dates sit exactly above those of the date rows in the list -->
+            <Grid ColumnDefinitions="43.5,178,27,70,*,Auto" Height="24">
+                <TextBlock Text="Next" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding NextEvent.TypeRepr}" VerticalAlignment="Center"/>
+                <Panel Grid.Column="2" Height="17" Width="17" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Image Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding NextEvent.IsAfterDusk}"/>
+                    <Image Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding NextEvent.IsAfterDawn}"/>
+                    <Image Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding NextEvent.IsFullDay}"/>
+                </Panel>
+                <TextBlock Grid.Column="3" Text="{Binding NextEvent.StampHebRepr}" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="4" Text="{Binding NextEvent.StampGrgRepr}" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="5" Classes="NextIn" Text="{Binding NextIn}" VerticalAlignment="Center"/>
+            </Grid>
+        </views:EventChip>
+
+        <ListBox x:Name="Periods" Grid.Row="3" Grid.Column="1" ItemsSource="{Binding ClosedPeriods}" ItemContainerTheme="{StaticResource PeriodItemTheme}"
                  ScrollViewer.VerticalScrollBarVisibility="Visible"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <!-- A plain stack rather than a virtualizing one, so the list always knows its height; LazyPeriod builds each period only once it's near the screen -->
@@ -161,7 +187,7 @@
         </ListBox>
 
         <!-- With no history yet, in the middle of the empty list: says what to do first (E3) -->
-        <StackPanel Grid.Row="2" Grid.Column="1" Classes="EmptyHint" IsHitTestVisible="False" IsVisible="{Binding ShowsEmptyHint}">
+        <StackPanel Grid.Row="3" Grid.Column="1" Classes="EmptyHint" IsHitTestVisible="False" IsVisible="{Binding ShowsEmptyHint}">
             <TextBlock Classes="Title" Text="No periods yet"/>
             <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                 <TextBlock Text="Press" VerticalAlignment="Center"/>
@@ -171,7 +197,7 @@
         </StackPanel>
 
         <!-- Not in the WPF app: problems with the data file, which the new storage reports. Under the list, so one appearing never moves the periods under the pointer -->
-        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="#FF0061"
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="#FF0061"
                    Text="{Binding Warning}" IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}"/>
     </Grid>
 </Window>

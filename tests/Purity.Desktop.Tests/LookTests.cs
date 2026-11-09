@@ -408,6 +408,101 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
+		public Task TheNextStripTakesTheColorsOfThatKindOfDatesChip() => Themed(async () =>
+		{
+			App.Apply(Appearance.Light);
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var periods = window.FindControl<ListBox>("Periods")!;
+			var strip = window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip"));
+			var type = strip.GetVisualDescendants().OfType<TextBlock>().First(el => el.Text == viewModel.NextEvent!.TypeRepr);
+
+			Assert.True(strip.IsVisible);
+			Assert.Equal(viewModel.NextEvent!.Type, strip.Type);
+			Assert.Equal(PurityEventType.Mikveh, strip.Type);
+			Assert.Equal(Color.Parse("#E2EBF3"), ColorOf(strip.Background));
+			Assert.Equal(Color.Parse("#24496A"), ColorOf(type.Foreground));
+			Assert.True(strip.TranslatePoint(new Point(0, strip.Bounds.Height), window)!.Value.Y <= periods.TranslatePoint(default, window)!.Value.Y, "The strip should be above the list");
+
+			var card = periods.GetVisualDescendants().OfType<Border>().First(el => el.Classes.Contains("Period"));
+			Assert.Equal(card.TranslatePoint(default, window)!.Value.X, strip.TranslatePoint(default, window)!.Value.X);
+			Assert.Equal(card.Bounds.Width, strip.Bounds.Width);
+
+			App.Apply(Appearance.Dark);
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(Color.Parse("#2C4A66"), ColorOf(strip.Background));
+			Assert.Equal(Color.Parse("#E2EBF3"), ColorOf(type.Foreground));
+
+			strip.Type = PurityEventType.OnaBeinonit;
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(Color.Parse("#633806"), ColorOf(strip.Background));
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task TheNextStripsDateLinesUpWithTheDatesInTheList() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var periods = window.FindControl<ListBox>("Periods")!;
+			var strip = window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip"));
+			var cells = ((Grid)strip.Child!).Children;
+			var row = periods.GetVisualDescendants().OfType<StackPanel>().First(el => el.Classes.Contains("EventLine"));
+			var texts = row.Children.OfType<TextBlock>().ToArray();
+			double Left(Visual visual) => visual.TranslatePoint(default, window)!.Value.X;
+			Control Cell(int column) => cells.Single(el => Grid.GetColumn(el) == column && (column != 0 || el is TextBlock));
+
+			Assert.Equal(Left(row.Children.OfType<Image>().First(el => el.IsVisible)), Left(Cell(2)));
+			Assert.Equal(Left(texts[0]), Left(Cell(3)));
+			Assert.Equal(Left(texts[1]), Left(Cell(4)));
+
+			var chip = row.GetVisualDescendants().OfType<EventChip>().Single();
+			Assert.Equal(Left(chip.Child!), Left(Cell(1)));
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task TheNextStripGoesWhenAPeriodIsOpenedAndReturnsWhenItIsRemoved() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var strip = window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip"));
+			Assert.True(strip.IsVisible);
+
+			viewModel.AddPeriodCommand.Execute(null);
+			await Ui.WaitUntil(() => !strip.IsVisible);
+
+			await viewModel.Periods[0].RemoveCommand.ExecuteAsync(null);
+			await Ui.WaitUntil(() => strip.IsVisible);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task DatesThatHavePassedAreGreyedAndTheStripGoes() => Ui.Run(async () =>
+		{
+			var ledger = new PeriodLedger();
+			ledger.AcceptPeriod(ledger.AddPeriod(Stamps.FromDate(new DateTime(2001, 1, 7), false), Stamps.FromDate(new DateTime(2001, 1, 12), false)));
+			var dataFile = Path.Combine(_root, "pureData.json");
+			File.WriteAllText(dataFile, PurityFile.Format(ledger.Data));
+			var window = new MainWindow(new StartOptions(dataFile));
+			window.Show();
+			IEnumerable<StackPanel> Lines() => window.GetVisualDescendants().OfType<StackPanel>().Where(el => el.Classes.Contains("EventLine"));
+			await Ui.WaitUntil(() => Lines().Any());
+
+			Assert.All(Lines(), el => Assert.Equal(0.4, el.Opacity));
+			Assert.False(window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip")).IsVisible);
+			Assert.All(window.GetVisualDescendants().OfType<Grid>().Where(el => el.Classes.Contains("TodayLine")), el => Assert.False(el.IsVisible));
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
 		public Task AnOpenPeriodStaysAboveTheListInLineWithItsPeriods() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();
@@ -613,7 +708,7 @@ namespace Purity.Desktop.Tests
 			}
 		});
 
-		private static IEnumerable<EventChip> Chips(Window window) => window.GetVisualDescendants().OfType<EventChip>();
+		private static IEnumerable<EventChip> Chips(Window window) => window.GetVisualDescendants().OfType<EventChip>().Where(el => !el.Classes.Contains("Strip"));
 
 		private static Color ColorOf(IBrush? brush) => Assert.IsAssignableFrom<ISolidColorBrush>(brush).Color;
 

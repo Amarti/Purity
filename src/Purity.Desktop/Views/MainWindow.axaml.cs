@@ -47,6 +47,14 @@ namespace Purity.Desktop.Views
 				RestorePlacement(_viewModel.WindowPlacement);
 			PositionChanged += (_, _) => Dispatcher.UIThread.Post(TrackPlacement, DispatcherPriority.Background);
 
+			// What counts as past changes at midnight, even with the window left open
+			DispatcherTimer.Run(() =>
+			{
+				if (IsVisible)
+					_viewModel.NoticeNewDay();
+				return IsVisible;
+			}, TimeSpan.FromMinutes(1));
+
 			// Show the newest periods whenever the list changes, as the WPF app does; here they're at the top
 			_viewModel.ClosedPeriods.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(ScrollToNewest, DispatcherPriority.Background);
 			Opened += async (_, _) =>

@@ -15,6 +15,7 @@ namespace Purity.Desktop.ViewModels
 			Period = period;
 			_owner = owner;
 			SubEvents = new ObservableCollection<PurityEvent>(period.SubEvents);
+			BuildRows();
 		}
 
 
@@ -24,6 +25,7 @@ namespace Purity.Desktop.ViewModels
 			SubEvents.Clear();
 			foreach (var item in Period.SubEvents)
 				SubEvents.Add(item);
+			BuildRows();
 			OnPropertyChanged(string.Empty);
 		}
 
@@ -128,6 +130,11 @@ namespace Purity.Desktop.ViewModels
 		public bool IsClosed => Period.Closed;
 		public bool IsLast => _owner.IsLast(Period);
 		public ObservableCollection<PurityEvent> SubEvents { get; }
+
+		/// <summary>The same dates, each with how it stands against today</summary>
+		public IReadOnlyList<EventRow> EventRows { get; private set; } = Array.Empty<EventRow>();
+
+		public bool HasTodayLine => EventRows.Any(el => el.TodayText != null);
 		public PurityPeriod Period { get; }
 
 		[RelayCommand]
@@ -139,6 +146,16 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>The WPF picker showed the UTC date. For the +00:00 stamps the app writes, that is the stamp's own date.</summary>
 		private static DateTime ShownDate(DateTimeOffset stamp) => stamp.UtcDateTime.Date;
+
+		/// <summary>The line marking today goes only between dates that have passed and dates to come, where it tells something</summary>
+		private void BuildRows()
+		{
+			var today = _owner.Today;
+			var passed = SubEvents.TakeWhile(el => EventTiming.IsOver(el, today)).Count();
+			var line = passed > 0 && passed < SubEvents.Count ? passed : -1;
+			var text = $"Today, {today.ToString("dddd, d MMMM yyyy", CultureInfo.InvariantCulture)}";
+			EventRows = SubEvents.Select((el, i) => new EventRow(el, EventTiming.IsOver(el, today), i == line ? text : null)).ToList();
+		}
 
 		/// <summary>The text a date field shows. The app runs without OS culture data, so that's the invariant culture everywhere.</summary>
 		private static string LongDate(DateTimeOffset stamp) => ShownDate(stamp).ToString("dddd, d MMMM yyyy", CultureInfo.InvariantCulture);

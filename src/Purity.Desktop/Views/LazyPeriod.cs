@@ -96,7 +96,7 @@ namespace Purity.Desktop.Views
 
 		protected override Size MeasureOverride(Size availableSize)
 		{
-			var kind = IsFolded ? Folded : _events?.Count ?? 0;
+			var kind = IsFolded ? Folded : (_events?.Count ?? 0) + ((DataContext as PeriodViewModel)?.HasTodayLine == true ? WithTodayLine : 0);
 			if (Child == null && Heights.TryGetValue(kind, out var height))
 				return new Size(0, height);
 
@@ -124,6 +124,9 @@ namespace Purity.Desktop.Views
 
 		/// <summary>The kind of period in <see cref="Heights"/> that a folded one is; otherwise the kind is its number of events</summary>
 		private const int Folded = -1;
+
+		/// <summary>Added to the kind of a period with the line marking today, which makes it taller</summary>
+		private const int WithTodayLine = 1000;
 
 		/// <summary>The height of a period, by its kind</summary>
 		private static readonly Dictionary<int, double> Heights = new();

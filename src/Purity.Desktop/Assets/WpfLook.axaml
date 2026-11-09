@@ -95,9 +95,28 @@
         <Setter Property="BorderBrush" Value="{DynamicResource EventsDividerBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
     </Style>
-    <!-- WPF lines a list's items up on the left unless told otherwise; only the list of periods stretches them -->
+    <!-- Stretched so the line marking today can run across; each date keeps to the left by itself -->
     <Style Selector="ListBox.Events ListBoxItem">
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- A date already past, and the line between those and the ones to come (T5) -->
+    <Style Selector="StackPanel.EventLine.Past">
+        <Setter Property="Opacity" Value="0.4"/>
+    </Style>
+    <Style Selector="Grid.TodayLine">
+        <Setter Property="Height" Value="18"/>
+    </Style>
+    <Style Selector="Grid.TodayLine > Border">
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource IconBrush}"/>
+    </Style>
+    <Style Selector="Grid.TodayLine > TextBlock">
+        <Setter Property="Margin" Value="8,0"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource IconBrush}"/>
     </Style>
 
     <!-- The kind of date as a colored chip, one color per kind (T4) -->
@@ -122,6 +141,17 @@
     <Style Selector="views|EventChip:veset-aflaga">
         <Setter Property="Background" Value="{DynamicResource VesetAflagaChipBackgroundBrush}"/>
         <Setter Property="TextElement.Foreground" Value="{DynamicResource VesetAflagaChipForegroundBrush}"/>
+    </Style>
+
+    <!-- The Next strip (T1): a wide pane with the colors its kind of date gives every chip -->
+    <Style Selector="views|EventChip.Strip">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="12,5"/>
+    </Style>
+    <Style Selector="views|EventChip.Strip TextBlock.NextIn">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
     <!-- The long date the WPF app shows on the production machine, fixed so every machine shows the same -->

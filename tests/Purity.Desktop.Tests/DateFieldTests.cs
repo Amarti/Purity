@@ -92,7 +92,7 @@ namespace Purity.Desktop.Tests
 				var field = periods.GetVisualDescendants().OfType<CalendarDatePicker>()
 					.Where(el => el.IsEffectivelyVisible && el.Bounds.Height > 0)
 					.Select(el => (Field: el, At: Center(el, window)))
-					.Where(el => el.At.Y > 60 && el.At.Y < window.Bounds.Height - 30)			// on the list, not the buttons above it
+					.Where(el => el.At.Y > periods.TranslatePoint(default, window)!.Value.Y && el.At.Y < window.Bounds.Height - 30)			// on the list, not what's above it
 					.OrderBy(el => el.At.Y)
 					.First();
 				offsets.Add(periods.Scroll!.Offset.Y);

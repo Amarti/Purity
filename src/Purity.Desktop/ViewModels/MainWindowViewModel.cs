@@ -27,6 +27,7 @@ namespace Purity.Desktop.ViewModels
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
 			_clock = clock;
+			Today = clock.GetLocalNow().Date;
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
 			_settings = DesktopSettings.Load();
@@ -280,6 +281,7 @@ namespace Purity.Desktop.ViewModels
 			OnPropertyChanged(nameof(ShowsEmptyHint));
 			Show(OpenPeriods, Periods.Where(el => !el.IsClosed));
 			Show(ClosedPeriods, Periods.Where(el => el.IsClosed));
+			UpdateNext();
 		}
 
 		private void OnHistoryReplaced(object? sender, EventArgs e) => Rebuild();
@@ -476,6 +478,7 @@ namespace Purity.Desktop.ViewModels
 		{
 			foreach (var item in Periods)
 				item.Refresh();
+			UpdateNext();
 		}
 
 		/// <param name="conflict">The periods the two sides disagree on</param>
