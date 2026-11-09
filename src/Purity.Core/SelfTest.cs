@@ -34,7 +34,7 @@ namespace Purity.Core
 	/// II, onsets after dusk, Veset Haflaga tracking and its reset, skipped intervals, ends at night,
 	/// Ona Beinonit across February, the year boundary, an open period, and the known issues kept
 	/// for the rav's review (H1 to H4). The approved output is tests/Purity.Parity/Golden/self-test.txt,
-	/// embedded here. The parity tests make it from the frozen production engine and check on every
+	/// embedded here. It was made by the old production engine, and the parity tests check on every
 	/// run that this engine still matches it, so it can't drift from production behavior.
 	/// </summary>
 	public static class SelfTest
@@ -83,7 +83,7 @@ namespace Purity.Core
 			return new SelfTestResult(true);
 		}
 
-		/// <summary>The approved output, from the frozen production engine</summary>
+		/// <summary>The approved output, made by the old production engine</summary>
 		public static string Expected => _expected ??= ReadExpected();
 
 		/// <summary>The rules version the approved output was made under. A bump needs a new approved output.</summary>

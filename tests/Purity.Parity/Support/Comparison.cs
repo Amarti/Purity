@@ -46,8 +46,5 @@ namespace Purity.Parity
 
 			Assert.Fail($"{context}: differs in trailing blank lines");
 		}
-
-		/// <summary>Canonical text for comparing with a live reference run on this platform.</summary>
-		public static string Dump(EngineRun run) => run.ToText(Platform.ReferenceTextIsTruth);
 	}
 }

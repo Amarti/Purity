@@ -19,11 +19,6 @@ namespace Purity.Parity
 		private static readonly DateTimeOffset Feb5 = new(2033, 2, 5, 0, 0, 0, TimeSpan.Zero);
 		private static readonly DateTimeOffset StaleStamp = new(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
-		public static TheoryData<string> BothEngines => ["reference", "candidate"];
-
-
-		private static IEngine Engine(string name) => name == "reference" ? Engines.Reference : Engines.Candidate;
-
 		/// <summary>Two periods whose stored events are deliberately wrong, as a file from an older version can be.</summary>
 		private static List<StoredPeriod> StaleHistory() =>
 		[
@@ -48,11 +43,10 @@ namespace Purity.Parity
 		}
 
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void OpeningAFileKeepsStoredEventsAndRebuildsTracking(string engine)
+		[Fact]
+		public void OpeningAFileKeepsStoredEventsAndRebuildsTracking()
 		{
-			var run = Culture.Run(Culture.Production, () => WithFile(JsonSerializer.Serialize(StaleHistory()), Engine(engine).LoadOnly));
+			var run = Culture.Run(Culture.Production, () => WithFile(JsonSerializer.Serialize(StaleHistory()), Engines.Candidate.LoadOnly));
 
 			Assert.All(run.Periods, period => Assert.Equal("stale", Assert.Single(period.Events).Note));
 			Assert.Equal("46", run.Tracked);
@@ -194,11 +188,10 @@ namespace Purity.Parity
 			Assert.Equal(Day7.AddDays(9).AddHours(12), mikveh.Stamp);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void FileHoldingOnlyNullIsAnEmptyHistory(string engine)
+		[Fact]
+		public void FileHoldingOnlyNullIsAnEmptyHistory()
 		{
-			var saved = WithFile("null", Engine(engine).RoundTripFile);
+			var saved = WithFile("null", Engines.Candidate.RoundTripFile);
 
 			Assert.Equal("[]", System.Text.Encoding.UTF8.GetString(saved));
 		}
@@ -210,41 +203,37 @@ namespace Purity.Parity
 		}
 
 		[Theory]
-		[InlineData("reference", 0, "")]
-		[InlineData("candidate", 0, "")]
-		[InlineData("reference", 1, "Periods lengths\n")]
-		[InlineData("candidate", 1, "Periods lengths\n")]
-		public void ReportWithTooLittleData(string engine, int periods, string expected)
+		[InlineData(0, "")]
+		[InlineData(1, "Periods lengths\n")]
+		public void ReportWithTooLittleData(int periods, string expected)
 		{
 			var inputs = Enumerable.Repeat(new PeriodInput(Day1, Day7, true, false), periods).ToList();
 
-			var report = Culture.Run(Culture.Production, () => Engine(engine).PeriodLengthsReport(inputs));
+			var report = Culture.Run(Culture.Production, () => Engines.Candidate.PeriodLengthsReport(inputs));
 
 			Assert.Equal(expected, report.Replace("\r\n", "\n"));
 		}
 
 		/// <summary>An unset End or Begin means no interval, on either side.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void UnsetDatesGiveNoInterval(string engine)
+		[Fact]
+		public void UnsetDatesGiveNoInterval()
 		{
 			var complete = new PeriodInput(Day1, Day7, true, false);
 			var later = new PeriodInput(Day30Night, Feb5, true, false);
 			var noEnd = complete with { End = DateTimeOffset.MinValue };
 			var noBegin = later with { Begin = DateTimeOffset.MinValue };
 
-			Assert.Equal((0, 0f), Engine(engine).Lengths(noEnd, later));
-			Assert.Equal((0, 0f), Engine(engine).Lengths(complete, noBegin));
+			Assert.Equal((0, 0f), Engines.Candidate.Lengths(noEnd, later));
+			Assert.Equal((0, 0f), Engines.Candidate.Lengths(complete, noBegin));
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void SkipRemovesTheIntervalButNotTheFullLength(string engine)
+		[Fact]
+		public void SkipRemovesTheIntervalButNotTheFullLength()
 		{
 			var first = new PeriodInput(Day1, Day7, true, false);
 			var second = new PeriodInput(Day30Night, Feb5, true, true);
 
-			var (length, fullLength) = Engine(engine).Lengths(first, second);
+			var (length, fullLength) = Engines.Candidate.Lengths(first, second);
 
 			Assert.Equal(0, length);
 			Assert.Equal(28.5f, fullLength);

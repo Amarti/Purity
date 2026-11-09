@@ -1,5 +1,5 @@
 <!--
-  A copy of src/Purity.WPF/Views/MainWindow.xaml: same sizes, margins and order. WPF's 710x900
+  Began as a copy of the WPF app's main window: same sizes, margins and order. WPF's 710x900
   includes the window frame, so the size here is the area inside it on Windows. Changes the owner
   approved for 2.2.0: the window can be resized (T8), periods are rounded and airier (T6), and each
   kind of date has a colored chip (T4). For 2.2.1: Begin and End on their own lines, each with a

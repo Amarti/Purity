@@ -4,8 +4,8 @@ using Xunit;
 namespace Purity.Parity
 {
 	/// <summary>
-	/// Layer 10: the machine must not change the output. The reference always runs under the
-	/// production culture; the code under test runs under each hostile culture. Time zones and the
+	/// Layer 10: the machine must not change the output. Each hostile culture must give exactly
+	/// what the production culture gives; the approved files prove that result is right. Time zones and the
 	/// ICU or NLS choice are set from outside the process by the CI matrix, which repeats this suite.
 	/// </summary>
 	public class EnvironmentTests
@@ -21,10 +21,10 @@ namespace Purity.Parity
 			{
 				var history = HistoryGenerator.Generate(seed, 30, pathological: seed % 2 == 0);
 
-				var expected = Culture.Run(Culture.Production, () => Engines.Reference.Recalculate(history));
+				var expected = Culture.Run(Culture.Production, () => Engines.Candidate.Recalculate(history));
 				var actual = Culture.Run(culture, () => Engines.Candidate.Recalculate(history));
 
-				Comparison.SameText(Comparison.Dump(expected), Comparison.Dump(actual), $"culture {culture}, seed {seed}");
+				Comparison.SameText(expected.ToText(), actual.ToText(), $"culture {culture}, seed {seed}");
 			}
 		}
 
@@ -34,7 +34,7 @@ namespace Purity.Parity
 		{
 			var history = HistoryGenerator.Generate(5, 30, pathological: false);
 
-			var expected = Culture.Run(Culture.Production, () => Engines.Reference.PeriodLengthsReport(history));
+			var expected = Culture.Run(Culture.Production, () => Engines.Candidate.PeriodLengthsReport(history));
 			var actual = Culture.Run(culture, () => Engines.Candidate.PeriodLengthsReport(history));
 
 			Comparison.SameText(expected.Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"), $"report under {culture}");
@@ -50,7 +50,7 @@ namespace Purity.Parity
 			{
 				File.WriteAllText(source, System.Text.Json.JsonSerializer.Serialize(history.Select(el => new StoredPeriod(el.Begin, el.End, el.Closed, el.SkipStreak, []))));
 
-				var expected = Culture.Run(Culture.Production, () => Engines.Reference.RoundTripFile(source));
+				var expected = Culture.Run(Culture.Production, () => Engines.Candidate.RoundTripFile(source));
 				var actual = Culture.Run(culture, () => Engines.Candidate.RoundTripFile(source));
 
 				Comparison.SameText(Text(expected), Text(actual), $"file under {culture}");

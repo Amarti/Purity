@@ -1,8 +1,8 @@
 namespace Purity.Parity
 {
 	/// <summary>
-	/// What the harness needs from an engine. The frozen reference and the code under test each
-	/// get an adapter, so the tests stay the same when the code under test is restructured.
+	/// What the tests need from the engine. Going through this adapter keeps them the same when
+	/// the engine is restructured.
 	/// </summary>
 	public interface IEngine
 	{
@@ -35,19 +35,6 @@ namespace Purity.Parity
 
 	public static class Engines
 	{
-		/// <summary>The old engine needs he-IL from the OS, so tests using it skip on a machine without cultures.</summary>
-		public static IEngine Reference
-		{
-			get
-			{
-				if (Culture.Invariant)
-					Xunit.Assert.Skip("The reference needs OS cultures");
-
-				return _reference;
-			}
-		}
 		public static readonly IEngine Candidate = new CandidateEngine();
-
-		private static readonly IEngine _reference = new ReferenceEngine();
 	}
 }

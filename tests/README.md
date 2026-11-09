@@ -1,12 +1,10 @@
 # Calculation parity tests
 
-These tests prove the port gives exactly the same dates as the production engine.
+These tests hold the engine to the dates the old production engine gave, which are kept as approved output in the repo.
 
 | Project | Purpose |
 |---|---|
-| `Purity.Reference.V1` | Frozen copy of the production engine. Never edit it |
-| `Purity.Parity` | Compares `src/Purity.Core` with the reference, approved files and the real history |
-| `oracle/` | The compiled 2022 production `Purity.dll`, used to prove the frozen source behaves the same |
+| `Purity.Parity` | Checks `src/Purity.Core` against approved files, hand-written edge cases and the real history |
 | `Purity.Storage.Tests` | Proves saving and merging can't lose the history, by making each failure happen on purpose |
 | `Purity.Desktop.Tests` | The desktop app's behavior through its view models: what it saves, what it asks, and that it never writes over a file it couldn't read |
 
@@ -15,11 +13,11 @@ For screenshots or a side-by-side run of the apps, `dotnet run tools/make-sample
 ## Running
 
 ```bash
-dotnet run -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+dotnet run --project tests/Purity.Parity/Purity.Parity.csproj
 ```
 
 ```bash
-dotnet run -f net10.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
+dotnet run --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
 ```
 
 Tests that need real data skip when `tests/private/` is missing. Set `PURITY_REQUIRE_REAL_DATA=1` to make them fail instead, which release builds must do.
@@ -58,11 +56,11 @@ Keep real dates out of test code, commit messages and CI output. Real-data failu
 
 ## Approved output
 
-`Purity.Parity/Golden/` holds output approved from the reference on Windows. Run with `PURITY_UPDATE_GOLDEN=1` to regenerate it.
+`Purity.Parity/Golden/` holds output approved from the old production engine, before it was retired. Run with `PURITY_UPDATE_GOLDEN=1` to regenerate it from the current engine, then review every changed date.
 
 A golden file changes only with a bump of `PeriodLedger.RulesVersion` and a reviewed list of every changed date. Halachic changes also need the rav's sign-off recorded. CI rejects a golden change without the bump; adding a new golden file doesn't count as a change.
 
-`Golden/self-test.txt` is what the apps check themselves against at every start. `Purity.Core` embeds it, and `SelfTest.Run()` calculates the same 13 made-up histories and compares. If anything differs, the desktop app shows no dates and doesn't open the data file. The histories reach every rule and the known issues H1 to H4; `SelfTestTests` proves the file came from the reference and that the engine and the embedded copy match it.
+`Golden/self-test.txt` is what the apps check themselves against at every start. `Purity.Core` embeds it, and `SelfTest.Run()` calculates the same 13 made-up histories and compares. If anything differs, the desktop app shows no dates and doesn't open the data file. The histories reach every rule and the known issues H1 to H4; `SelfTestTests` proves that the engine and the embedded copy match it.
 
 ## Mutation testing
 

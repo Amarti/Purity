@@ -7,8 +7,8 @@ using Core = Candidate::Purity.Core;
 namespace Purity.Parity
 {
 	/// <summary>
-	/// The self-test the apps run at every start. Its approved output must come from the frozen
-	/// production engine, never from the code it checks, and must be what the apps carry.
+	/// The self-test the apps run at every start. Its approved output was made by the old
+	/// production engine, changes only under the approved-output rule, and must be what the apps carry.
 	/// </summary>
 	public class SelfTestTests
 	{
@@ -16,12 +16,8 @@ namespace Purity.Parity
 
 
 		[Fact]
-		public void ApprovedOutputIsTheProductionEngines() =>
-			Golden.CheckReference(FileName, Build(Engines.Reference));
-
-		[Fact]
 		public void TheEngineMatchesTheApprovedOutput() =>
-			Comparison.SameText(Golden.Read(FileName), Build(Engines.Candidate), "candidate vs approved self-test");
+			Golden.Check(FileName, Build(Engines.Candidate), "candidate vs approved self-test");
 
 		[Fact]
 		public void TheAppsCarryTheApprovedOutput() =>

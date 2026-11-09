@@ -43,8 +43,7 @@ history.
 
 ## What it checks
 
-- Calculations: the whole parity suite, comparing the new engine with the frozen production
-  engine and the approved output.
+- Calculations: the whole parity suite, comparing the engine with the approved output.
 - Data file: the whole storage suite, covering atomic saves, merging, locks and recovery after a
   crash.
 - The app: its tests, a picture of its window with the made-up history, and your hands-on check

@@ -1,5 +1,5 @@
 <!--
-  A copy of src/Purity.WPF/Views/SettingsWindow.xaml, without its debug-only "Save data" button.
+  Began as a copy of the WPF app's settings window, without its debug-only "Save data" button.
   WPF's 400x350 includes the window frame, so the size here is the area inside it on Windows.
 -->
 <Window xmlns="https://github.com/avaloniaui"

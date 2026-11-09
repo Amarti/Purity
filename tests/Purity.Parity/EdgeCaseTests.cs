@@ -14,154 +14,124 @@ namespace Purity.Parity
 	{
 		private const int Mikveh = 1, VesetHodesh = 2, VesetAflaga = 3, OnaBeinonit = 4;
 
-		public static TheoryData<string> BothEngines => ["reference", "candidate"];
-
-
-		private static IEngine Engine(string name) => name == "reference" ? Engines.Reference : Engines.Candidate;
-
 		private static DateTimeOffset At(string stamp) => DateTimeOffset.Parse(stamp + "+00:00", System.Globalization.CultureInfo.InvariantCulture);
 
 		private static string Iso(string stamp) => At(stamp).ToString("o");
 
 		private static PeriodInput Period(string begin, string end, bool skip = false) => new(At(begin), At(end), true, skip);
 
-		private static EventDump Single(string engine, PeriodInput input, int type, params int[] tracked) =>
-			Culture.Run(Culture.Production, () => Engine(engine).CommitSingle(input, tracked, true).Single(el => el.Type == type));
-
-		private static bool TextIsTruth(string engine) => engine == "candidate" || Platform.ReferenceTextIsTruth;
+		private static EventDump Single(PeriodInput input, int type, params int[] tracked) =>
+			Culture.Run(Culture.Production, () => Engines.Candidate.CommitSingle(input, tracked, true).Single(el => el.Type == type));
 
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void MikvehIsSevenDaysAfterEndAtNight(string engine)
+		[Fact]
+		public void MikvehIsSevenDaysAfterEndAtNight()
 		{
-			var e = Single(engine, Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), Mikveh);
+			var e = Single(Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), Mikveh);
 
 			Assert.Equal(Iso("2033-05-14T12:00:00"), e.Stamp);
 			Assert.True(e.Dusk);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void MikvehCountsFromNextDayWhenEndIsAtNight(string engine)
+		[Fact]
+		public void MikvehCountsFromNextDayWhenEndIsAtNight()
 		{
-			var e = Single(engine, Period("2033-05-01T00:00:00", "2033-05-07T12:00:00"), Mikveh);
+			var e = Single(Period("2033-05-01T00:00:00", "2033-05-07T12:00:00"), Mikveh);
 
 			Assert.Equal(Iso("2033-05-15T12:00:00"), e.Stamp);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void OnaBeinonitIsDayThirty(string engine)
+		[Fact]
+		public void OnaBeinonitIsDayThirty()
 		{
-			var e = Single(engine, Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), OnaBeinonit);
+			var e = Single(Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), OnaBeinonit);
 
 			Assert.Equal(Iso("2033-05-30T00:00:00"), e.Stamp);
 			Assert.True(e.FullDay);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void OnaBeinonitAfterNightOnsetStartsFromTheNextDate(string engine)
+		[Fact]
+		public void OnaBeinonitAfterNightOnsetStartsFromTheNextDate()
 		{
-			var e = Single(engine, Period("2033-05-01T12:00:00", "2033-05-07T00:00:00"), OnaBeinonit);
+			var e = Single(Period("2033-05-01T12:00:00", "2033-05-07T00:00:00"), OnaBeinonit);
 
 			Assert.Equal(Iso("2033-05-31T00:00:00"), e.Stamp);
 		}
 
 		[Theory]
-		[InlineData("reference", "2033-01-31T00:00:00", "28 Feb - 1 Mar ")]
-		[InlineData("candidate", "2033-01-31T00:00:00", "28 Feb - 1 Mar ")]
-		[InlineData("reference", "2032-01-31T00:00:00", "28-29 Feb ")]
-		[InlineData("candidate", "2032-01-31T00:00:00", "28-29 Feb ")]
-		[InlineData("reference", "2034-11-03T00:00:00", "1-2 Dec ")]
-		[InlineData("candidate", "2034-11-03T00:00:00", "1-2 Dec ")]
-		public void OnaBeinonitTextSpansTheNightBefore(string engine, string begin, string text)
+		[InlineData("2033-01-31T00:00:00", "28 Feb - 1 Mar ")]
+		[InlineData("2032-01-31T00:00:00", "28-29 Feb ")]
+		[InlineData("2034-11-03T00:00:00", "1-2 Dec ")]
+		public void OnaBeinonitTextSpansTheNightBefore(string begin, string text)
 		{
-			var e = Single(engine, Period(begin, "2035-01-01T00:00:00"), OnaBeinonit);
+			var e = Single(Period(begin, "2035-01-01T00:00:00"), OnaBeinonit);
 
-			if (TextIsTruth(engine))
-				Assert.Equal(text, e.GregorianText);
+			Assert.Equal(text, e.GregorianText);
 		}
 
-		[Theory]
-		[InlineData("reference")]
-		[InlineData("candidate")]
-		public void SeptemberIsAbbreviatedAsOnTheProductionMachine(string engine)
+		[Fact]
+		public void SeptemberIsAbbreviatedAsOnTheProductionMachine()
 		{
-			var e = Single(engine, Period("2033-08-07T00:00:00", "2033-08-13T00:00:00"), OnaBeinonit);
+			var e = Single(Period("2033-08-07T00:00:00", "2033-08-13T00:00:00"), OnaBeinonit);
 
-			if (TextIsTruth(engine))
-				Assert.Equal("4-5 Sept ", e.GregorianText);
+			Assert.Equal("4-5 Sept ", e.GregorianText);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void VesetHodeshKeepsTheHebrewDateAndOnah(string engine)
+		[Fact]
+		public void VesetHodeshKeepsTheHebrewDateAndOnah()
 		{
-			var day = Single(engine, Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), VesetHodesh);
-			var night = Single(engine, Period("2033-05-02T12:00:00", "2033-05-07T00:00:00"), VesetHodesh);
+			var day = Single(Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), VesetHodesh);
+			var night = Single(Period("2033-05-02T12:00:00", "2033-05-07T00:00:00"), VesetHodesh);
 
 			Assert.True(day.Dawn);
 			Assert.True(night.Dusk);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void VesetHodeshMovesFromAdarOneToAdarTwoInALeapYear(string engine)
+		[Fact]
+		public void VesetHodeshMovesFromAdarOneToAdarTwoInALeapYear()
 		{
-			var e = Single(engine, Period("2035-02-19T00:00:00", "2035-02-25T00:00:00"), VesetHodesh);	// 10 Adar I 5795
+			var e = Single(Period("2035-02-19T00:00:00", "2035-02-25T00:00:00"), VesetHodesh);	// 10 Adar I 5795
 
 			Assert.Equal(Iso("2035-03-21T00:00:00"), e.Stamp);											// 10 Adar II 5795
-			if (TextIsTruth(engine))
-				Assert.Equal("י' אדר ב׳", e.HebrewText);
+			Assert.Equal("י' אדר ב׳", e.HebrewText);
 		}
 
 		/// <summary>H1: onset on the night of 1 Shevat lands on 30 Shevat, not 1 Adar.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void Preserved_H1_NightOnsetOnTheFirstLandsOnTheThirtieth(string engine)
+		[Fact]
+		public void Preserved_H1_NightOnsetOnTheFirstLandsOnTheThirtieth()
 		{
-			var e = Single(engine, Period("2031-01-24T12:00:00", "2031-01-30T00:00:00"), VesetHodesh);
+			var e = Single(Period("2031-01-24T12:00:00", "2031-01-30T00:00:00"), VesetHodesh);
 
 			Assert.Equal(Iso("2031-02-22T12:00:00"), e.Stamp);
-			if (TextIsTruth(engine))
-				Assert.Equal("ל' שבט", e.HebrewText);
+			Assert.Equal("ל' שבט", e.HebrewText);
 		}
 
 		/// <summary>H1 again at the year boundary: Elul always has 29 days.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void Preserved_H1_NightOnsetOnRoshHashana(string engine)
+		[Fact]
+		public void Preserved_H1_NightOnsetOnRoshHashana()
 		{
-			var e = Single(engine, Period("2032-09-05T12:00:00", "2032-09-11T00:00:00"), VesetHodesh);
+			var e = Single(Period("2032-09-05T12:00:00", "2032-09-11T00:00:00"), VesetHodesh);
 
 			Assert.Equal(Iso("2032-10-04T12:00:00"), e.Stamp);
-			if (TextIsTruth(engine))
-				Assert.Equal("ל' תשרי", e.HebrewText);
+			Assert.Equal("ל' תשרי", e.HebrewText);
 		}
 
 		/// <summary>H2: the same Hebrew date gives different answers by onah when the next month has no 30th.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void Preserved_H2_ThirtiethDependsOnTheOnah(string engine)
+		[Fact]
+		public void Preserved_H2_ThirtiethDependsOnTheOnah()
 		{
-			var night = Single(engine, Period("2031-02-22T12:00:00", "2031-02-28T00:00:00"), VesetHodesh);
-			var day = Single(engine, Period("2031-02-23T00:00:00", "2031-03-01T00:00:00"), VesetHodesh);
+			var night = Single(Period("2031-02-22T12:00:00", "2031-02-28T00:00:00"), VesetHodesh);
+			var day = Single(Period("2031-02-23T00:00:00", "2031-03-01T00:00:00"), VesetHodesh);
 
 			Assert.Equal(Iso("2031-03-24T12:00:00"), night.Stamp);
 			Assert.Equal(Iso("2031-03-24T00:00:00"), day.Stamp);
-			if (TextIsTruth(engine))
-			{
-				Assert.Equal("א' ניסן", night.HebrewText);
-				Assert.Equal("כ\"ט אדר", day.HebrewText);
-			}
+			Assert.Equal("א' ניסן", night.HebrewText);
+			Assert.Equal("כ\"ט אדר", day.HebrewText);
 		}
 
 		/// <summary>H3: a longer interval clears everything tracked, including longer ones not yet reached.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void Preserved_H3_LongerIntervalClearsAllTracked(string engine)
+		[Fact]
+		public void Preserved_H3_LongerIntervalClearsAllTracked()
 		{
 			var history = new[]
 			{
@@ -172,7 +142,7 @@ namespace Purity.Parity
 				Period("2033-04-15T00:00:00", "2033-04-21T00:00:00"),	// interval 43
 			};
 
-			var run = Culture.Run(Culture.Production, () => Engine(engine).Recalculate(history));
+			var run = Culture.Run(Culture.Production, () => Engines.Candidate.Recalculate(history));
 
 			Assert.Equal([0, 46, 40, 30, 43], run.Periods.Select(el => el.Length));
 			Assert.Equal(["(46)", "(40)", "(30)"], run.Periods[3].Events.Where(el => el.Type == VesetAflaga).Select(el => el.Note).Reverse());
@@ -181,19 +151,17 @@ namespace Purity.Parity
 		}
 
 		/// <summary>H4: the interval is measured from the effective End but projected from the raw End.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void Preserved_H4_FlagaProjectsFromRawEnd(string engine)
+		[Fact]
+		public void Preserved_H4_FlagaProjectsFromRawEnd()
 		{
-			var e = Single(engine, Period("2033-05-01T00:00:00", "2033-05-07T12:00:00"), VesetAflaga, 30);
+			var e = Single(Period("2033-05-01T00:00:00", "2033-05-07T12:00:00"), VesetAflaga, 30);
 
 			Assert.Equal(Iso("2033-05-22T12:00:00"), e.Stamp);
 			Assert.Equal("(30)", e.Note);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void SkippedPeriodDoesNotChangeTrackedIntervals(string engine)
+		[Fact]
+		public void SkippedPeriodDoesNotChangeTrackedIntervals()
 		{
 			var history = new[]
 			{
@@ -202,16 +170,15 @@ namespace Purity.Parity
 				Period("2033-02-15T00:00:00", "2033-02-20T00:00:00", skip: true),	// not counted
 			};
 
-			var run = Culture.Run(Culture.Production, () => Engine(engine).Recalculate(history));
+			var run = Culture.Run(Culture.Production, () => Engines.Candidate.Recalculate(history));
 
 			Assert.Equal(0, run.Periods[2].Length);
 			Assert.Equal("46", run.Tracked);
 		}
 
 		/// <summary>A year typo in End gives a negative interval. Preserved until input warnings arrive.</summary>
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void Preserved_YearTypoInEndGivesANegativeInterval(string engine)
+		[Fact]
+		public void Preserved_YearTypoInEndGivesANegativeInterval()
 		{
 			var history = new[]
 			{
@@ -219,15 +186,14 @@ namespace Purity.Parity
 				Period("2033-07-01T00:00:00", "2033-07-07T00:00:00"),
 			};
 
-			var run = Culture.Run(Culture.Production, () => Engine(engine).Recalculate(history));
+			var run = Culture.Run(Culture.Production, () => Engines.Candidate.Recalculate(history));
 
 			Assert.Equal(-683, run.Periods[1].Length);
 			Assert.Contains(run.Periods[1].Events, el => el.Note == "(-683)");
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void OpenPeriodHasNoEvents(string engine)
+		[Fact]
+		public void OpenPeriodHasNoEvents()
 		{
 			var history = new[]
 			{
@@ -235,16 +201,15 @@ namespace Purity.Parity
 				new PeriodInput(At("2033-01-30T12:00:00"), At("2033-02-05T00:00:00"), false, false),
 			};
 
-			var run = Culture.Run(Culture.Production, () => Engine(engine).Recalculate(history));
+			var run = Culture.Run(Culture.Production, () => Engines.Candidate.Recalculate(history));
 
 			Assert.Empty(run.Periods[1].Events);
 		}
 
-		[Theory]
-		[MemberData(nameof(BothEngines))]
-		public void SameDayAflagaAndHodeshStayInStampOrder(string engine)
+		[Fact]
+		public void SameDayAflagaAndHodeshStayInStampOrder()
 		{
-			var events = Culture.Run(Culture.Production, () => Engine(engine).CommitSingle(Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), [46], false));
+			var events = Culture.Run(Culture.Production, () => Engines.Candidate.CommitSingle(Period("2033-05-01T00:00:00", "2033-05-07T00:00:00"), [46], false));
 
 			Assert.Equal(events.OrderBy(el => At(el.Stamp[..19])).Select(el => el.Stamp), events.Select(el => el.Stamp));
 		}

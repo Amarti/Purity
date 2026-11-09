@@ -64,10 +64,8 @@ for rid in "${rids[@]}"; do
 
 	# What the parity tests read. They find it by walking up to Purity.sln, so an empty one marks the root.
 	: > "$kit/Purity.sln"
-	mkdir -p "$kit/tests/Purity.Parity" "$kit/tests/Purity.Reference.V1" "$kit/tests/oracle"
+	mkdir -p "$kit/tests/Purity.Parity"
 	cp -R "$root/tests/Purity.Parity/Golden" "$kit/tests/Purity.Parity/"
-	cp -R "$root/tests/Purity.Reference.V1/Source" "$kit/tests/Purity.Reference.V1/"
-	cp "$root/tests/oracle/Purity.2022-05-06.dll" "$kit/tests/oracle/"
 
 	for script in run-check.sh try-purity.command README.md; do
 		tr -d '\r' < "$root/tools/platform-check/$script" > "$kit/$script"
