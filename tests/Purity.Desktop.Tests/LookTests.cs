@@ -53,14 +53,16 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(Colors.White, ColorOf(window.Background));
 			Assert.Equal(Colors.Black, ColorOf(window.Foreground));
 			Assert.Equal(Color.Parse("#5683A9"), IconColor("RefreshIconDrawingGroup"));
-			Assert.Equal(Colors.Black, FrameColor("AfterDuskIconDrawingGroup"));
+			Assert.Equal(Color.Parse("#22324D"), FillColor("AfterDuskIconDrawingGroup"));
+			Assert.Equal(Color.Parse("#E3A008"), FillColor("AfterDawnIconDrawingGroup"));
 
 			App.Apply(Appearance.Dark);
 			Dispatcher.UIThread.RunJobs();
 			Assert.Equal(Color.Parse("#1F2023"), ColorOf(window.Background));
 			Assert.Equal(Color.Parse("#E4E6EA"), ColorOf(window.Foreground));
 			Assert.Equal(Color.Parse("#7FB0E6"), IconColor("RefreshIconDrawingGroup"));
-			Assert.Equal(Color.Parse("#9A9EA6"), FrameColor("AfterDuskIconDrawingGroup"));
+			Assert.Equal(Color.Parse("#C9D6EA"), FillColor("AfterDuskIconDrawingGroup"));
+			Assert.Equal(Color.Parse("#F5BD3A"), FillColor("AfterDawnIconDrawingGroup"));
 
 			window.Close();
 		});
@@ -721,8 +723,8 @@ namespace Purity.Desktop.Tests
 
 		private static Color IconColor(string key) => ColorOf(Icon(key).Children.OfType<GeometryDrawing>().First().Brush);
 
-		/// <summary>The frame around a day or night tile, its last part</summary>
-		private static Color FrameColor(string key) => ColorOf(Icon(key).Children.OfType<GeometryDrawing>().Last().Brush);
+		/// <summary>The color a day or night icon is drawn in</summary>
+		private static Color FillColor(string key) => ColorOf(Icon(key).Children.OfType<GeometryDrawing>().Last().Brush);
 
 		/// <summary>Four periods, so every kind of date shows</summary>
 		private static string History()
