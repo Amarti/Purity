@@ -26,7 +26,6 @@ The app keeps its settings and local copies per user: in `%LOCALAPPDATA%\Purity`
 Current TODOs:
 
  - Add options to the settings window:
-	- Language option (en, heb)
 	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
  - Desktop (Windows, macOS, Linux)

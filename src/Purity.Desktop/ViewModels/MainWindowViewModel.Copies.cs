@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Purity.Storage;
+using static Purity.Desktop.Localization.Loc;
 
 
 namespace Purity.Desktop.ViewModels
@@ -32,7 +33,7 @@ namespace Purity.Desktop.ViewModels
 				if (asking.Count == 0)
 					return;
 
-				if (await _dialogs.AskAsync(CopiesQuestion(asking), "Bring them in", "Not now") != 0)
+				if (await _dialogs.AskAsync(CopiesQuestion(asking), T.BringThemIn, T.NotNow) != 0)
 				{
 					_copiesPutOff.UnionWith(asking.Select(el => el.Key));
 					return;
@@ -55,7 +56,7 @@ namespace Purity.Desktop.ViewModels
 				}
 
 				_copiesWaiting = ReadCopies().Count;
-				await _dialogs.AskAsync(CopiesReport(setAside, Ledger.Data.Count - before, problems), "OK");
+				await _dialogs.AskAsync(CopiesReport(setAside, Ledger.Data.Count - before, problems), T.Ok);
 			}
 			finally
 			{
@@ -75,12 +76,12 @@ namespace Purity.Desktop.ViewModels
 			catch (InvalidDataException)
 			{
 				_copiesPutOff.Add(copy.Key);
-				return $"\"{copy.Name}\" can't be read, so it was left where it is.";
+				return T.CopyUnreadable(copy.Name);
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
 				_saveFailed = true;
-				return $"\"{copy.Name}\" was left where it is, because the data file couldn't be written.";
+				return T.CopyNotWritten(copy.Name);
 			}
 
 			if (status == SaveStatus.NeedsResolution)
@@ -90,15 +91,15 @@ namespace Purity.Desktop.ViewModels
 					return SetAside(copy);
 
 				return _session?.State == SessionState.NeedsResolution
-					? $"\"{copy.Name}\" disagrees with your history about a period. Press Refresh when you're ready to choose."
-					: $"\"{copy.Name}\" was left where it is.";
+					? T.CopyDisagrees(copy.Name)
+					: T.CopyLeft(copy.Name);
 			}
 
 			if (status is SaveStatus.Saved or SaveStatus.Unchanged && _session?.HasUnsavedChanges == false)
 				return SetAside(copy);
 
 			_saveFailed = status == SaveStatus.TryAgain;
-			return $"\"{copy.Name}\" was left where it is, because the data file couldn't be written.";
+			return T.CopyNotWritten(copy.Name);
 		}
 
 		/// <summary>Settles the waiting question, then sets aside the copy that raised it, if one did</summary>
@@ -113,7 +114,7 @@ namespace Purity.Desktop.ViewModels
 				_copiesPutOff.Add(copy.Key);
 			_copiesWaiting = ReadCopies().Count;
 			UpdateWarning();
-			await _dialogs.AskAsync(problem ?? $"\"{copy.Name}\" is brought in and now in this computer's backups.", "OK");
+			await _dialogs.AskAsync(problem ?? T.CopyBroughtIn(copy.Name), T.Ok);
 		}
 
 		/// <summary>
@@ -130,13 +131,13 @@ namespace Purity.Desktop.ViewModels
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
 				_copiesPutOff.Add(copy.Key);
-				return $"The entries of \"{copy.Name}\" are in your history, but the copy stays beside the data file, because this computer's backups couldn't be written.";
+				return T.CopyBackupFailed(copy.Name);
 			}
 
 			try
 			{
 				if (!File.ReadAllBytes(copy.Path).AsSpan().SequenceEqual(copy.Content))
-					return $"\"{copy.Name}\" changed while it was being brought in, so it was left where it is.";
+					return T.CopyChanged(copy.Name);
 
 				File.Delete(copy.Path);
 				return null;
@@ -148,7 +149,7 @@ namespace Purity.Desktop.ViewModels
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
 				_copiesPutOff.Add(copy.Key);
-				return $"The entries of \"{copy.Name}\" are in your history, but the copy couldn't be removed from beside the data file.";
+				return T.CopyNotRemoved(copy.Name);
 			}
 		}
 
@@ -189,32 +190,18 @@ namespace Purity.Desktop.ViewModels
 
 		private static string CopiesQuestion(IReadOnlyList<ConflictedCopy> copies)
 		{
-			var one = copies.Count == 1;
 			var names = string.Join("\n", copies.Take(5).Select(el => "    " + el.Name));
 			if (copies.Count > 5)
-				names += $"\n    and {copies.Count - 5} more";
+				names += "\n    " + T.AndMore(copies.Count - 5);
 
-			return (one ? "Your sync app left a copy" : $"Your sync app left {copies.Count} copies") +
-				" of the data file beside it, from a time when two devices saved at once:\n\n" + names + "\n\n" +
-				(one ? "It may hold entries that are missing here. Bring it in?" : "They may hold entries that are missing here. Bring them in?") +
-				"\n\nNothing in your history is removed. If a copy disagrees about a period, you choose which version to keep. " +
-				"Afterwards each copy moves to this computer's backups.";
+			return T.CopiesQuestion(copies.Count, names);
 		}
 
 		private static string CopiesReport(int setAside, int added, IReadOnlyList<string> problems)
 		{
 			var lines = new List<string>();
 			if (setAside > 0)
-			{
-				var copies = setAside == 1 ? "1 copy" : $"{setAside} copies";
-				var periods = added switch
-				{
-					0 => setAside == 1 ? "It held nothing new" : "They held nothing new",
-					1 => "1 new period came from " + (setAside == 1 ? "it" : "them"),
-					_ => $"{added} new periods came from " + (setAside == 1 ? "it" : "them"),
-				};
-				lines.Add($"Brought in {copies}. {periods}, and {(setAside == 1 ? "it is" : "they are")} now in this computer's backups.");
-			}
+				lines.Add(T.CopiesReport(setAside, added));
 			lines.AddRange(problems);
 			return string.Join("\n\n", lines);
 		}

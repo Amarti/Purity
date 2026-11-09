@@ -1,4 +1,5 @@
 using Purity.Storage;
+using static Purity.Desktop.Localization.Loc;
 
 
 namespace Purity.Desktop.ViewModels
@@ -15,7 +16,7 @@ namespace Purity.Desktop.ViewModels
 		{
 			while (true)
 			{
-				var answer = await _dialogs.AskAsync(FirstStartMessage, "Start a new history", "Open my data file...");
+				var answer = await _dialogs.AskAsync(T.FirstStart, T.StartNew, T.OpenMine);
 				if (answer == 0)
 					return AppPaths.DefaultDataFile;
 				if (answer != 1)
@@ -36,7 +37,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				await _dialogs.AskAsync("The settings couldn't be saved, so Purity will ask for the data file again next time.\n\n" + e.Message, "OK");
+				await _dialogs.AskAsync(T.SettingsNotSaved + e.Message, T.Ok);
 			}
 			await OpenDataFileAsync();
 		}
@@ -61,7 +62,7 @@ namespace Purity.Desktop.ViewModels
 				return;
 			if (File.Exists(to))
 			{
-				await _dialogs.AskAsync(MoveOntoFileMessage, "OK");
+				await _dialogs.AskAsync(T.MoveOntoFile, T.Ok);
 				return;
 			}
 
@@ -69,7 +70,7 @@ namespace Purity.Desktop.ViewModels
 				await SaveAsync();
 			if (_session is not { State: SessionState.Ready, HasUnsavedChanges: false })
 			{
-				await _dialogs.AskAsync("The history can't move yet, because some entries haven't reached the data file. Try again once they have.", "OK");
+				await _dialogs.AskAsync(T.CantMoveYet, T.Ok);
 				return;
 			}
 
@@ -86,12 +87,12 @@ namespace Purity.Desktop.ViewModels
 			{
 				if (madeVault)
 					TryDeleteFolder(vault);
-				await _dialogs.AskAsync("The history couldn't be copied there, so it stays where it is.\n\n" + e.Message, "OK");
+				await _dialogs.AskAsync(T.CopyFailed + e.Message, T.Ok);
 				return;
 			}
 
 			await UseDataFileAsync(to);
-			await _dialogs.AskAsync($"Your history is now kept in {to}.\n\nThe old file is still in {from}, unchanged, and Purity no longer uses it.", "OK");
+			await _dialogs.AskAsync(T.Moved(to, from), T.Ok);
 		}
 
 		/// <exception cref="IOException">The copy failed, or came out different; nothing is left behind</exception>
@@ -147,15 +148,5 @@ namespace Purity.Desktop.ViewModels
 				// it's only a vault nothing uses
 			}
 		}
-
-
-		private const string FirstStartMessage =
-			"Purity keeps your history in one data file.\n\n" +
-			"Start a new history on this computer, or open the data file you already have, such as the one your other computers use in Dropbox. " +
-			"A new history can move to a synced folder later, in Settings.";
-
-		private const string MoveOntoFileMessage =
-			"There's already a file with that name there, and Purity won't replace it, since it may hold someone's history.\n\n" +
-			"To use that file instead, choose it with the ... button in Settings.";
 	}
 }

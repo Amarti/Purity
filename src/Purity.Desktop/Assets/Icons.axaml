@@ -86,6 +86,47 @@
         </GeometryDrawing>
     </DrawingGroup>
 
+    <!-- The flags of the language switch, drawn here because Windows has no flag emoji -->
+    <DrawingImage x:Key="FlagEnglishDrawingImage" Drawing="{DynamicResource FlagEnglishDrawingGroup}"/>
+    <DrawingGroup x:Key="FlagEnglishDrawingGroup" ClipGeometry="M0,0 H60 V40 H0 Z">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="#012169" Geometry="M0,0 H60 V40 H0 Z"/>
+            <GeometryDrawing Geometry="M0,0 L60,40 M60,0 L0,40">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="8" Brush="White"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M0,0 L60,40 M60,0 L0,40">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="3" Brush="#C8102E"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M30,0 V40 M0,20 H60">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="13" Brush="White"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M30,0 V40 M0,20 H60">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="8" Brush="#C8102E"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="FlagHebrewDrawingImage" Drawing="{DynamicResource FlagHebrewDrawingGroup}"/>
+    <DrawingGroup x:Key="FlagHebrewDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="White" Geometry="M0,0 H240 V160 H0 Z"/>
+            <GeometryDrawing Brush="#0038B8" Geometry="M0,15 H240 V40 H0 Z M0,120 H240 V145 H0 Z"/>
+            <GeometryDrawing Geometry="M120,47 L149,97 L91,97 Z M120,113 L91,63 L149,63 Z">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="7" Brush="#0038B8"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
     <!-- The day and night icons: a sun, a crescent, and for a full day a small sun with the same crescent, all filled. The invisible square keeps every one the same size. -->
     <StreamGeometry x:Key="IconSquare">M0,0 H24 V24 H0 Z</StreamGeometry>
 

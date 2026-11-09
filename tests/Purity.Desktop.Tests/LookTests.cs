@@ -22,7 +22,7 @@ namespace Purity.Desktop.Tests
 	/// the whole app, so every test puts it back.
 	/// </summary>
 	[Collection(AppDataCollection.Name)]
-	public sealed class LookTests : IDisposable
+	public sealed partial class LookTests : IDisposable
 	{
 		public LookTests()
 		{

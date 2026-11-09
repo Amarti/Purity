@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop
@@ -24,6 +25,20 @@ namespace Purity.Desktop
 		{
 			get => Enum.TryParse<Appearance>(AppearanceText, out var value) && Enum.IsDefined(value) ? value : Appearance.System;
 			set => AppearanceText = value.ToString();
+		}
+
+		/// <summary>
+		/// <see cref="Language"/> as saved, read leniently for the same reason: a value this version
+		/// doesn't know means English.
+		/// </summary>
+		[JsonPropertyName("Language")]
+		public string LanguageText { get; set; } = nameof(Localization.Language.English);
+
+		[JsonIgnore]
+		public Language Language
+		{
+			get => Enum.TryParse<Language>(LanguageText, out var value) && Enum.IsDefined(value) ? value : Language.English;
+			set => LanguageText = value.ToString();
 		}
 
 		/// <summary>Where the main window was when it last closed, or null before it ever closed with a data file chosen</summary>

@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Purity.Core;
+using Purity.Desktop.Localization;
 using Purity.Storage;
+using static Purity.Desktop.Localization.Loc;
 
 
 namespace Purity.Desktop.ViewModels
@@ -31,6 +32,7 @@ namespace Purity.Desktop.ViewModels
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
 			_settings = DesktopSettings.Load();
+			Loc.Instance.Use(_settings.Language);
 		}
 
 
@@ -46,7 +48,7 @@ namespace Purity.Desktop.ViewModels
 			if (!SelfTestResult.Passed)
 			{
 				UpdateWarning();
-				await _dialogs.AskAsync(SelfTestFailedMessage + SelfTestResult, "OK");
+				await _dialogs.AskAsync(T.SelfTestFailed + SelfTestResult, T.Ok);
 				return true;
 			}
 
@@ -70,7 +72,7 @@ namespace Purity.Desktop.ViewModels
 			if (!_session.HasUnsavedChanges)
 				return true;
 
-			return await _dialogs.AskAsync(UnsavedOnCloseMessage, "Close", "Keep open") == 0;
+			return await _dialogs.AskAsync(T.UnsavedOnClose, T.Close, T.KeepOpen) == 0;
 		}
 
 		public void Dispose() => CloseDataFile();
@@ -79,8 +81,10 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance);
+			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage);
 			var ok = await _dialogs.ShowSettingsAsync(settings);
+			if (!ok)
+				ShowLanguage(_settings.Language);			// a language shows as soon as it's chosen, so leaving without OK puts it back
 			if (settings.RestoreRequested)
 			{
 				await ChooseAndRestoreAsync();
@@ -99,6 +103,7 @@ namespace Purity.Desktop.ViewModels
 			}
 
 			await SetAppearanceAsync(settings.Appearance);
+			await SetLanguageAsync(settings.Language);
 			var chosen = settings.DataFilePath.Trim();
 			if (_session != null && SamePath(chosen, DataFilePath))
 				return;
@@ -160,7 +165,7 @@ namespace Purity.Desktop.ViewModels
 		private async Task AddOrExplainAsync()
 		{
 			if (!TryAddPeriod())
-				await _dialogs.AskAsync("A period beginning today is already in the history, and two periods can't begin at the same time.\n\nTo add another, first change that period's start date.", "OK");
+				await _dialogs.AskAsync(T.DuplicateToday, T.Ok);
 		}
 
 		/// <summary>
@@ -172,7 +177,7 @@ namespace Purity.Desktop.ViewModels
 			if (open.EndDate <= _clock.GetLocalNow().Date)
 				return true;
 
-			return await _dialogs.AskAsync($"This period's end date, {open.EndText}, hasn't come yet.\n\nClose the period anyway?", "Close period", "Keep open") == 0;
+			return await _dialogs.AskAsync(T.EndNotYet(open.EndText), T.ClosePeriod, T.KeepOpen) == 0;
 		}
 
 		/// <summary>
@@ -210,7 +215,7 @@ namespace Purity.Desktop.ViewModels
 
 		internal async Task RemoveAsync(PeriodViewModel period)
 		{
-			if (period.IsClosed && await _dialogs.AskAsync("Are you sure you want to remove this period?", "Yes", "No") != 0)
+			if (period.IsClosed && await _dialogs.AskAsync(T.RemoveQuestion, T.Yes, T.No) != 0)
 				return;
 			if (!Ledger.RemovePeriod(period.Period))
 				return;
@@ -330,7 +335,7 @@ namespace Purity.Desktop.ViewModels
 			{
 				_toldUnreadable = true;
 				UpdateWarning();
-				await _dialogs.AskAsync(UnreadableMessage, "OK");
+				await _dialogs.AskAsync(T.Unreadable, T.Ok);
 			}
 			else if (_session?.State == SessionState.NeedsResolution)
 			{
@@ -367,15 +372,15 @@ namespace Purity.Desktop.ViewModels
 					UpdateWarning();
 					var (other, keepOther) = (_resolvingCopy, _restoringFrom) switch
 					{
-						({ } copy, _) => ($"In the copy \"{copy.Name}\"", "Keep the copy's"),
-						(null, { } when) => ($"In the backup from {when}", "Keep the backup's"),
-						_ => ("In the data file", "Keep the file's"),
+						({ } copy, _) => (T.InCopy(copy.Name), T.KeepCopy),
+						(null, { } when) => (T.InBackup(when), T.KeepBackup),
+						_ => (T.InDataFile, T.KeepFile),
 					};
 					var question = _session.PendingMerge!;
 					var answers = new Dictionary<MergeConflict, MergeSide>();
 					foreach (var conflict in question.Conflicts)
 					{
-						var answer = await _dialogs.AskAsync(ConflictText(conflict, other), "Keep this computer's", keepOther);
+						var answer = await _dialogs.AskAsync(ConflictText(conflict, other), T.KeepThisComputer, keepOther);
 						if (answer == null)
 							return false;			// asked again on Refresh; nothing is saved until then
 
@@ -432,15 +437,13 @@ namespace Purity.Desktop.ViewModels
 
 			Warning = _session?.State switch
 			{
-				_ when SelfTestResult is { Passed: false } => "Purity's check of its date calculations failed on this computer, so it shows no dates. Don't rely on this copy of the app.",
-				null => "Choose your data file in Settings.",
-				SessionState.Unreadable => "The data file can't be read. Nothing is written to it until it can be; your entries are kept on this computer.",
-				SessionState.NeedsResolution => "Two versions of your history disagree. Press Refresh to choose which to keep. Nothing is saved until then.",
-				_ when _saveFailed => "The data file couldn't be written. Your entries are kept on this computer and saved on the next change.",
-				_ when _copiesWaiting > 0 && !_checkingCopies => (_copiesWaiting == 1
-					? "A copy of the data file left by your sync app is beside it and not brought in yet. Press Refresh to bring it in."
-					: $"{_copiesWaiting} copies of the data file left by your sync app are beside it and not brought in yet. Press Refresh to bring them in."),
-				_ when _session.VaultFailed => "This computer's backup copy couldn't be written or read. Saving to the data file still works.",
+				_ when SelfTestResult is { Passed: false } => T.WarnSelfTest,
+				null => T.WarnChooseFile,
+				SessionState.Unreadable => T.WarnUnreadable,
+				SessionState.NeedsResolution => T.WarnTwoVersions,
+				_ when _saveFailed => T.WarnNotWritten,
+				_ when _copiesWaiting > 0 && !_checkingCopies => T.WarnCopies(_copiesWaiting),
+				_ when _session.VaultFailed => T.WarnVault,
 				_ => null,
 			};
 			OnPropertyChanged(nameof(ShowsEmptyHint));
@@ -485,24 +488,24 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="other">Names the other side: the data file or a copy</param>
 		private static string ConflictText(MergeConflict conflict, string other)
 		{
-			var text = new StringBuilder("Your history was changed in two places, and the two versions disagree here.\n\nOn this computer:\n");
+			var text = new StringBuilder(T.ConflictIntro);
 			Describe(text, conflict.Local);
 			text.Append('\n').Append(other).Append(":\n");
 			Describe(text, conflict.Remote);
-			text.Append("\nWhich version do you want to keep?");
+			text.Append(T.WhichVersion);
 			return text.ToString();
 		}
 
 		private static void Describe(StringBuilder text, IReadOnlyList<PeriodRecord> periods)
 		{
 			if (periods.Count == 0)
-				text.Append("    nothing\n");
+				text.Append("    ").Append(T.Nothing).Append('\n');
 			foreach (var period in periods)
-				text.Append(CultureInfo.InvariantCulture, $"    {Describe(period.Begin)} to {Describe(period.End)}{(period.Closed ? "" : ", open")}{(period.SkipStreak ? ", skipped" : "")}\n");
+				text.Append("    ").Append(T.PeriodRange(Describe(period.Begin), Describe(period.End))).Append(period.Closed ? "" : T.OpenSuffix).Append(period.SkipStreak ? T.SkippedSuffix : "").Append('\n');
 		}
 
 		private static string Describe(DateTimeOffset stamp) =>
-			stamp.UtcDateTime.ToString("dddd, d MMMM yyyy", CultureInfo.InvariantCulture) + (PurityEvent.IsDateAfterDusk(stamp) ? " (night)" : " (day)");
+			stamp.UtcDateTime.ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture) + (PurityEvent.IsDateAfterDusk(stamp) ? T.NightSuffix : T.DaySuffix);
 
 		private static bool SamePath(string a, string b)
 		{
@@ -542,26 +545,11 @@ namespace Purity.Desktop.ViewModels
 		private bool CanAddPeriod => HasDataFile && !HasOpenPeriod;
 
 		/// <summary>What the wide button does now, for its tooltip and screen readers</summary>
-		public string AddOrCloseLabel => HasOpenPeriod ? ClosePeriodLabel : NewPeriodLabel;
+		public string AddOrCloseLabel => HasOpenPeriod ? T.ClosePeriod : T.NewPeriod;
 
 		/// <summary>An empty history that opened properly, so the list can say what to do first</summary>
 		public bool ShowsEmptyHint => _session?.State == SessionState.Ready && Periods.Count == 0;
 
-
-		public const string NewPeriodLabel = "New period";
-		public const string ClosePeriodLabel = "Close period";
-
-		private const string UnreadableMessage =
-			"The data file couldn't be read, so you're seeing the copy this computer kept last time, if it has one. Recent entries may be missing.\n\n" +
-			"Nothing will be written to the data file until it can be read. Anything you enter now is kept on this computer and added once it can be read, for example when your sync finishes.";
-
-		private const string SelfTestFailedMessage =
-			"Purity checks its date calculations every time it starts, and on this computer they came out different from the approved ones. " +
-			"So it shows no dates, and it hasn't opened your data file, so nothing in it can change.\n\n" +
-			"Please don't rely on this copy of the app, and let the developer know what the check found:\n\n";
-
-		private const string UnsavedOnCloseMessage =
-			"Some entries couldn't be saved to the data file yet.\n\nThey're kept on this computer, and Purity saves them the next time it opens. Close anyway?";
 
 		private static readonly PeriodLedger NoLedger = new();
 		private static readonly TimeSpan DoubleClickTime = TimeSpan.FromMilliseconds(600);

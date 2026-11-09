@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -34,7 +35,10 @@ namespace Purity.Core
 		}
 
 		/// <summary>Short Gregorian date, such as 4 Sept</summary>
-		public static string Gregorian(DateTimeOffset stamp) => Invariant($"{stamp.Day} {GregorianMonths[stamp.Month - 1]}");
+		public static string Gregorian(DateTimeOffset stamp) => Gregorian(stamp, GregorianMonths);
+
+		/// <summary>The same with another language's month names, for the screen only</summary>
+		public static string Gregorian(DateTimeOffset stamp, IReadOnlyList<string> months) => Invariant($"{stamp.Day} {months[stamp.Month - 1]}");
 
 		/// <summary>
 		/// This is a temporary solution for bug in Avalonia (v.10) that reverses order of hebrew words in the string<br/>
@@ -64,7 +68,7 @@ namespace Purity.Core
 		{
 			"תשרי", "חשוון", "כסלו", "טבת", "שבט", "אדר א׳", "אדר ב׳", "ניסן", "אייר", "סיוון", "תמוז", "אב", "אלול",
 		};
-		private static readonly string[] GregorianMonths =
+		internal static readonly string[] GregorianMonths =
 		{
 			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec",
 		};

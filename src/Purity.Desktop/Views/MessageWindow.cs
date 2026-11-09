@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop.Views
@@ -11,6 +12,7 @@ namespace Purity.Desktop.Views
 		private MessageWindow(string text, IReadOnlyList<string> buttons)
 		{
 			Title = "Purity";
+			FlowDirection = Loc.Instance.FlowDirection;
 			SizeToContent = SizeToContent.WidthAndHeight;
 			CanResize = false;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;

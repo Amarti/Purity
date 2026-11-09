@@ -1,11 +1,19 @@
 using Purity.Core;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop.ViewModels
 {
 	/// <summary>One date in a period's list, and how it stands against today (T5)</summary>
 	/// <param name="TodayText">The line marking today, on the first date still to come after some that have passed; otherwise null</param>
-	public sealed record EventRow(PurityEvent Event, bool IsPast, string? TodayText);
+	public sealed record EventRow(PurityEvent Event, bool IsPast, string? TodayText)
+	{
+		/// <summary>The kind of date, in the language being shown</summary>
+		public string TypeText { get; } = Loc.T.EventType(Event.Type);
+
+		/// <summary>The Gregorian date, in the language being shown</summary>
+		public string GregorianText { get; } = Loc.Instance.GregorianText(Event);
+	}
 
 
 	/// <summary>
@@ -26,9 +34,9 @@ namespace Purity.Desktop.ViewModels
 			var days = (Begins(item).UtcDateTime.Date - today).Days;
 			return days switch
 			{
-				<= 0 => "Today",
-				1 => "Tomorrow",
-				_ => $"in {days} days",
+				<= 0 => Loc.T.Today,
+				1 => Loc.T.Tomorrow,
+				_ => Loc.T.InDays(days),
 			};
 		}
 	}

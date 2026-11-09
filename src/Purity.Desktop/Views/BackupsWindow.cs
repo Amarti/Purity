@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Purity.Desktop.Localization;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Purity.Desktop.ViewModels;
@@ -13,7 +14,8 @@ namespace Purity.Desktop.Views
 	{
 		private BackupsWindow(IReadOnlyList<BackupChoice> choices)
 		{
-			Title = "Earlier versions";
+			Title = Loc.T.EarlierVersions;
+			FlowDirection = Loc.Instance.FlowDirection;
 			Width = 520;
 			Height = 380;
 			CanResize = false;
@@ -27,8 +29,8 @@ namespace Purity.Desktop.Views
 				SelectionMode = SelectionMode.Single,
 			};
 			ScrollViewer.SetHorizontalScrollBarVisibility(list, Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled);
-			var restore = new Button { Content = "Restore...", MinWidth = 90, Padding = new Thickness(10, 3), IsEnabled = false, IsDefault = true };
-			var cancel = new Button { Content = "Cancel", MinWidth = 90, Padding = new Thickness(10, 3), IsCancel = true };
+			var restore = new Button { Content = Loc.T.RestoreEllipsis, MinWidth = 90, Padding = new Thickness(10, 3), IsEnabled = false, IsDefault = true };
+			var cancel = new Button { Content = Loc.T.Cancel, MinWidth = 90, Padding = new Thickness(10, 3), IsCancel = true };
 			list.SelectionChanged += (_, _) => restore.IsEnabled = list.SelectedItem != null;
 			list.DoubleTapped += (_, _) => { if (list.SelectedItem is BackupChoice choice) Close(choice.Backup); };
 			restore.Click += (_, _) => Close((list.SelectedItem as BackupChoice)?.Backup);
@@ -41,8 +43,8 @@ namespace Purity.Desktop.Views
 			var intro = new TextBlock
 			{
 				Text = choices.Count == 0
-					? "This computer has no earlier versions yet. One is kept each time your history changes."
-					: "Each time your history changed, this computer kept the version it replaced. Choose the one to bring back:",
+					? Loc.T.NoBackupsYet
+					: Loc.T.ChooseBackup,
 				TextWrapping = Avalonia.Media.TextWrapping.Wrap,
 			};
 

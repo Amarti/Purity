@@ -5,42 +5,70 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Purity.Desktop.ViewModels"
+        xmlns:loc="using:Purity.Desktop.Localization"
         x:Class="Purity.Desktop.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
-        Title="Settings" Width="384" Height="348"
+        Title="{Binding Text.Settings, Source={x:Static loc:Loc.Instance}}" Width="384" Height="348"
+        FlowDirection="{Binding FlowDirection, Source={x:Static loc:Loc.Instance}}"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/Purity.ico">
 
-    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,30,37,*,30,10,30,20">
-        <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,2,0,0" Height="23" Text="Data file path:"/>
-        <TextBox Grid.Column="2" Grid.Row="1" Height="23" Text="{Binding DataFilePath}"/>
-        <Button Grid.Column="3" Grid.Row="1" Margin="6,0,0,0" Height="23" Width="23" Content="..." Click="PickFile"
-                ToolTip.Tip="Use a data file you already have, such as the one your other computers use"/>
+    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,37,30,37,*,30,10,30,20">
+        <!-- Not in the WPF app: the language, which changes the moment it's chosen. Each half names its own
+             language in that language, and the two stay in place, so a flag doesn't jump from under the pointer. -->
+        <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,2,0,0" Height="23" Text="{Binding Text.LanguageLabel, Source={x:Static loc:Loc.Instance}}"/>
+        <Border Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" Height="23" BorderThickness="1" CornerRadius="5"
+                BorderBrush="{DynamicResource SwitchBorderBrush}" FlowDirection="LeftToRight"
+                AutomationProperties.Name="{Binding Text.LanguageName, Source={x:Static loc:Loc.Instance}}">
+            <Grid ColumnDefinitions="*,*">
+                <RadioButton Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4" GroupName="Language" IsChecked="{Binding IsEnglish}" AutomationProperties.Name="English">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Border BorderThickness="1" BorderBrush="{DynamicResource DateFieldBorderBrush}" VerticalAlignment="Center">
+                            <Image Height="12" Width="18" Source="{StaticResource FlagEnglishDrawingImage}"/>
+                        </Border>
+                        <TextBlock Text="English" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0" GroupName="Language" IsChecked="{Binding IsHebrew}" AutomationProperties.Name="עברית">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Border BorderThickness="1" BorderBrush="{DynamicResource DateFieldBorderBrush}" VerticalAlignment="Center">
+                            <Image Height="12" Width="18" Source="{StaticResource FlagHebrewDrawingImage}"/>
+                        </Border>
+                        <TextBlock Text="עברית" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </RadioButton>
+            </Grid>
+        </Border>
 
         <!-- Not in the WPF app: light, dark or the system's choice (T7, approved for 2.2.0) -->
-        <TextBlock Grid.Column="1" Grid.Row="2" Margin="0,9,0,0" Height="23" Text="Appearance:"/>
+        <TextBlock Grid.Column="1" Grid.Row="2" Margin="0,9,0,0" Height="23" Text="{Binding Text.AppearanceLabel, Source={x:Static loc:Loc.Instance}}"/>
         <ComboBox Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,7,0,0" Height="23" Padding="4,0" HorizontalAlignment="Stretch"
                   VerticalContentAlignment="Center" ItemsSource="{Binding AppearanceChoices}" SelectedIndex="{Binding AppearanceIndex}"
-                  AutomationProperties.Name="Appearance"/>
+                  AutomationProperties.Name="{Binding Text.AppearanceName, Source={x:Static loc:Loc.Instance}}"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="3" Margin="0,9,0,0" Height="23" Text="{Binding Text.DataFilePathLabel, Source={x:Static loc:Loc.Instance}}"/>
+        <TextBox Grid.Column="2" Grid.Row="3" Margin="0,7,0,0" Height="23" Text="{Binding DataFilePath}"/>
+        <Button Grid.Column="3" Grid.Row="3" Margin="6,7,0,0" Height="23" Width="23" Content="..." Click="PickFile"
+                ToolTip.Tip="{Binding Text.PickFileTip, Source={x:Static loc:Loc.Instance}}"/>
 
         <!-- Not in the WPF app, whose backups never ran. In the row of its debug-only "Save data" button -->
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="3" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="Restore an earlier version..."
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.RestoreEarlier, Source={x:Static loc:Loc.Instance}}"
                 Click="Restore" IsEnabled="{Binding CanRestore}"
-                ToolTip.Tip="Bring back your history as it was before a change. The version it replaces is kept too."
+                ToolTip.Tip="{Binding Text.RestoreEarlierTip, Source={x:Static loc:Loc.Instance}}"
                 ToolTip.ShowOnDisabled="True"/>
 
         <!-- Not in the WPF app either -->
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="Move the data file to another folder..."
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="5" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.MoveFile, Source={x:Static loc:Loc.Instance}}"
                 Click="Move" IsEnabled="{Binding CanMove}"
-                ToolTip.Tip="Copy your history to another folder, such as one Dropbox or OneDrive syncs, and use it from there. The file here stays as it is."
+                ToolTip.Tip="{Binding Text.MoveFileTip, Source={x:Static loc:Loc.Instance}}"
                 ToolTip.ShowOnDisabled="True"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="6" Height="30" HorizontalAlignment="Stretch" Content="Create periods lengths report" Click="CreateReport"
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="7" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.CreateReport, Source={x:Static loc:Loc.Instance}}" Click="CreateReport"
                 IsEnabled="{Binding CanReport}"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="8" Height="30" Width="150" Content="OK" Click="Ok" HorizontalAlignment="Left" IsDefault="True"
+        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="9" Height="30" Width="150" Content="{Binding Text.Ok, Source={x:Static loc:Loc.Instance}}" Click="Ok" HorizontalAlignment="Left" IsDefault="True"
                 IsEnabled="{Binding CanAccept}"/>
-        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="8" Height="30" Width="150" Content="Cancel" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
+        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="9" Height="30" Width="150" Content="{Binding Text.Cancel, Source={x:Static loc:Loc.Instance}}" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
     </Grid>
 </Window>

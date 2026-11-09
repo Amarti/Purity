@@ -6,7 +6,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:views="using:Purity.Desktop.Views">
+                    xmlns:views="using:Purity.Desktop.Views" xmlns:loc="using:Purity.Desktop.Localization">
 
     <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
@@ -151,8 +151,8 @@
         </Setter>
     </ControlTheme>
 
-    <!-- One half of the Day | Night switch (T3b) -->
-    <ControlTheme x:Key="DayNightHalfTheme" TargetType="RadioButton">
+    <!-- One half of a switch: Day | Night (T3b), or the language in Settings -->
+    <ControlTheme x:Key="SwitchHalfTheme" TargetType="RadioButton">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource SwitchOffForegroundBrush}"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -191,18 +191,18 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="{TemplateBinding CornerRadius}">
                     <Grid ColumnDefinitions="*,*">
-                        <RadioButton Name="PART_Day" Theme="{StaticResource DayNightHalfTheme}" CornerRadius="4,0,0,4"
-                                     ToolTip.Tip="After dawn" AutomationProperties.Name="Day">
+                        <RadioButton Name="PART_Day" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4"
+                                     ToolTip.Tip="{Binding Text.AfterDawn, Source={x:Static loc:Loc.Instance}}" AutomationProperties.Name="{Binding Text.Day, Source={x:Static loc:Loc.Instance}}">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDawnIconDrawingImage}"/>
-                                <TextBlock Text="Day" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Text.Day, Source={x:Static loc:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </RadioButton>
-                        <RadioButton Name="PART_Night" Grid.Column="1" Theme="{StaticResource DayNightHalfTheme}" CornerRadius="0,4,4,0"
-                                     ToolTip.Tip="After dusk" AutomationProperties.Name="Night">
+                        <RadioButton Name="PART_Night" Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0"
+                                     ToolTip.Tip="{Binding Text.AfterDusk, Source={x:Static loc:Loc.Instance}}" AutomationProperties.Name="{Binding Text.Night, Source={x:Static loc:Loc.Instance}}">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDuskIconDrawingImage}"/>
-                                <TextBlock Text="Night" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Text.Night, Source={x:Static loc:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </RadioButton>
                     </Grid>

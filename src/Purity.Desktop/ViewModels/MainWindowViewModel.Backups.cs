@@ -1,7 +1,8 @@
-using System.Globalization;
 using System.Text;
 using Purity.Core;
+using Purity.Desktop.Localization;
 using Purity.Storage;
+using static Purity.Desktop.Localization.Loc;
 
 
 namespace Purity.Desktop.ViewModels
@@ -37,10 +38,8 @@ namespace Purity.Desktop.ViewModels
 				return;
 
 			var when = When(backup);
-			var confirm = $"Bring back your history as it was until {when}?\n\n" +
-				"The history as it is now is kept as a backup too, so you can go back to it the same way. " +
-				"Entries that haven't reached the data file yet are kept.";
-			if (await _dialogs.AskAsync(confirm, "Restore", "Cancel") != 0)
+			var confirm = T.RestoreConfirm(when);
+			if (await _dialogs.AskAsync(confirm, T.Restore, T.Cancel) != 0)
 				return;
 
 			SaveStatus status;
@@ -53,7 +52,7 @@ namespace Purity.Desktop.ViewModels
 			catch (InvalidDataException)
 			{
 				_restoringFrom = null;
-				await _dialogs.AskAsync("That backup can't be read, so nothing was changed.", "OK");
+				await _dialogs.AskAsync(T.BackupUnreadable, T.Ok);
 				return;
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
@@ -61,7 +60,7 @@ namespace Purity.Desktop.ViewModels
 				_restoringFrom = null;
 				_saveFailed = true;
 				UpdateWarning();
-				await _dialogs.AskAsync("The data file couldn't be written, so the restored version is kept on this computer and saved on the next change.", "OK");
+				await _dialogs.AskAsync(T.RestoreNotWritten, T.Ok);
 				return;
 			}
 
@@ -70,43 +69,42 @@ namespace Purity.Desktop.ViewModels
 			UpdateWarning();
 
 			if (_session?.State == SessionState.Ready && !_session.HasUnsavedChanges)
-				await _dialogs.AskAsync($"Your history is back as it was until {when}. The version from just before is now a backup too.", "OK");
+				await _dialogs.AskAsync(T.Restored(when), T.Ok);
 		}
 
 		/// <summary>When a version was replaced, and what it holds, so the right one can be recognized. Short, for a list.</summary>
 		private string Describe(Backup backup)
 		{
-			var replaced = backup.TakenAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm", CultureInfo.InvariantCulture);
-			var text = new StringBuilder("Until ").Append(replaced).Append(": ");
+			var replaced = backup.TakenAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm", Loc.Instance.DateCulture);
+			var text = new StringBuilder(T.Until(replaced));
 			try
 			{
 				var content = _vault!.ReadBackup(backup);
 				var periods = PurityFile.Parse(new UTF8Encoding(false).GetString(content));
 				if (periods.Count == 0)
-					text.Append("no periods");
+					text.Append(T.NoPeriods);
 				else
 				{
 					var last = periods.MaxBy(el => el.Begin)!;
-					text.Append(periods.Count == 1 ? "1 period" : $"{periods.Count} periods")
-						.Append(", the last beginning ")
-						.Append(last.Begin.UtcDateTime.ToString("d MMMM yyyy", CultureInfo.InvariantCulture))
-						.Append(PurityEvent.IsDateAfterDusk(last.Begin) ? " (night)" : "");
+					text.Append(T.PeriodCount(periods.Count))
+						.Append(T.LastBeginning(last.Begin.UtcDateTime.ToString("d MMMM yyyy", Loc.Instance.DateCulture)))
+						.Append(PurityEvent.IsDateAfterDusk(last.Begin) ? T.NightSuffix : "");
 				}
 
 				// an older version can be identical to today's, for example after a restore
 				if (content.AsSpan().SequenceEqual(new UTF8Encoding(false).GetBytes(PurityFile.Format(Ledger.Data))))
-					text.Append(", the same as now");
+					text.Append(T.SameAsNow);
 				return text.ToString();
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or DecoderFallbackException)
 			{
-				return text.Append("can't be read").ToString();
+				return text.Append(T.CantBeRead).ToString();
 			}
 		}
 
 		/// <summary>The moment the version was replaced, in this computer's time</summary>
 		private static string When(Backup backup) =>
-			backup.TakenAt.ToLocalTime().ToString("dddd, d MMMM yyyy, HH:mm", CultureInfo.InvariantCulture);
+			backup.TakenAt.ToLocalTime().ToString("dddd, d MMMM yyyy, HH:mm", Loc.Instance.DateCulture);
 
 
 		/// <summary>Names the backup being restored while a question about it is open</summary>
