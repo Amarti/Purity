@@ -51,7 +51,6 @@ for platform in "${platforms[@]}"; do
 		linux)
 			bash "$root/tools/package-linux.sh" linux-x64 linux-arm64 > "$stage/linux.log" 2>&1 || { cat "$stage/linux.log"; exit 1; }
 			for arch in amd64 arm64; do
-				cp "$root/out/linux/purity_${version}_$arch.deb" "$out/"
 				echo "  purity_${version}_$arch.deb, $(du -h "$out/purity_${version}_$arch.deb" | cut -f1)"
 			done
 			;;

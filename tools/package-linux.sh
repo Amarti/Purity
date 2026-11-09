@@ -2,8 +2,9 @@
 # Builds Debian packages of the desktop app, which also install on Ubuntu:
 #   bash tools/package-linux.sh                 # amd64 and arm64
 #   bash tools/package-linux.sh linux-x64       # or chosen runtime identifiers
-# Writes out/linux/purity_<version>_<arch>.deb. Runs on Linux. On Windows the packaging step runs
-# in WSL, since dpkg-deb only exists on Linux. tools/test-linux-package.sh tries a package out.
+# Writes out/<version>/purity_<version>_<arch>.deb, beside the other platforms' builds. Runs on
+# Linux. On Windows the packaging step runs in WSL, since dpkg-deb only exists on Linux.
+# tools/test-linux-package.sh tries a package out.
 #
 # The package puts the self-contained app in /opt/purity, a purity command in /usr/bin, and a menu
 # entry with the lotus icon. Installing: sudo apt install ./purity_<version>_<arch>.deb
@@ -48,8 +49,8 @@ if [ "${1:-}" = --deb ]; then
 	exit
 fi
 
-out="$root/out/linux"
 version=$(tr -d '\r' < "$root/src/Purity.Desktop/Purity.Desktop.csproj" | sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' | head -1)
+out="$root/out/$version"
 if [ $# -gt 0 ]; then rids=("$@"); else rids=(linux-x64 linux-arm64); fi
 mkdir -p "$out"
 
@@ -75,6 +76,6 @@ for rid in "${rids[@]}"; do
 		exit 1
 	fi
 	rm -rf "$publish"
-	echo "  $(du -h "$deb" | cut -f1), ready in out/linux"
+	echo "  $(du -h "$deb" | cut -f1), ready in out/$version"
 done
 rm -f "$out/publish.log"
