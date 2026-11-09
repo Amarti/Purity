@@ -1,8 +1,12 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Headless;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.Input;
 using Purity.Core;
 using Purity.Desktop.ViewModels;
 using Purity.Desktop.Views;
@@ -13,8 +17,9 @@ namespace Purity.Desktop.Tests
 {
 	/// <summary>
 	/// The look the owner approved for 2.2.0: colored chips (T4), rounded periods (T6), a dark
-	/// theme (T7) and a window that can be resized (T8). Every date is made up. The theme is one
-	/// setting for the whole app, so every test puts it back.
+	/// theme (T7) and a window that can be resized (T8); and for 2.2.1, Begin and End on their own
+	/// lines with a Day | Night switch (T3b). Every date is made up. The theme is one setting for
+	/// the whole app, so every test puts it back.
 	/// </summary>
 	[Collection(AppDataCollection.Name)]
 	public sealed class LookTests : IDisposable
@@ -121,8 +126,39 @@ namespace Purity.Desktop.Tests
 			Assert.True(window.CanResize);
 			Assert.Equal(694, window.Width);
 			Assert.Equal(861, window.Height);
-			Assert.Equal(694, window.MinWidth);
+			Assert.Equal(650, window.MinWidth);
 			Assert.Equal(WindowFit.MinimumHeight, window.MinHeight);
+		});
+
+		[Fact]
+		public Task ThePeriodsNarrowWithTheWindowAndStayInTheMiddleOfAWiderOne() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var periods = window.FindControl<ListBox>("Periods")!;
+			double Left() => periods.TranslatePoint(default, window)!.Value.X;
+			void Resize(double width)
+			{
+				window.Width = width;
+				Dispatcher.UIThread.RunJobs();
+			}
+
+			Assert.Equal(654, periods.Bounds.Width);
+			Assert.Equal(20, Left());
+
+			Resize(1000);
+			Assert.Equal(660, periods.Bounds.Width);
+			Assert.Equal(170, Left());
+
+			Resize(window.MinWidth);
+			Assert.Equal(610, periods.Bounds.Width);
+			Assert.Equal(20, Left());
+
+			// Only the "Begin" label, 30 wide in Segoe UI, depends on the font; the rest of the line is fixed
+			var events = periods.GetVisualDescendants().OfType<ListBox>().First(el => el.Classes.Contains("Events"));
+			Assert.True(events.Bounds.Width - RestOfTheDateLine >= 40, $"The lines have {events.Bounds.Width} to fit in");
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
 		});
 
 		[Fact]
@@ -138,7 +174,7 @@ namespace Purity.Desktop.Tests
 			// Never smaller than the window allows, and pictures always show the starting size
 			new DesktopSettings { DataFilePath = Path.Combine(_root, "pureData.json"), Window = new WindowPlacement(40, 30, 300, 200, false) }.Save();
 			window = new MainWindow(new StartOptions(null));
-			Assert.Equal(694, window.Width);
+			Assert.Equal(650, window.Width);
 			Assert.Equal(WindowFit.MinimumHeight, window.Height);
 			Assert.Equal(WindowState.Normal, window.WindowState);
 			window = new MainWindow(new StartOptions(Path.Combine(_root, "pureData.json"), Path.Combine(_root, "picture.png")));
@@ -182,6 +218,146 @@ namespace Purity.Desktop.Tests
 			window.Close();
 		});
 
+
+		[Fact]
+		public Task TheSwitchShowsTheOnahAndOnlyTheOtherHalfChangesIt() => Ui.Run(() =>
+		{
+			var pressed = 0;
+			var control = new DayNightSwitch { Height = 25 };
+			control.Command = new RelayCommand(() =>
+			{
+				pressed++;
+				control.IsNight = !control.IsNight;
+			});
+			var window = new Window { Content = control, Width = 300, Height = 100 };
+			window.Show();
+			var (day, night) = Halves(control);
+			Assert.Equal(new bool?[] { true, false }, new[] { day.IsChecked, night.IsChecked });
+
+			Press(day, window);
+			Assert.Equal(0, pressed);
+			Assert.False(control.IsNight);
+			Assert.True(day.IsChecked);
+
+			Press(night, window);
+			Assert.Equal(1, pressed);
+			Assert.True(control.IsNight);
+			Assert.Equal(new bool?[] { false, true }, new[] { day.IsChecked, night.IsChecked });
+
+			Press(night, window);
+			Assert.Equal(1, pressed);
+			Assert.True(night.IsChecked);
+
+			Press(day, window);
+			Assert.Equal(2, pressed);
+			Assert.False(control.IsNight);
+			Assert.Equal(new bool?[] { true, false }, new[] { day.IsChecked, night.IsChecked });
+
+			// It shows what the period holds, even if the press didn't change that
+			control.Command = new RelayCommand(() => {});
+			Press(night, window);
+			Assert.Equal(new bool?[] { true, false }, new[] { day.IsChecked, night.IsChecked });
+
+			window.Close();
+		});
+
+		[Fact]
+		public Task APeriodsSwitchesMoveItsDatesToTheOtherOnah() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var period = viewModel.Periods[^1];
+			var begin = period.Period.Begin;
+			var end = period.Period.End;
+			var (beginSwitch, endSwitch) = SwitchesOf(window, period);
+
+			Assert.Equal("Begin day or night", AutomationProperties.GetName(beginSwitch));
+			Assert.Equal("End day or night", AutomationProperties.GetName(endSwitch));
+			Assert.False(beginSwitch.IsNight);
+
+			Press(Halves(beginSwitch).Night, window);
+			Assert.Equal(begin.AddHours(12), period.Period.Begin);
+			Assert.Equal(end, period.Period.End);
+			Assert.True(beginSwitch.IsNight);
+			Assert.False(endSwitch.IsNight);
+
+			Press(Halves(endSwitch).Night, window);
+			Assert.Equal(end.AddHours(12), period.Period.End);
+			Assert.True(endSwitch.IsNight);
+
+			Press(Halves(beginSwitch).Day, window);
+			Assert.Equal(begin, period.Period.Begin);
+			Assert.False(beginSwitch.IsNight);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task BeginAndEndHaveTheirOwnLinesStartingWhereTheDividerStarts() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var (beginSwitch, endSwitch) = SwitchesOf(window, viewModel.Periods[^1]);
+			var card = beginSwitch.FindAncestorOfType<Border>(includeSelf: false)!;
+			while (!card.Classes.Contains("Period"))
+				card = card.FindAncestorOfType<Border>(includeSelf: false)!;
+			var fields = card.GetVisualDescendants().OfType<DateField>().ToArray();
+			var begin = card.GetVisualDescendants().OfType<TextBlock>().First(el => el.Text == "Begin");
+			var events = card.GetVisualDescendants().OfType<ListBox>().Single(el => el.Classes.Contains("Events"));
+			Point At(Visual visual) => visual.TranslatePoint(default, card)!.Value;
+
+			Assert.Equal(2, fields.Length);
+			Assert.All(fields, el => Assert.Equal(WholeDateWidth, el.Bounds.Width));
+			Assert.Equal(At(fields[0]).X, At(fields[1]).X);
+			Assert.Equal(At(fields[0]).Y + 30, At(fields[1]).Y);
+			Assert.Equal(At(beginSwitch).X, At(endSwitch).X);
+			Assert.Equal(At(fields[0]).Y, At(beginSwitch).Y);
+			Assert.Equal(At(events).X, At(begin).X);
+			Assert.Equal(126, beginSwitch.Bounds.Width);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+
+		private async Task<MainWindow> OpenPeriodsAsync()
+		{
+			var dataFile = Path.Combine(_root, "pureData.json");
+			File.WriteAllText(dataFile, History());
+			var window = new MainWindow(new StartOptions(dataFile));
+			window.Show();
+			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<DayNightSwitch>().Any(el => el.Bounds.Width > 0));
+			await Task.Delay(200);
+			await Ui.WaitUntil(() => true);					// the list scrolls to the newest periods first
+			return window;
+		}
+
+		private static (DayNightSwitch Begin, DayNightSwitch End) SwitchesOf(Window window, PeriodViewModel period)
+		{
+			var switches = window.GetVisualDescendants().OfType<DayNightSwitch>().Where(el => el.DataContext == period).ToArray();
+			Assert.Equal(2, switches.Length);
+			return (switches[0], switches[1]);
+		}
+
+		private static (RadioButton Day, RadioButton Night) Halves(DayNightSwitch control)
+		{
+			var halves = control.GetVisualDescendants().OfType<RadioButton>().ToArray();
+			return (halves.Single(el => el.Name == "PART_Day"), halves.Single(el => el.Name == "PART_Night"));
+		}
+
+		private static void Press(Control control, Window window)
+		{
+			// The pointer finds what was last drawn, so a frame has to be drawn first
+			Dispatcher.UIThread.RunJobs();
+			AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+			Dispatcher.UIThread.RunJobs();
+
+			var center = control.TranslatePoint(new Point(control.Bounds.Width / 2, control.Bounds.Height / 2), window)!.Value;
+			window.MouseDown(center, MouseButton.Left);
+			window.MouseUp(center, MouseButton.Left);
+			Dispatcher.UIThread.RunJobs();
+		}
 
 		/// <summary>Runs a test that changes the theme, and always puts the system's back</summary>
 		private static Task Themed(Action test) => Ui.Run(() =>
@@ -233,6 +409,12 @@ namespace Purity.Desktop.Tests
 			return PurityFile.Format(ledger.Data);
 		}
 
+
+		/// <summary>The longest date, "Wednesday, 29 September ...", is 170 wide in Segoe UI and 175 in Linux's Liberation Sans; the field's frame and calendar page take 29</summary>
+		private const double WholeDateWidth = 210;
+
+		/// <summary>A date line's date field, switch, Skip and two buttons, with their gaps</summary>
+		private const double RestOfTheDateLine = 215 + 132 + 80 + 40 + 40;
 
 		private readonly string _root = Path.Combine(Path.GetTempPath(), $"purity-desktop-{Guid.NewGuid():N}");
 	}

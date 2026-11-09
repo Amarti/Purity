@@ -2,23 +2,23 @@
   A copy of src/Purity.WPF/Views/MainWindow.xaml: same sizes, margins and order. WPF's 710x900
   includes the window frame, so the size here is the area inside it on Windows. Changes the owner
   approved for 2.2.0: the window can be resized (T8), periods are rounded and airier (T6), and each
-  kind of date has a colored chip (T4).
+  kind of date has a colored chip (T4). For 2.2.1: Begin and End on their own lines, each with a
+  Day | Night switch (T3b), and date fields wide enough for the whole date.
 -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="using:Purity.Desktop"
         xmlns:vm="using:Purity.Desktop.ViewModels"
         xmlns:core="using:Purity.Core"
         xmlns:views="using:Purity.Desktop.Views"
         x:Class="Purity.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Purity" Width="694" Height="861"
-        MinWidth="694" MinHeight="400"
+        MinWidth="650" MinHeight="400"
         WindowStartupLocation="CenterScreen"
         Icon="/Assets/Purity.ico">
 
-    <!-- The column keeps its width when the window gets wider, so the periods stay in the middle -->
-    <Grid ColumnDefinitions="*,654,*" RowDefinitions="Auto,*,Auto,Auto,20">
+    <!-- The periods follow the window's width up to 660, and in a wider window stay that wide in the middle -->
+    <Grid MaxWidth="700" ColumnDefinitions="20,*,20" RowDefinitions="Auto,*,Auto,Auto,20">
 
         <ListBox x:Name="Periods" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Periods}" ItemContainerTheme="{StaticResource PeriodItemTheme}"
                  ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -35,40 +35,29 @@
                         <views:LazyPeriod.PeriodTemplate>
                             <DataTemplate x:DataType="vm:PeriodViewModel">
                                 <Border Classes="Period" Classes.Open="{Binding !IsClosed}">
-                                    <StackPanel Margin="0,8,0,4" HorizontalAlignment="Center">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Margin="5,5,0,0" Height="23" Text="Begin" VerticalAlignment="Center"/>
-                                            <views:DateField Classes="Wpf" Margin="5,0,0,0" Height="25" Width="150" SelectedDate="{Binding BeginDate}"/>
-                                            <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="Begin day or night"
-                                                    ToolTip.Tip="{Binding BeginIsAfterDusk, Converter={x:Static local:Converters.DuskDawnTooltip}}">
-                                                <Panel>
-                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !BeginIsAfterDusk}"/>
-                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding BeginIsAfterDusk}"/>
-                                                </Panel>
-                                            </Button>
-                                            <TextBlock Margin="15,5,0,0" Height="23" Text="End" VerticalAlignment="Center"/>
-                                            <views:DateField Classes="Wpf" Margin="5,0,0,0" Height="25" Width="150" SelectedDate="{Binding EndDate}"/>
-                                            <Button Margin="5,0,0,0" Height="25" Width="25" VerticalAlignment="Center" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="End day or night"
-                                                    ToolTip.Tip="{Binding EndIsAfterDusk, Converter={x:Static local:Converters.DuskDawnTooltip}}">
-                                                <Panel>
-                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !EndIsAfterDusk}"/>
-                                                    <Image Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding EndIsAfterDusk}"/>
-                                                </Panel>
-                                            </Button>
-                                            <CheckBox Margin="10,8,0,0" Height="25" Width="80" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
+                                    <StackPanel Margin="0,8,0,4">
+                                        <!-- Begin and End on their own lines (T3b), starting where the line under them starts -->
+                                        <Grid Margin="12,0" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" RowDefinitions="25,25" RowSpacing="5">
+                                            <TextBlock Text="Begin" VerticalAlignment="Center"/>
+                                            <views:DateField Grid.Column="1" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding BeginDate}"/>
+                                            <views:DayNightSwitch Grid.Column="2" Margin="6,0,0,0" IsNight="{Binding BeginIsAfterDusk}" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="Begin day or night"/>
+                                            <TextBlock Grid.Row="1" Text="End" VerticalAlignment="Center"/>
+                                            <views:DateField Grid.Row="1" Grid.Column="1" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding EndDate}"/>
+                                            <views:DayNightSwitch Grid.Row="1" Grid.Column="2" Margin="6,0,0,0" IsNight="{Binding EndIsAfterDusk}" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="End day or night"/>
+                                            <CheckBox Grid.Column="4" Grid.RowSpan="2" VerticalAlignment="Center" Width="80" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
                                                       ToolTip.Tip="Omit this period from Veset Aflaga calculation due to some external reasons (surgery, intrauterine device installation, etc)"/>
                                             <!-- WPF hides these buttons without giving up their space -->
-                                            <Panel Margin="15,0,0,0" Height="25" Width="25">
+                                            <Panel Grid.Column="5" Grid.RowSpan="2" Margin="15,0,0,0" Height="25" Width="25" VerticalAlignment="Center">
                                                 <Button Height="25" Width="25" ToolTip.Tip="Accept period" AutomationProperties.Name="Accept period" Command="{Binding AcceptCommand}" IsVisible="{Binding !IsClosed}">
                                                     <Image Height="18" Width="18" Source="{StaticResource AcceptIconDrawingImage}"/>
                                                 </Button>
                                             </Panel>
-                                            <Panel Margin="15,0,5,0" Height="25" Width="25">
+                                            <Panel Grid.Column="6" Grid.RowSpan="2" Margin="15,0,0,0" Height="25" Width="25" VerticalAlignment="Center">
                                                 <Button Height="25" Width="25" ToolTip.Tip="Remove period" AutomationProperties.Name="Remove period" Command="{Binding RemoveCommand}" IsVisible="{Binding IsLast}">
                                                     <Image Height="18" Width="18" Source="{StaticResource RemoveIconDrawingImage}"/>
                                                 </Button>
                                             </Panel>
-                                        </StackPanel>
+                                        </Grid>
                                         <ListBox Classes="Events" ItemsSource="{Binding SubEvents}">
                                             <ListBox.ItemsPanel>
                                                 <ItemsPanelTemplate>

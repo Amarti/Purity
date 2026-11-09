@@ -2,10 +2,11 @@
   Controls drawn the way WPF draws them on Windows 10 and 11 (its Aero2 theme), with the same sizes,
   so the app matches the WPF app it replaces. Everything else comes from the Simple theme.
   Changes the owner approved for 2.2.0: rounded corners and lighter buttons (T6), and colors from
-  Palette.axaml, so they have a dark version too (T7).
+  Palette.axaml, so they have a dark version too (T7). For 2.2.1: the Day | Night switch (T3b).
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:views="using:Purity.Desktop.Views">
 
     <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
@@ -126,6 +127,67 @@
     <ControlTheme x:Key="PeriodItemTheme" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
         <Setter Property="Margin" Value="0,4"/>
         <Setter Property="CornerRadius" Value="8"/>
+    </ControlTheme>
+
+    <!-- One half of the Day | Night switch (T3b) -->
+    <ControlTheme x:Key="DayNightHalfTheme" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource SwitchOffForegroundBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- The plain panel makes the whole half pressable, its rounded outer corners included -->
+                <Panel Background="Transparent">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Background="{TemplateBinding Background}"
+                                      CornerRadius="{TemplateBinding CornerRadius}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalContentAlignment="Center"
+                                      VerticalContentAlignment="Center"/>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^:checked">
+            <Setter Property="Background" Value="{DynamicResource SwitchOnBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SwitchOnForegroundBrush}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type views:DayNightSwitch}" TargetType="views:DayNightSwitch">
+        <Setter Property="BorderBrush" Value="{DynamicResource SwitchBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Width" Value="126"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid ColumnDefinitions="*,*">
+                        <RadioButton Name="PART_Day" Theme="{StaticResource DayNightHalfTheme}" CornerRadius="4,0,0,4"
+                                     ToolTip.Tip="After dawn" AutomationProperties.Name="Day">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDawnIconDrawingImage}"/>
+                                <TextBlock Text="Day" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Name="PART_Night" Grid.Column="1" Theme="{StaticResource DayNightHalfTheme}" CornerRadius="0,4,4,0"
+                                     ToolTip.Tip="After dusk" AutomationProperties.Name="Night">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDuskIconDrawingImage}"/>
+                                <TextBlock Text="Night" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
     </ControlTheme>
 
     <!-- WPF's date field: a text box and a small calendar page showing 15 -->
