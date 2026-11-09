@@ -26,6 +26,7 @@ syntax: glob
 launchSettings.json
 
 bin/
+TestResults/
 obj/
 ipch/
 packages/
@@ -64,3 +65,10 @@ pureSettings*.json
 
 # Build output of tools such as the platform check kit
 /out/
+
+# Made-up histories for trying the app; only the note explaining them is kept
+tests/synthetic-data/*
+!tests/synthetic-data/README.md
+
+# Launch profiles are otherwise personal, but this one points at the made-up data
+!src/Purity.Desktop/Properties/launchSettings.json

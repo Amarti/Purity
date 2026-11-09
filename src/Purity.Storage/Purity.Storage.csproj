@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Keeps pureData.json safe: atomic saves, change detection, merging and backups. All file
-       access lives here so that Purity.Core stays pure. net8.0 exists only for the Monterey
-       fallback build. -->
+       access lives here so that Purity.Core stays pure. -->
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>Purity.Storage</RootNamespace>

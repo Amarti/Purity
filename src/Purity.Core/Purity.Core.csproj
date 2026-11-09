@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The calculation engine for every platform. It must stay pure: no file access, no logging,
-       no UI, and no dependence on the machine's culture, time zone or ICU data. net8.0 exists only
-       for the Monterey fallback build. -->
+       no UI, and no dependence on the machine's culture, time zone or ICU data. -->
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>Purity.Core</RootNamespace>
@@ -12,5 +11,11 @@
     <IsAotCompatible>true</IsAotCompatible>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The self-test's approved output. It lives with the other approved files, so it changes only
+         with a rules-version bump; it was made by the old production engine. -->
+    <EmbeddedResource Include="..\..\tests\Purity.Parity\Golden\self-test.txt" LogicalName="Purity.Core.SelfTest.expected.txt" Link="SelfTest.expected.txt" />
+  </ItemGroup>
 
 </Project>

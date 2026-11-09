@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The desktop app for Windows, macOS 12 and later, and Linux. It copies the WPF app's look on
+    purpose: WPF is the visual baseline, and any change to the look needs approval.
+    Dates come only from Purity.Core and the data file is touched only through Purity.Storage.
+    The app runs without OS culture data, so no machine setting can change a date's text, and
+    Linux needs no ICU library.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Purity.Desktop</RootNamespace>
+    <AssemblyName>Purity</AssemblyName>
+    <Product>Purity</Product>
+    <!-- The one place the version is set: the window title, the Mac bundle and the Linux package all take it from here -->
+    <Version>2.2.4</Version>
+    <ApplicationIcon>Assets\Purity.ico</ApplicationIcon>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- dotnet run starts where Visual Studio's launch profile does, so the profile's relative paths work for both -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)/../../tests/synthetic-data</RunWorkingDirectory>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Windows gets a single Purity.exe, as the Mac gets one Purity.app and Linux one package. Its
+    native libraries unpack themselves into the temp folder on the first start. Compressed, it is
+    half the size and starts about as quickly.
+  -->
+  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 12.1.3 is the version the Monterey Mac passed with. Rerun the platform check kit before changing it. -->
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Purity.Core\Purity.Core.csproj" />
+    <ProjectReference Include="..\Purity.Storage\Purity.Storage.csproj" />
+    <InternalsVisibleTo Include="Purity.Desktop.Tests" />
+  </ItemGroup>
+
+</Project>

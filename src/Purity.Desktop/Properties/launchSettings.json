@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Purity (synthetic data)": {
+      "commandName": "Project",
+      "commandLineArgs": "--data sample.json",
+      "workingDirectory": "../../tests/synthetic-data",
+      "environmentVariables": {
+        "PURITY_APP_DATA": "app data"
+      }
+    },
+    "Purity (this computer's settings)": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Purity.Reference.V1\Purity.Reference.V1.csproj" Aliases="RefV1" />
     <ProjectReference Include="..\..\src\Purity.Core\Purity.Core.csproj" Aliases="Candidate" />
   </ItemGroup>
 

@@ -2,19 +2,38 @@
 
 ## Jewish family purity tracker
 
+## Building the desktop app
+
+One command builds the app for Windows, macOS and Linux into `out/<version>/`. Each build is self-contained, so the computer it goes to needs nothing installed:
+
+```bash
+bash tools/build-apps.sh
+```
+
+To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs the .NET 10 SDK; on Windows, run it in Git Bash, and the Linux packages also need WSL. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there.
+
+| File | For | To install and run |
+|---|---|---|
+| `Purity-<version>-windows-x64.exe` | Windows PCs | The whole app in one file: put it anywhere, such as the desktop, and run it. It isn't code-signed, so Windows may warn the first time: More info, then Run anyway |
+| `Purity-<version>-windows-arm64.exe` | Windows on ARM | The same |
+| `Purity-<version>-macos-intel.zip` | Macs with an Intel processor, macOS 12 and later | Unzip and move `Purity.app` to Applications. It isn't signed by an Apple developer, so a downloaded copy is blocked the first time: right-click it and choose Open, or on macOS 15 and later allow it in System Settings, Privacy & Security. Running `xattr -dr com.apple.quarantine /Applications/Purity.app` once in Terminal also works. A copy brought over by Dropbox or a USB stick isn't blocked |
+| `Purity-<version>-macos-apple-silicon.zip` | Macs with an Apple chip | The same |
+| `purity_<version>_amd64.deb` | Debian and Ubuntu PCs | `sudo apt install ./purity_<version>_amd64.deb`, then Purity is in the menu. `sudo apt remove purity` removes it |
+| `purity_<version>_arm64.deb` | Debian and Ubuntu on ARM | The same |
+
+The app keeps its settings and local copies per user: in `%LOCALAPPDATA%\Purity` on Windows, `~/Library/Application Support/Purity` on macOS and `~/.local/share/Purity` on Linux.
+
 Current TODOs:
 
- - Implement configuration window, consisting:
+ - Add options to the settings window:
 	- Language option (en, heb)
 	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
- - Port to macOS (avalonia)
+ - Desktop (Windows, macOS, Linux)
 	- calendar/reminders integration
-	- compel the listbox control to put last item fully
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
  - Port to android
 	- external storage file path (dropbox/google drive integration)
 	- calendar/reminders integration
- - Port to linux

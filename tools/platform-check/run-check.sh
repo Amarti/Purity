@@ -1,6 +1,6 @@
 #!/bin/bash
-# Purity platform check: runs the calculation and storage tests on this machine, opens the window
-# of each candidate UI stack, and writes a report to send back. Usage:
+# Purity platform check: runs the test suites on this machine, opens the desktop app with a made-up
+# history, and writes a report to send back. Usage:
 #   bash run-check.sh              # everything, with a short hands-on check at the end
 #   bash run-check.sh --auto-only  # no hands-on check, for machines without a person at them
 # Works with macOS's bash 3.2 and on Linux. It changes nothing outside this folder apart from
@@ -11,12 +11,18 @@ kit=$(cd "$(dirname "$0")" && pwd)
 stamp=$(date +%Y%m%d-%H%M%S)
 results="$kit/results-$stamp"
 report="$results/report.txt"
+check="$kit/.check-$stamp"
 os=$(uname -s)
 summary=""
-first_window=""
 manual=yes
 [ "${1:-}" = "--auto-only" ] && manual=no
-mkdir -p "$results"
+mkdir -p "$results" "$check"
+
+if [ -d "$kit/Purity.app" ]; then
+	app="$kit/Purity.app/Contents/MacOS/Purity"
+else
+	app="$kit/app/Purity"
+fi
 
 # Keeps the home folder, which carries the user name, out of everything sent back
 scrub() { sed -e "s#$HOME#~#g"; }
@@ -68,24 +74,33 @@ run_tests() { # name program
 	note "$1" "$result in ${seconds}s. ${counts:-no test summary}"
 }
 
-run_window() { # variant
-	program="$kit/bin/$1/Purity.UiProbe"
-	if [ ! -f "$program" ]; then
-		note "$1" "missing from the kit"
-		return
+# Opens the app on a copy of the made-up history; it saves a picture of its window and closes
+run_app_picture() {
+	if [ ! -f "$app" ]; then
+		note "app window" "missing from the kit"
+		return 1
 	fi
-	printf 'Opening %s (a window flashes up) ... ' "$1"
-	run_limited 90 "$results/$1.log" "$program" --auto --out "$results" --variant "$1"
+	printf 'Opening the app (its window flashes up) ... '
+	cp "$kit/sample.json" "$check/picture.json"
+	run_limited 90 "$results/app.log" env PURITY_APP_DATA="$check/app data" "$app" --data "$check/picture.json" --picture "$results/app.png"
 	code=$?
-	result=$(sed -n 's/^result: //p' "$results/$1.txt" 2> /dev/null)
-	if [ $code -eq 0 ] && [ "$result" = passed ]; then
+	result=$(sed -n 's/^result: //p' "$results/app.txt" 2> /dev/null)
+	selftest=$(sed -n 's/^self-test: //p' "$results/app.txt" 2> /dev/null)
+	if [ $code -eq 0 ] && [ "$result" = passed ] && [ "$selftest" = passed ]; then
 		echo passed
-		note "$1" "passed"
-		[ -n "$first_window" ] || first_window=$1
-	else
-		echo "FAILED (exit $code)"
-		note "$1" "FAILED (exit $code, ${result:-no report})"
+		note "app window" "passed, $(sed -n 's/^window: //p' "$results/app.txt")"
+		note "app self-test" "passed"
+		return 0
 	fi
+	echo "FAILED (exit $code)"
+	note "app window" "FAILED (exit $code, ${result:-no report})"
+	note "app self-test" "${selftest:-not run}"
+	return 1
+}
+
+periods_in() { # data file
+	count=$(grep -c '"Begin"' "$1" 2> /dev/null)
+	echo "${count:-0}"
 }
 
 ask() { # question
@@ -105,7 +120,7 @@ if [ "$os" = Darwin ]; then
 	say "macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion)), $(sysctl -n hw.model)"
 	say "Processor: $(sysctl -n machdep.cpu.brand_string 2> /dev/null)"
 	[ "$(sysctl -n sysctl.proc_translated 2> /dev/null)" = 1 ] && say "This Terminal runs under Rosetta"
-	system_profiler SPDisplaysDataType 2> /dev/null | grep -E 'Chipset Model|Metal' | sed 's/^ */Graphics: /' | scrub | tee -a "$report"
+	system_profiler SPDisplaysDataType 2> /dev/null | grep -E 'Chipset Model|Metal|Resolution' | sed 's/^ */Graphics: /' | scrub | tee -a "$report"
 else
 	say "$(. /etc/os-release 2> /dev/null && echo "${PRETTY_NAME:-}") $(uname -r)"
 fi
@@ -122,10 +137,11 @@ case "$kit_rid:$(uname -m)" in
 		;;
 esac
 
-# .NET won't start on Linux without ICU unless told to do without it (macOS always has ICU)
+# The test suites need ICU on Linux unless told to do without it (macOS always has it). The app
+# itself never uses it.
 if [ "$os" = Linux ] && ! { /sbin/ldconfig -p 2> /dev/null || ldconfig -p 2> /dev/null; } | grep -q 'libicuuc\.so'; then
 	export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-	say "ICU: not installed, so everything runs without it. The app will need the libicu package here, or to run the same way."
+	say "ICU: not installed, so the tests run without it and most calculation tests skip. The app doesn't need it."
 fi
 
 if [ -f "$kit/private/pureData.json" ]; then
@@ -137,8 +153,9 @@ fi
 say ""
 
 # Downloads are quarantined, and zip tools drop the executable flag. The kit is built on Windows,
-# so on a Mac its programs also get an ad hoc signature, which is valid on this machine only.
+# so on a Mac anything unsigned also gets an ad hoc signature, which is valid on this machine only.
 [ "$os" = Darwin ] && xattr -dr com.apple.quarantine "$kit" 2> /dev/null
+chmod +x "$kit/try-purity.command" 2> /dev/null
 signed=0
 while IFS= read -r file; do
 	is_native "$file" || continue
@@ -146,39 +163,46 @@ while IFS= read -r file; do
 	if [ "$os" = Darwin ] && ! codesign -v "$file" 2> /dev/null; then
 		codesign -f -s - "$file" >> "$results/prepare.log" 2>&1 && signed=$((signed + 1))
 	fi
-done < <(find "$kit/bin" -type f ! -name '*.dll' ! -name '*.json' ! -name '*.pdb' ! -name '*.xml')
+done < <(find "$kit/bin" "$kit/Purity.app" "$kit/app" -type f ! -name '*.dll' ! -name '*.json' ! -name '*.pdb' ! -name '*.xml' 2> /dev/null)
 [ "$os" = Darwin ] && say "Signed $signed programs and libraries for this Mac"
 
-# Calculations and storage, on both runtimes
-run_tests parity-net10 "$kit/bin/tests-net10/Purity.Parity"
-run_tests parity-net8 "$kit/bin/tests-net8/Purity.Parity"
-run_tests storage-net10 "$kit/bin/tests-net10/Purity.Storage.Tests"
-run_tests storage-net8 "$kit/bin/tests-net8/Purity.Storage.Tests"
+# Calculations, storage and the app's behavior
+run_tests parity "$kit/bin/tests/Purity.Parity"
+run_tests storage "$kit/bin/tests/Purity.Storage.Tests"
+run_tests desktop "$kit/bin/tests/Purity.Desktop.Tests"
 
-# Each UI candidate, in order of preference
-run_window ui-avalonia12-net10
-run_window ui-avalonia12-net8
-run_window ui-avalonia11-net8
-
-# A person tries the best candidate that opened
-if [ "$manual" = yes ] && [ -n "$first_window" ]; then
+# The app itself
+if run_app_picture && [ "$manual" = yes ]; then
+	cp "$kit/sample.json" "$check/try.json"
+	before=$(periods_in "$check/try.json")
 	echo ""
-	echo "Last step: a window opens for you to try ($first_window). In it:"
-	echo "  1. Look at the table. Column A is the Hebrew date as the Windows app shows it;"
-	echo "     column B is an old workaround and may look scrambled."
-	echo "  2. Click the date box, pick any date, then tick Night."
-	echo "  3. Click \"Choose a file...\", then cancel, or pick any file (it isn't opened)."
-	echo "  4. Click Close. The questions follow."
-	printf 'Press Return to open the window ... '
+	echo "Last step: the app opens with a made-up history for you to try. In it:"
+	echo "  1. Click a few folded periods to open them, then scroll the list with the mouse wheel or trackpad, keeping the pointer over the"
+	echo "     date boxes. No date should change."
+	echo "  2. Click New period at the top to add a period. Click the little calendar in"
+	echo "     its To box and pick a date, then click Night next to it."
+	echo "  3. Click Close period at the top. If it asks because the end date is still ahead, choose Close period. The period moves into the list with its dates."
+	echo "  4. Click the gear at the top left, then \"...\" next to the data file path. Cancel"
+	echo "     the file chooser, then press Cancel in Settings."
+	echo "  5. Close the window. The questions follow."
+	printf 'Press Return to open the app ... '
 	read -r _
-	"$kit/bin/$first_window/Purity.UiProbe" --out "$results" --variant "$first_window-manual" > "$results/$first_window-manual.log" 2>&1
+	PURITY_APP_DATA="$check/app data" "$app" --data "$check/try.json" > "$results/app-try.log" 2>&1
+	after=$(periods_in "$check/try.json")
+	if [ "$after" -gt "$before" ]; then saved="saved the new period"; else saved="saved no new period"; fi
+	note "app, by hand" "$saved ($before periods before, $after after)"
+
 	echo "Answers:" >> "$report"
-	ask "Did the window look right, with sharp text and nothing cut off?"
-	ask "Does column A read correctly?"
-	ask "Does column B read correctly?"
-	ask "Did the date picker open and let you pick a date?"
-	ask "Did the file chooser open?"
+	ask "Did the whole window fit on the screen, with sharp text and nothing cut off?"
+	ask "Do the Hebrew dates read correctly, as in the Windows app?"
+	ask "Did scrolling over the date boxes leave every date unchanged?"
+	ask "Did the calendar open and let you pick a date?"
+	ask "Did the file chooser open from Settings?"
+	printf 'Anything else that looked wrong? Type a short note, or just press Return: '
+	read -r remark
+	[ -n "$remark" ] && echo "  Note: $remark" >> "$report"
 fi
+rm -rf "$check"
 
 say ""
 say "Summary"
@@ -197,3 +221,4 @@ else
 fi
 echo ""
 say "Done. Please send back $sent"
+[ -f "$app" ] && echo "To try the app again later, double-click try-purity.command in this folder."

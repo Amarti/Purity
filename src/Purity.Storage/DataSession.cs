@@ -385,9 +385,10 @@ namespace Purity.Storage
 			_synced = stored;
 			UseVault(vault =>
 			{
-				if (vault.ReadLastSynced() is { } previous)
-					vault.AddBackup(previous);
-				vault.WriteLastSynced(stored?.Content ?? Encode(PurityFile.Format(new List<PurityPeriod>())));
+				var next = stored?.Content ?? Encode(PurityFile.Format(new List<PurityPeriod>()));
+				if (vault.ReadLastSynced() is { } previous && !previous.AsSpan().SequenceEqual(next))
+					vault.AddBackup(previous);				// the same content again replaces nothing
+				vault.WriteLastSynced(next);
 			});
 		}
 

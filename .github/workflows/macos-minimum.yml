@@ -29,12 +29,10 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      # Until the desktop app exists (phase 4), the probe carries the packages the app will ship with.
-      # Point this at the app then, or the check guards versions nobody ships.
-      - name: Publish for Intel and Apple Silicon
+      - name: Publish the desktop app for Intel and Apple Silicon
         run: |
           for rid in osx-x64 osx-arm64; do
-            dotnet publish tools/Purity.UiProbe/Purity.UiProbe.csproj -c Release -f net10.0 -r "$rid" --self-contained -o "out/macos/$rid"
+            dotnet publish src/Purity.Desktop/Purity.Desktop.csproj -c Release -r "$rid" --self-contained -o "out/macos/$rid"
           done
 
       - name: Check

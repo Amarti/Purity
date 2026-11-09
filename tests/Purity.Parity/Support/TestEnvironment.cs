@@ -8,8 +8,6 @@ namespace Purity.Parity
 		public static string Root { get; } = FindRoot();
 
 		public static string Golden(string name) => Path.Combine(Root, "tests", "Purity.Parity", "Golden", name);
-		public static string ReferenceSource => Path.Combine(Root, "tests", "Purity.Reference.V1", "Source");
-		public static string OracleBinary => Path.Combine(Root, "tests", "oracle", "Purity.2022-05-06.dll");
 
 
 		private static string FindRoot()
@@ -20,16 +18,6 @@ namespace Purity.Parity
 
 			throw new InvalidOperationException("Repository root not found");
 		}
-	}
-
-	public static class Platform
-	{
-		/// <summary>
-		/// The reference takes month names from the OS. The approved names are the ones
-		/// Windows ICU produces, so its live text only counts as truth there.
-		/// </summary>
-		public static bool ReferenceTextIsTruth =>
-			OperatingSystem.IsWindows() && Environment.GetEnvironmentVariable("DOTNET_SYSTEM_GLOBALIZATION_USENLS") is not ("1" or "true");
 	}
 
 	public static class Culture

@@ -7,7 +7,7 @@ namespace Purity.Parity
 {
 	/// <summary>
 	/// Approved output files. They change only with a rules-version bump and a reviewed list of
-	/// every changed date. Set PURITY_UPDATE_GOLDEN=1 to regenerate them from the reference.
+	/// every changed date. Set PURITY_UPDATE_GOLDEN=1 to regenerate them from the engine.
 	/// </summary>
 	public static class Golden
 	{
@@ -16,12 +16,9 @@ namespace Purity.Parity
 
 		public static string Read(string name) => File.ReadAllText(RepoPaths.Golden(name), new UTF8Encoding(false));
 
-		/// <summary>Checks the reference against an approved file, or rewrites the file when updating.</summary>
-		public static void CheckReference(string name, string actual)
+		/// <summary>Compares output with an approved file, or rewrites the file when updating.</summary>
+		public static void Check(string name, string actual, string context)
 		{
-			if (!Platform.ReferenceTextIsTruth)
-				Assert.Skip("Approved month names come from Windows ICU, so the reference is only checked there");
-
 			if (Updating)
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(RepoPaths.Golden(name))!);
@@ -29,7 +26,7 @@ namespace Purity.Parity
 				return;
 			}
 
-			Comparison.SameText(Read(name), actual, $"reference vs {name}");
+			Comparison.SameText(Read(name), actual, context);
 		}
 	}
 

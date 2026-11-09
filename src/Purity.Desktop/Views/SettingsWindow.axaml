@@ -1,0 +1,46 @@
+<!--
+  Began as a copy of the WPF app's settings window, without its debug-only "Save data" button.
+  WPF's 400x350 includes the window frame, so the size here is the area inside it on Windows.
+-->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Purity.Desktop.ViewModels"
+        x:Class="Purity.Desktop.Views.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Title="Settings" Width="384" Height="348"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Icon="/Assets/Purity.ico">
+
+    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,30,37,*,30,10,30,20">
+        <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,2,0,0" Height="23" Text="Data file path:"/>
+        <TextBox Grid.Column="2" Grid.Row="1" Height="23" Text="{Binding DataFilePath}"/>
+        <Button Grid.Column="3" Grid.Row="1" Margin="6,0,0,0" Height="23" Width="23" Content="..." Click="PickFile"
+                ToolTip.Tip="Use a data file you already have, such as the one your other computers use"/>
+
+        <!-- Not in the WPF app: light, dark or the system's choice (T7, approved for 2.2.0) -->
+        <TextBlock Grid.Column="1" Grid.Row="2" Margin="0,9,0,0" Height="23" Text="Appearance:"/>
+        <ComboBox Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,7,0,0" Height="23" Padding="4,0" HorizontalAlignment="Stretch"
+                  VerticalContentAlignment="Center" ItemsSource="{Binding AppearanceChoices}" SelectedIndex="{Binding AppearanceIndex}"
+                  AutomationProperties.Name="Appearance"/>
+
+        <!-- Not in the WPF app, whose backups never ran. In the row of its debug-only "Save data" button -->
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="3" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="Restore an earlier version..."
+                Click="Restore" IsEnabled="{Binding CanRestore}"
+                ToolTip.Tip="Bring back your history as it was before a change. The version it replaces is kept too."
+                ToolTip.ShowOnDisabled="True"/>
+
+        <!-- Not in the WPF app either -->
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="Move the data file to another folder..."
+                Click="Move" IsEnabled="{Binding CanMove}"
+                ToolTip.Tip="Copy your history to another folder, such as one Dropbox or OneDrive syncs, and use it from there. The file here stays as it is."
+                ToolTip.ShowOnDisabled="True"/>
+
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="6" Height="30" HorizontalAlignment="Stretch" Content="Create periods lengths report" Click="CreateReport"
+                IsEnabled="{Binding CanReport}"/>
+
+        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="8" Height="30" Width="150" Content="OK" Click="Ok" HorizontalAlignment="Left" IsDefault="True"
+                IsEnabled="{Binding CanAccept}"/>
+        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="8" Height="30" Width="150" Content="Cancel" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
+    </Grid>
+</Window>

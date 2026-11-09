@@ -38,15 +38,16 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: |
-            8.0.x
-            10.0.x
+          dotnet-version: 10.0.x
 
       - name: Build
         run: dotnet build tests/Purity.Parity/Purity.Parity.csproj -c Release
 
       - name: Build storage tests
         run: dotnet build tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj -c Release
+
+      - name: Build desktop app tests
+        run: dotnet build tests/Purity.Desktop.Tests/Purity.Desktop.Tests.csproj -c Release
 
       # After the build, so the plain data isn't on disk during package restore. Forks and fork
       # pull requests have no secret and skip this; here a missing secret must fail, not skip.
@@ -72,28 +73,19 @@ jobs:
         shell: bash
         env:
           PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
-          PURITY_RANDOM_SEED: ${{ github.event_name == 'schedule' && github.run_number || '' }}
-        run: dotnet run --no-build -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
-
-      - name: Test on .NET 8
-        shell: bash
-        env:
-          PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
-        run: dotnet run --no-build -c Release -f net8.0 --project tests/Purity.Parity/Purity.Parity.csproj
+        run: dotnet run --no-build -c Release --project tests/Purity.Parity/Purity.Parity.csproj
 
       - name: Test storage on .NET 10
         shell: bash
         timeout-minutes: 15
         env:
           PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
-        run: dotnet run --no-build -c Release -f net10.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
+        run: dotnet run --no-build -c Release --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
 
-      - name: Test storage on .NET 8
+      - name: Test the desktop app
         shell: bash
-        timeout-minutes: 15
-        env:
-          PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
-        run: dotnet run --no-build -c Release -f net8.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
+        timeout-minutes: 10
+        run: dotnet run --no-build -c Release --project tests/Purity.Desktop.Tests/Purity.Desktop.Tests.csproj
 
       - name: Remove decrypted data
         if: always()
@@ -112,7 +104,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Test on .NET 10
-        run: dotnet run -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+        run: dotnet run -c Release --project tests/Purity.Parity/Purity.Parity.csproj
 
   no-os-culture:
     name: no OS culture data
@@ -125,7 +117,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Test on .NET 10
-        run: dotnet run -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+        run: dotnet run -c Release --project tests/Purity.Parity/Purity.Parity.csproj
 
   nls:
     name: windows NLS
@@ -138,7 +130,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Test on .NET 10
-        run: dotnet run -c Release -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+        run: dotnet run -c Release --project tests/Purity.Parity/Purity.Parity.csproj
 
   golden-guard:
     name: approved output changes need a rules bump
@@ -150,9 +142,11 @@ jobs:
           fetch-depth: 0
       - name: Check
         shell: bash
+        # Only changed, renamed or removed approved files count: a new one adds a check without
+        # changing any approved date
         run: |
           base="${{ github.event.pull_request.base.sha }}"
-          if git diff --name-only "$base" HEAD | grep -q '^tests/Purity.Parity/Golden/'; then
+          if git diff --name-only --diff-filter=MDR "$base" HEAD | grep -q '^tests/Purity.Parity/Golden/'; then
             git diff "$base" HEAD -- src/Purity.Core/PeriodLedger.cs | grep -q '^+.*RulesVersion = ' || {
               echo "Approved output changed without bumping PeriodLedger.RulesVersion"
               exit 1

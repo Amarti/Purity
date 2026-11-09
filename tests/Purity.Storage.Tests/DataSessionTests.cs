@@ -177,6 +177,20 @@ namespace Purity.Storage.Tests
 			Assert.Equal(before, _vault.ListBackups().Count);
 		}
 
+		/// <summary>Opening a file that didn't change replaces nothing, so it mustn't add the current version to the backups</summary>
+		[Fact]
+		public async Task OnlyAVersionThatIsReplacedBecomesABackup()
+		{
+			var session = await OpenedWith(Cycles(3));
+			Store(Cycles(4));
+			await session.RefreshAsync();
+
+			await _session.OpenAsync();
+			await _session.OpenAsync();
+
+			Assert.Equal(FileFor(Cycles(3)), _vault.ReadBackup(Assert.Single(_vault.ListBackups())));
+		}
+
 		[Fact]
 		public async Task RefreshTakesInAnotherDevicesEntryWithStoredEvents()
 		{

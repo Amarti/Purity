@@ -1,29 +1,30 @@
 # Calculation parity tests
 
-These tests prove the port gives exactly the same dates as the production engine.
+These tests hold the engine to the dates the old production engine gave, which are kept as approved output in the repo.
 
 | Project | Purpose |
 |---|---|
-| `Purity.Reference.V1` | Frozen copy of the production engine. Never edit it |
-| `Purity.Parity` | Compares `src/Purity.Core` with the reference, approved files and the real history |
-| `oracle/` | The compiled 2022 production `Purity.dll`, used to prove the frozen source behaves the same |
+| `Purity.Parity` | Checks `src/Purity.Core` against approved files, hand-written edge cases and the real history |
 | `Purity.Storage.Tests` | Proves saving and merging can't lose the history, by making each failure happen on purpose |
+| `Purity.Desktop.Tests` | The desktop app's behavior through its view models: what it saves, what it asks, and that it never writes over a file it couldn't read |
+
+For screenshots or a side-by-side run of the apps, `dotnet run tools/make-sample-data.cs -- <file>` writes a made-up history. Point a test run at it with `--data <file>`, and set `PURITY_APP_DATA` to a scratch folder so the app's own settings and local copies stay out of the real ones.
 
 ## Running
 
 ```bash
-dotnet run -f net10.0 --project tests/Purity.Parity/Purity.Parity.csproj
+dotnet run --project tests/Purity.Parity/Purity.Parity.csproj
 ```
 
 ```bash
-dotnet run -f net10.0 --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
+dotnet run --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
 ```
 
 Tests that need real data skip when `tests/private/` is missing. Set `PURITY_REQUIRE_REAL_DATA=1` to make them fail instead, which release builds must do.
 
 ## On machines CI can't reach
 
-Hosted CI has no Monterey Mac and no real Debian machine, so `tools/platform-check` builds a kit that needs nothing installed: both suites on .NET 10 and .NET 8, plus a small window for each UI candidate, all self-contained. The person at the machine runs one script and sends back the report. The kit's README explains how.
+Hosted CI has no Monterey Mac and no real Debian machine, so `tools/platform-check` builds a kit that needs nothing installed: the three test suites and the desktop app (a `Purity.app` bundle on a Mac), all self-contained on .NET 10. The script runs the suites, has the app save a picture of its window with a made-up history (`--picture`, which refuses to run without `--data`), then lets the person try the app and answer a few questions, and packs up a report to send back. The kit's README explains how. The .NET 8 build of the engine is still tested in CI, but the kit no longer carries it, since Monterey runs .NET 10.
 
 ```bash
 bash tools/platform-check/build-kit.sh                  # Mac, Intel and Apple Silicon
@@ -33,7 +34,7 @@ bash tools/platform-check/build-kit.sh                  # Mac, Intel and Apple S
 bash tools/platform-check/build-kit.sh linux-x64 linux-arm64
 ```
 
-The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the kit runs with globalization off and most calculation tests skip, so install `libicu` first for a full run.
+The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the tests run with globalization off and most calculation tests skip, so install `libicu` first for a full run. The app itself never needs ICU.
 
 The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon on Monterey hasn't been tried. Rerun the kit on a Monterey Mac after upgrading Avalonia or .NET.
 
@@ -45,6 +46,8 @@ dotnet run tools/check-macos-minimum.cs -- <publish folder> 12.0
 
 That catches the usual way an update drops a macOS version. It can't catch a library calling something newer only at run time, which is why the kit is still the real test.
 
+For Linux, `bash tools/package-linux.sh` builds `out/linux/purity_<version>_<arch>.deb` for amd64 and arm64 (on Windows its last step runs in WSL). The Linux package workflow installs each package in clean Debian 12 and 13 and Ubuntu 22.04 and 24.04 containers, then opens the app on a made-up history on a virtual screen, which proves the package's dependencies are enough. `tools/test-linux-package.sh` does the same locally in a Docker container.
+
 ## Real data
 
 `tests/private/` holds a snapshot of `pureData.json` and older copies, and it is gitignored. The repo is public, so only the encrypted file `tests/fixtures/private.tar.gz.gpg` may be committed. Use `tools/fixture.sh` to create or unpack it. Once that file is committed, CI fails if the `PURITY_FIXTURE_PASSPHRASE` secret is missing, so the real-data tests can't quietly stop running. Forks and fork pull requests skip them.
@@ -53,9 +56,11 @@ Keep real dates out of test code, commit messages and CI output. Real-data failu
 
 ## Approved output
 
-`Purity.Parity/Golden/` holds output approved from the reference on Windows. Run with `PURITY_UPDATE_GOLDEN=1` to regenerate it.
+`Purity.Parity/Golden/` holds output approved from the old production engine, before it was retired. Run with `PURITY_UPDATE_GOLDEN=1` to regenerate it from the current engine, then review every changed date.
 
-A golden file changes only with a bump of `PeriodLedger.RulesVersion` and a reviewed list of every changed date. Halachic changes also need the rav's sign-off recorded. CI rejects a golden change without the bump.
+A golden file changes only with a bump of `PeriodLedger.RulesVersion` and a reviewed list of every changed date. Halachic changes also need the rav's sign-off recorded. CI rejects a golden change without the bump; adding a new golden file doesn't count as a change.
+
+`Golden/self-test.txt` is what the apps check themselves against at every start. `Purity.Core` embeds it, and `SelfTest.Run()` calculates the same 13 made-up histories and compares. If anything differs, the desktop app shows no dates and doesn't open the data file. The histories reach every rule and the known issues H1 to H4; `SelfTestTests` proves that the engine and the embedded copy match it.
 
 ## Mutation testing
 
