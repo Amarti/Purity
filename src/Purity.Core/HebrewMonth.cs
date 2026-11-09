@@ -36,6 +36,12 @@ namespace Purity.Core
 		/// <summary>The month and year, such as שבט תשצ"ד</summary>
 		public string Title => $"{Name} {DateText.HebrewYearName(Year)}";
 
+		/// <summary>The month's name in English letters, such as Adar II</summary>
+		public string EnglishName => DateText.HebrewMonthNameInEnglish(Year, Month);
+
+		/// <summary>The month and year in English letters, such as Shevat 5794</summary>
+		public string EnglishTitle => DateText.Invariant($"{EnglishName} {Year}");
+
 		/// <summary>The Gregorian day holding the daytime of this date in the month</summary>
 		public DateTime Daytime(int day) => Calendar.ToDateTime(Year, Month, day, 0, 0, 0, 0);
 

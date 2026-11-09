@@ -55,6 +55,11 @@ namespace Purity.Desktop.Localization
 			Dark = "כהה",
 			LanguageLabel = "שפה:",
 			LanguageName = "שפה",
+			CalendarLabel = "לוח שנה:",
+			CalendarName = "לוח שנה",
+			GregorianAndHebrew = "לועזי ועברי",
+			HebrewOnly = "עברי בלבד",
+			HebrewInEnglishLabel = "כתיבת תאריכים עבריים באותיות לועזיות",
 			RestoreEarlier = "שחזור גרסה קודמת...",
 			RestoreEarlierTip = "החזרת ההיסטוריה למצבה לפני שינוי. הגרסה שמוחלפת נשמרת גם היא.",
 			MoveFile = "העברת קובץ הנתונים לתיקייה אחרת...",
@@ -177,6 +182,7 @@ namespace Purity.Desktop.Localization
 
 			AppearanceNotSaved = "לא ניתן היה לשמור את המראה, ולכן Purity ייפתח בפעם הבאה עם המראה הקודם.\n\n",
 			LanguageNotSaved = "לא ניתן היה לשמור את השפה, ולכן Purity ייפתח בפעם הבאה בשפה הקודמת.\n\n",
+			CalendarNotSaved = "לא ניתן היה לשמור את לוח השנה, ולכן Purity ייפתח בפעם הבאה עם הלוח הקודם.\n\n",
 		};
 	}
 }

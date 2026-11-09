@@ -11,7 +11,8 @@
   the list, and an empty list says what to do first (E3). For 2.2.4: a strip above the list shows
   the next date (T1), and dates already past are greyed with a line marking today (T5). For
   2.3.0: English or Hebrew, chosen in Settings, with Hebrew right to left. For 2.3.1: each date's
-  tooltip names the same onah in the Hebrew calendar.
+  tooltip names the same onah in the Hebrew calendar. Settings can then show Hebrew dates alone, picked
+  from a month grid, and write them in English letters.
 -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -46,14 +47,14 @@
                         <Image Grid.Column="1" Margin="6,0,0,0" Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource AddPeriodIconDrawingImage}"/>
                         <views:DateField Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding BeginDate}" ToolTip.Tip="{Binding BeginInOtherCalendar}" AutomationProperties.Name="{Binding Text.From, Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding !UsesHebrewCalendar}"/>
                         <views:HebrewDateField Grid.Column="2" Margin="5,0,0,0" Width="210" Text="{Binding BeginText}" SelectedDay="{Binding BeginHebrewDay}" ToolTip.Tip="{Binding BeginInOtherCalendar}" AutomationProperties.Name="{Binding Text.From, Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding UsesHebrewCalendar}"/>
-                        <views:DayNightSwitch Grid.Column="3" Margin="6,0,0,0" Classes.NightFirst="{Binding UsesHebrewCalendar}" IsNight="{Binding BeginIsAfterDusk}" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="{Binding Text.FromDayOrNight, Source={x:Static loc:Loc.Instance}}"/>
+                        <views:DayNightSwitch Grid.Column="3" Margin="6,0,0,0" IsNight="{Binding BeginIsAfterDusk}" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="{Binding Text.FromDayOrNight, Source={x:Static loc:Loc.Instance}}"/>
                         <Panel Grid.Row="1" Grid.Column="1" Margin="6,0,0,0" Height="16" Width="13" VerticalAlignment="Center">
                             <Image Source="{StaticResource OpenEndIconDrawingImage}" IsVisible="{Binding !IsClosed}"/>
                             <Image Source="{StaticResource ClosePeriodIconDrawingImage}" IsVisible="{Binding IsClosed}"/>
                         </Panel>
                         <views:DateField Grid.Row="1" Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding EndDate}" ToolTip.Tip="{Binding EndInOtherCalendar}" AutomationProperties.Name="{Binding Text.To, Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding !UsesHebrewCalendar}"/>
                         <views:HebrewDateField Grid.Row="1" Grid.Column="2" Margin="5,0,0,0" Width="210" Text="{Binding EndText}" SelectedDay="{Binding EndHebrewDay}" ToolTip.Tip="{Binding EndInOtherCalendar}" AutomationProperties.Name="{Binding Text.To, Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding UsesHebrewCalendar}"/>
-                        <views:DayNightSwitch Grid.Row="1" Grid.Column="3" Margin="6,0,0,0" Classes.NightFirst="{Binding UsesHebrewCalendar}" IsNight="{Binding EndIsAfterDusk}" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="{Binding Text.ToDayOrNight, Source={x:Static loc:Loc.Instance}}"/>
+                        <views:DayNightSwitch Grid.Row="1" Grid.Column="3" Margin="6,0,0,0" IsNight="{Binding EndIsAfterDusk}" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="{Binding Text.ToDayOrNight, Source={x:Static loc:Loc.Instance}}"/>
                         <!-- Last, so it ends exactly where a folded line's number ends -->
                         <CheckBox Grid.Column="5" Grid.RowSpan="2" Margin="15,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
                                   ToolTip.Tip="{Binding Text.SkipTip, Source={x:Static loc:Loc.Instance}}"/>
@@ -83,8 +84,8 @@
                                         <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding Event.IsAfterDusk}" VerticalAlignment="Center"/>
                                         <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding Event.IsAfterDawn}" VerticalAlignment="Center"/>
                                         <Image Margin="5,0,5,0" Height="17" Width="17" Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding Event.IsFullDay}" VerticalAlignment="Center"/>
-                                        <TextBlock Margin="5,5,5,0" Height="23" Width="60" Text="{Binding Event.StampHebRepr}" VerticalAlignment="Center"/>
-                                        <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding GregorianText}" VerticalAlignment="Center"/>
+                                        <TextBlock Margin="5,5,5,0" Height="23" Width="{Binding HebrewWidth}" Text="{Binding HebrewText}" VerticalAlignment="Center"/>
+                                        <TextBlock Margin="5,5,5,0" Height="23" Text="{Binding DetailText}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
@@ -132,7 +133,7 @@
         <!-- The next date (T1), in the colors of that kind of date's chip, while no period is open. In line with the periods below. -->
         <views:EventChip Grid.Row="2" Grid.Column="1" Classes="Strip" Margin="4,0,22,8" Type="{Binding NextEvent.Type}" IsVisible="{Binding ShowsNextStrip}">
             <!-- The kind, day or night icon and both dates sit exactly above those of the date rows in the list -->
-            <Grid ColumnDefinitions="43.5,178,27,70,*,Auto" Height="24">
+            <Grid ColumnDefinitions="43.5,178,27,Auto,*,Auto" Height="24">
                 <TextBlock Text="{Binding Text.Next, Source={x:Static loc:Loc.Instance}}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="1" Text="{Binding NextRow.TypeText}" VerticalAlignment="Center"/>
                 <Panel Grid.Column="2" Height="17" Width="17" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -140,8 +141,8 @@
                     <Image Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding NextEvent.IsAfterDawn}"/>
                     <Image Source="{StaticResource FullDayIconDrawingImage}" IsVisible="{Binding NextEvent.IsFullDay}"/>
                 </Panel>
-                <TextBlock Grid.Column="3" Text="{Binding NextEvent.StampHebRepr}" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="4" Text="{Binding NextRow.GregorianText}" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="3" Margin="0,0,10,0" Width="{Binding NextRow.HebrewWidth}" Text="{Binding NextRow.HebrewText}" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="4" Text="{Binding NextRow.DetailText}" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="5" Classes="NextIn" Text="{Binding NextIn}" VerticalAlignment="Center"/>
             </Grid>
         </views:EventChip>

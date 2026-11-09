@@ -62,6 +62,34 @@ namespace Purity.Desktop.ViewModels
 				shown.Add(item);
 		}
 
+		/// <summary>Shows the whole app with this calendar and these letters at once. Saves nothing: that waits for OK.</summary>
+		private void ShowCalendar(CalendarKind calendar, bool hebrewInEnglish)
+		{
+			if (calendar == Loc.Instance.Calendar && hebrewInEnglish == Loc.Instance.HebrewInEnglish)
+				return;
+
+			Loc.Instance.UseCalendar(calendar, hebrewInEnglish);
+			OnPropertyChanged(nameof(UsesHebrewCalendar));
+			RefreshAll();
+		}
+
+		private async Task SetCalendarAsync(CalendarKind calendar, bool hebrewInEnglish)
+		{
+			if (calendar == _settings.Calendar && hebrewInEnglish == _settings.HebrewDatesInEnglish)
+				return;
+
+			_settings.Calendar = calendar;
+			_settings.HebrewDatesInEnglish = hebrewInEnglish;
+			try
+			{
+				_settings.Save();
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				await _dialogs.AskAsync(T.CalendarNotSaved + e.Message, T.Ok);
+			}
+		}
+
 		private async Task SetLanguageAsync(Language language)
 		{
 			if (language == _settings.Language)

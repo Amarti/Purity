@@ -209,16 +209,6 @@
                 </Border>
             </ControlTemplate>
         </Setter>
-
-        <!-- On a Hebrew date the night comes first -->
-        <Style Selector="^.NightFirst /template/ RadioButton#PART_Day">
-            <Setter Property="Grid.Column" Value="1"/>
-            <Setter Property="CornerRadius" Value="0,4,4,0"/>
-        </Style>
-        <Style Selector="^.NightFirst /template/ RadioButton#PART_Night">
-            <Setter Property="Grid.Column" Value="0"/>
-            <Setter Property="CornerRadius" Value="4,0,0,4"/>
-        </Style>
     </ControlTheme>
 
     <!-- The small calendar page showing 15, on both kinds of date field -->
@@ -333,7 +323,6 @@
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type views:HebrewMonthView}" TargetType="views:HebrewMonthView">
-        <Setter Property="FlowDirection" Value="RightToLeft"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Margin="0,2" Background="{DynamicResource ThemeBackgroundBrush}" BorderBrush="{DynamicResource ThemeBorderHighBrush}"
@@ -365,13 +354,13 @@
                                     <Setter Property="FontWeight" Value="Bold"/>
                                 </Style>
                             </Grid.Styles>
-                            <TextBlock Grid.Column="0" Text="א׳"/>
-                            <TextBlock Grid.Column="1" Text="ב׳"/>
-                            <TextBlock Grid.Column="2" Text="ג׳"/>
-                            <TextBlock Grid.Column="3" Text="ד׳"/>
-                            <TextBlock Grid.Column="4" Text="ה׳"/>
-                            <TextBlock Grid.Column="5" Text="ו׳"/>
-                            <TextBlock Grid.Column="6" Text="ש׳"/>
+                            <TextBlock Grid.Column="0"/>
+                            <TextBlock Grid.Column="1"/>
+                            <TextBlock Grid.Column="2"/>
+                            <TextBlock Grid.Column="3"/>
+                            <TextBlock Grid.Column="4"/>
+                            <TextBlock Grid.Column="5"/>
+                            <TextBlock Grid.Column="6"/>
                         </Grid>
                     </Grid>
                 </Border>

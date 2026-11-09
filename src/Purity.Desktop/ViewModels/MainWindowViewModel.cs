@@ -23,8 +23,7 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="clock">Sets "today" for a new period</param>
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
 		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
-		/// <param name="calendar">The calendar dates are picked and shown in</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, CalendarKind calendar = CalendarKind.Gregorian)
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
@@ -32,9 +31,9 @@ namespace Purity.Desktop.ViewModels
 			Today = clock.GetLocalNow().Date;
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
-			_calendar = calendar;
 			_settings = DesktopSettings.Load();
 			Loc.Instance.Use(_settings.Language);
+			Loc.Instance.UseCalendar(_settings.Calendar, _settings.HebrewDatesInEnglish);
 		}
 
 
@@ -83,10 +82,13 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage);
+			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage, Loc.Instance.Calendar, Loc.Instance.HebrewInEnglish, ShowCalendar);
 			var ok = await _dialogs.ShowSettingsAsync(settings);
 			if (!ok)
-				ShowLanguage(_settings.Language);			// a language shows as soon as it's chosen, so leaving without OK puts it back
+				{
+				ShowLanguage(_settings.Language);			// these show as soon as they're chosen, so leaving without OK puts them back
+				ShowCalendar(_settings.Calendar, _settings.HebrewDatesInEnglish);
+			}
 			if (settings.RestoreRequested)
 			{
 				await ChooseAndRestoreAsync();
@@ -106,6 +108,7 @@ namespace Purity.Desktop.ViewModels
 
 			await SetAppearanceAsync(settings.Appearance);
 			await SetLanguageAsync(settings.Language);
+			await SetCalendarAsync(settings.Calendar, settings.HebrewInEnglish);
 			var chosen = settings.DataFilePath.Trim();
 			if (_session != null && SamePath(chosen, DataFilePath))
 				return;
@@ -507,7 +510,7 @@ namespace Purity.Desktop.ViewModels
 		}
 
 		private static string Describe(DateTimeOffset stamp) =>
-			stamp.UtcDateTime.ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture) + (PurityEvent.IsDateAfterDusk(stamp) ? T.NightSuffix : T.DaySuffix);
+			Loc.Instance.LongDate(stamp) + (PurityEvent.IsDateAfterDusk(stamp) ? T.NightSuffix : T.DaySuffix);
 
 		private static bool SamePath(string a, string b)
 		{
@@ -535,7 +538,7 @@ namespace Purity.Desktop.ViewModels
 		public string DataFilePath => _dataFileOverride ?? _settings.DataFilePath;
 
 		/// <summary>Whether dates are picked and shown in the Hebrew calendar</summary>
-		public bool UsesHebrewCalendar => _calendar == CalendarKind.Hebrew;
+		public bool UsesHebrewCalendar => Loc.Instance.IsHebrewOnly;
 
 		/// <summary>How the check of this machine's date calculations went, once it has run</summary>
 		public SelfTestResult? SelfTestResult { get; private set; }
@@ -563,7 +566,6 @@ namespace Purity.Desktop.ViewModels
 		private readonly TimeProvider _clock;
 		private readonly Action<Func<Task>> _runOnUiThread;
 		private readonly Func<SelfTestResult> _selfTest;
-		private readonly CalendarKind _calendar;
 		private readonly DesktopSettings _settings;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;

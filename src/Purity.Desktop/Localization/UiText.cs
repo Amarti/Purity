@@ -71,6 +71,11 @@ namespace Purity.Desktop.Localization
 		public required string Dark { get; init; }
 		public required string LanguageLabel { get; init; }
 		public required string LanguageName { get; init; }
+		public required string CalendarLabel { get; init; }
+		public required string CalendarName { get; init; }
+		public required string GregorianAndHebrew { get; init; }
+		public required string HebrewOnly { get; init; }
+		public required string HebrewInEnglishLabel { get; init; }
 		public required string RestoreEarlier { get; init; }
 		public required string RestoreEarlierTip { get; init; }
 		public required string MoveFile { get; init; }
@@ -171,5 +176,6 @@ namespace Purity.Desktop.Localization
 		// Settings that couldn't be kept
 		public required string AppearanceNotSaved { get; init; }
 		public required string LanguageNotSaved { get; init; }
+		public required string CalendarNotSaved { get; init; }
 	}
 }

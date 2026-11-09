@@ -53,6 +53,11 @@ namespace Purity.Desktop.Localization
 			Dark = "Dark",
 			LanguageLabel = "Language:",
 			LanguageName = "Language",
+			CalendarLabel = "Calendar:",
+			CalendarName = "Calendar",
+			GregorianAndHebrew = "Gregorian and Hebrew",
+			HebrewOnly = "Hebrew only",
+			HebrewInEnglishLabel = "Write Hebrew dates in English letters",
 			RestoreEarlier = "Restore an earlier version...",
 			RestoreEarlierTip = "Bring back your history as it was before a change. The version it replaces is kept too.",
 			MoveFile = "Move the data file to another folder...",
@@ -174,6 +179,7 @@ namespace Purity.Desktop.Localization
 
 			AppearanceNotSaved = "The appearance couldn't be saved, so Purity will start with the earlier one next time.\n\n",
 			LanguageNotSaved = "The language couldn't be saved, so Purity will start with the earlier one next time.\n\n",
+			CalendarNotSaved = "The calendar couldn't be saved, so Purity will start with the earlier one next time.\n\n",
 		};
 	}
 }

@@ -203,14 +203,12 @@ namespace Purity.Desktop.ViewModels
 			var today = _owner.Today;
 			var passed = SubEvents.TakeWhile(el => EventTiming.IsOver(el, today)).Count();
 			var line = passed > 0 && passed < SubEvents.Count ? passed : -1;
-			var text = Loc.T.TodayLine(today.ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture));
+			var text = Loc.T.TodayLine(Loc.Instance.LongDay(today));
 			EventRows = SubEvents.Select((el, i) => new EventRow(el, EventTiming.IsOver(el, today), i == line ? text : null)).ToList();
 		}
 
 		/// <summary>The text a date field shows, in the language being shown. It never comes from the OS's culture data, so no machine setting can change it.</summary>
-		private string LongDate(DateTimeOffset stamp) => UsesHebrewCalendar && Stamps.IsInHebrewCalendar(stamp)
-			? DateText.HebrewOfOnahWithYear(stamp)
-			: ShownDate(stamp).ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture);
+		private static string LongDate(DateTimeOffset stamp) => Loc.Instance.LongDate(stamp);
 
 		/// <summary>The same onah in the calendar not on show, without the year, or null for a date the Hebrew calendar doesn't reach</summary>
 		private string? InOtherCalendar(DateTimeOffset stamp)
@@ -220,7 +218,7 @@ namespace Purity.Desktop.ViewModels
 
 			var night = PurityEvent.IsDateAfterDusk(stamp);
 			if (!UsesHebrewCalendar)
-				return Loc.T.HebrewDateTip(DateText.HebrewOfOnah(stamp), night);
+				return Loc.T.HebrewDateTip(Loc.Instance.HebrewDate(stamp), night);
 
 			var day = ShownDate(stamp);
 			return night ? Loc.T.GregorianNightTip(day, day.AddDays(1)) : day.ToString("dddd, d MMMM", Loc.Instance.DateCulture);

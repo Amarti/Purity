@@ -41,6 +41,23 @@ namespace Purity.Desktop
 			set => LanguageText = value.ToString();
 		}
 
+		/// <summary>
+		/// <see cref="Calendar"/> as saved, read leniently for the same reason: a value this version
+		/// doesn't know means Gregorian with the Hebrew date beside it.
+		/// </summary>
+		[JsonPropertyName("Calendar")]
+		public string CalendarText { get; set; } = nameof(CalendarKind.Gregorian);
+
+		[JsonIgnore]
+		public CalendarKind Calendar
+		{
+			get => Enum.TryParse<CalendarKind>(CalendarText, out var value) && Enum.IsDefined(value) ? value : CalendarKind.Gregorian;
+			set => CalendarText = value.ToString();
+		}
+
+		/// <summary>Whether Hebrew dates are written in English letters everywhere</summary>
+		public bool HebrewDatesInEnglish { get; set; }
+
 		/// <summary>Where the main window was when it last closed, or null before it ever closed with a data file chosen</summary>
 		public WindowPlacement? Window { get; set; }
 

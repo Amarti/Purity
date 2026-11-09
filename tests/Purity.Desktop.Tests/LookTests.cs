@@ -214,7 +214,7 @@ namespace Purity.Desktop.Tests
 			var settings = new SettingsWindowViewModel("pureData.json", null, appearance: Appearance.Dark);
 			var window = new SettingsWindow(settings);
 			window.Show();
-			var choice = window.GetVisualDescendants().OfType<ComboBox>().Single();
+			var choice = window.GetVisualDescendants().OfType<ComboBox>().Single(el => el.ItemCount == 3);
 
 			Assert.Equal(new[] { "Same as the system", "Light", "Dark" }, settings.AppearanceChoices);
 			Assert.Equal((int)Appearance.Dark, choice.SelectedIndex);

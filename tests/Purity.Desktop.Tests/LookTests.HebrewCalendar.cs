@@ -44,15 +44,15 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task OnAHebrewDateTheNightComesFirst() => BackToEnglishAfter(async () =>
+		public Task TheSwitchKeepsItsOrderInTheHebrewCalendar() => BackToEnglishAfter(async () =>
 		{
 			var window = await OpenInHebrewAsync();
 			var first = ((MainWindowViewModel)window.DataContext!).Periods[0];
 
 			var (day, night) = Halves(SwitchesOf(window, first).Begin);
 
-			Assert.Equal(0, Grid.GetColumn(night));
-			Assert.Equal(1, Grid.GetColumn(day));
+			Assert.Equal(0, Grid.GetColumn(day));
+			Assert.Equal(1, Grid.GetColumn(night));
 			window.Close();
 		});
 
@@ -165,7 +165,8 @@ namespace Purity.Desktop.Tests
 		{
 			var dataFile = Path.Combine(_root, "pureData.json");
 			File.WriteAllText(dataFile, History());
-			var window = new MainWindow(new StartOptions(dataFile, Calendar: CalendarKind.Hebrew));
+			new DesktopSettings { Calendar = CalendarKind.Hebrew }.Save();
+			var window = new MainWindow(new StartOptions(dataFile));
 			window.Show();
 			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<HebrewDateField>().Any(el => el.IsVisible && el.Bounds.Width > 0));
 			await Task.Delay(200);

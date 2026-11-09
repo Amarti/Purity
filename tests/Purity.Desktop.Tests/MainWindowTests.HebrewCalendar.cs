@@ -17,7 +17,8 @@ namespace Purity.Desktop.Tests
 		private async Task<MainWindowViewModel> OpenInHebrewAsync()
 		{
 			WriteHistory();
-			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, new FixedClock(), _pending.Enqueue, calendar: CalendarKind.Hebrew);
+			new DesktopSettings { Calendar = CalendarKind.Hebrew }.Save();
+			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, new FixedClock(), _pending.Enqueue);
 			await _viewModel.StartAsync();
 			return _viewModel;
 		}
@@ -153,13 +154,5 @@ namespace Purity.Desktop.Tests
 			Assert.Null(period.BeginHebrewDay);
 			Assert.Contains("1400", period.BeginText);
 		}
-
-		[Theory]
-		[InlineData("--calendar", "hebrew", CalendarKind.Hebrew)]
-		[InlineData("--calendar", "HEBREW", CalendarKind.Hebrew)]
-		[InlineData("--calendar", "klingon", CalendarKind.Gregorian)]
-		[InlineData("--other", "hebrew", CalendarKind.Gregorian)]
-		public void TheCalendarCanBeChosenForOneRun(string option, string value, CalendarKind expected) =>
-			Assert.Equal(expected, StartOptions.Parse(new[] { option, value }).Calendar);
 	}
 }

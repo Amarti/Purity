@@ -13,7 +13,10 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="appearance">Light, dark, or the system's choice, as set now</param>
 		/// <param name="language">The language being shown</param>
 		/// <param name="showLanguage">Shows the whole app in a language, the moment it's chosen</param>
-		public SettingsWindowViewModel(string dataFilePath, Func<string?>? report, bool canRestore = false, bool canMove = false, Appearance appearance = Appearance.System, Language language = Language.English, Action<Language>? showLanguage = null)
+		/// <param name="calendar">The calendar dates are picked and shown in</param>
+		/// <param name="hebrewInEnglish">Whether Hebrew dates are written in English letters</param>
+		/// <param name="showCalendar">Shows the whole app with a calendar and letters, the moment they're chosen</param>
+		public SettingsWindowViewModel(string dataFilePath, Func<string?>? report, bool canRestore = false, bool canMove = false, Appearance appearance = Appearance.System, Language language = Language.English, Action<Language>? showLanguage = null, CalendarKind calendar = CalendarKind.Gregorian, bool hebrewInEnglish = false, Action<CalendarKind, bool>? showCalendar = null)
 		{
 			DataFilePath = dataFilePath;
 			_report = report;
@@ -22,6 +25,9 @@ namespace Purity.Desktop.ViewModels
 			AppearanceIndex = (int)appearance;
 			Language = language;
 			_showLanguage = showLanguage;
+			CalendarIndex = (int)calendar;
+			HebrewInEnglish = hebrewInEnglish;
+			_showCalendar = showCalendar;
 		}
 
 
@@ -33,6 +39,27 @@ namespace Purity.Desktop.ViewModels
 		public partial int AppearanceIndex { get; set; }
 
 		public Appearance Appearance => Enum.IsDefined((Appearance)AppearanceIndex) ? (Appearance)AppearanceIndex : Appearance.System;
+
+		/// <summary>The choices for <see cref="Calendar"/>, in the order of its values</summary>
+		public IReadOnlyList<string> CalendarChoices => new[] { Loc.T.GregorianAndHebrew, Loc.T.HebrewOnly };
+
+		/// <summary>Which of <see cref="CalendarChoices"/> is picked. Shows at once, like the language.</summary>
+		[ObservableProperty]
+		public partial int CalendarIndex { get; set; }
+
+		public CalendarKind Calendar => CalendarIndex == (int)CalendarKind.Hebrew ? CalendarKind.Hebrew : CalendarKind.Gregorian;
+
+		/// <summary>Whether Hebrew dates are written in English letters. Shows at once, like the language.</summary>
+		[ObservableProperty]
+		public partial bool HebrewInEnglish { get; set; }
+
+		partial void OnCalendarIndexChanged(int value)
+		{
+			if (value >= 0)
+				_showCalendar?.Invoke(Calendar, HebrewInEnglish);
+		}
+
+		partial void OnHebrewInEnglishChanged(bool value) => _showCalendar?.Invoke(Calendar, value);
 
 		/// <summary>The language chosen so far</summary>
 		public Language Language { get; private set; }
@@ -81,11 +108,11 @@ namespace Purity.Desktop.ViewModels
 
 		public void RequestMove(string path) => MoveTo = path;
 
-		/// <inheritdoc cref="SettingsWindowViewModel(string, Func{string?}?, bool, bool, Appearance, Language, Action{Language}?)"/>
+		/// <inheritdoc cref="SettingsWindowViewModel(string, Func{string?}?, bool, bool, Appearance, Language, Action{Language}?, CalendarKind, bool, Action{CalendarKind, bool}?)"/>
 		public string? BuildReport() => _report?.Invoke();
 
 
-		/// <summary>The app changes language at once, this window included. The appearance list has to be filled again with the new words.</summary>
+		/// <summary>The app changes language at once, this window included. The two lists have to be filled again with the new words.</summary>
 		private void Choose(Language language)
 		{
 			if (language == Language)
@@ -100,10 +127,16 @@ namespace Purity.Desktop.ViewModels
 			AppearanceIndex = -1;
 			OnPropertyChanged(nameof(AppearanceChoices));
 			AppearanceIndex = appearance;
+
+			var calendar = CalendarIndex;
+			CalendarIndex = -1;
+			OnPropertyChanged(nameof(CalendarChoices));
+			CalendarIndex = calendar;
 		}
 
 
 		private readonly Func<string?>? _report;
 		private readonly Action<Language>? _showLanguage;
+		private readonly Action<CalendarKind, bool>? _showCalendar;
 	}
 }

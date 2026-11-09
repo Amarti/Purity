@@ -1,17 +1,21 @@
+using System.Globalization;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Purity.Core;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop.Views
 {
 	/// <summary>
 	/// A month of the Hebrew calendar to pick a date from, since Avalonia's calendar can only show
-	/// Gregorian months. Weeks start on the right, as on a Hebrew calendar, in every language. It
+	/// Gregorian months. Weeks start on the right, as on a Hebrew calendar, in every language, unless
+	/// Hebrew dates are being written in English letters. It
 	/// deals in whole Hebrew dates, each given as the Gregorian day holding its daytime; whether the
 	/// date's night or day is meant stays with the switch beside the field.
 	/// </summary>
@@ -85,7 +89,11 @@ namespace Purity.Desktop.Views
 			if (_days == null || Month is not { } month)
 				return;
 
-			_title!.Text = month.Title;
+			var english = Loc.Instance.HebrewInEnglish;
+			FlowDirection = english ? FlowDirection.LeftToRight : FlowDirection.RightToLeft;
+			_title!.Text = english ? month.EnglishTitle : month.Title;
+			foreach (var header in _days.Children.OfType<TextBlock>())
+				header.Text = (english ? EnglishWeekdays : HebrewWeekdays)[Grid.GetColumn(header)];
 			_previousYear!.IsEnabled = month.InYear(month.Year - 1) != null;
 			_previous!.IsEnabled = month.Previous != null;
 			_next!.IsEnabled = month.Next != null;
@@ -105,11 +113,12 @@ namespace Purity.Desktop.Views
 		private Button DayButton(HebrewMonth month, int day, int cell, ControlTheme? theme)
 		{
 			var date = month.Daytime(day);
-			var name = DateText.HebrewDayName(day);
+			var english = Loc.Instance.HebrewInEnglish;
+			var name = english ? day.ToString(CultureInfo.InvariantCulture) : DateText.HebrewDayName(day);
 			var button = new Button { Content = name, Theme = theme };
 			Grid.SetColumn(button, cell % 7);
 			Grid.SetRow(button, 1 + cell / 7);
-			AutomationProperties.SetName(button, $"{name} {month.Name}");
+			AutomationProperties.SetName(button, $"{name} {(english ? month.EnglishName : month.Name)}");
 			button.Classes.Set(SelectedClass, date == _selected);
 			button.Classes.Set(TodayClass, date == _today);
 			button.Click += (_, _) => DayPicked?.Invoke(this, date);
@@ -119,6 +128,9 @@ namespace Purity.Desktop.Views
 
 		private const string SelectedClass = "Selected";
 		private const string TodayClass = "Today";
+
+		private static readonly string[] HebrewWeekdays = { "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳" };
+		private static readonly string[] EnglishWeekdays = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
 
 		private readonly List<Button> _buttons = new();
 		private Button? _previousYear;

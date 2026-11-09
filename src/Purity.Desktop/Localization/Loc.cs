@@ -6,7 +6,7 @@ using Purity.Core;
 
 namespace Purity.Desktop.Localization
 {
-	/// <summary>The calendar dates are picked and shown in</summary>
+	/// <summary>The calendar dates are picked and shown in: Gregorian with the Hebrew date beside it, or Hebrew alone</summary>
 	public enum CalendarKind
 	{
 		Gregorian,
@@ -33,6 +33,8 @@ namespace Purity.Desktop.Localization
 
 		/// <summary>The words of the language being shown, for code</summary>
 		public static UiText T => Instance.Text;
+
+		internal const char LeftToRightMark = '‎';
 
 
 		public Language Language { get; private set; }
@@ -61,6 +63,43 @@ namespace Purity.Desktop.Localization
 			CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = DateCulture;
 		}
 
+		/// <summary>The calendar dates are picked and shown in</summary>
+		public CalendarKind Calendar { get; private set; }
+
+		/// <summary>Hebrew dates are written in English letters, such as 15 Shevat, in every place and interface language</summary>
+		public bool HebrewInEnglish { get; private set; }
+
+		/// <summary>Hebrew dates stand alone, with no Gregorian date beside them</summary>
+		public bool IsHebrewOnly => Calendar == CalendarKind.Hebrew;
+
+		/// <summary>The Hebrew date of the onah a stamp stands for, in the letters chosen</summary>
+		public string HebrewDate(DateTimeOffset stamp) => HebrewInEnglish ? InReadingOrder(DateText.HebrewOfOnahInEnglish(stamp)) : DateText.HebrewOfOnah(stamp);
+
+		/// <summary>A stored date in full, in the calendar on show</summary>
+		public string LongDate(DateTimeOffset stamp) => ShowsHebrew(stamp) ? HebrewDateWithYear(stamp) : stamp.UtcDateTime.ToString("dddd, d MMMM yyyy", DateCulture);
+
+		/// <summary>A stored date without its weekday, in the calendar on show</summary>
+		public string Date(DateTimeOffset stamp) => ShowsHebrew(stamp) ? HebrewDateWithYear(stamp) : stamp.UtcDateTime.ToString("d MMMM yyyy", DateCulture);
+
+		/// <summary>A day on this computer's calendar in full, in the calendar on show</summary>
+		public string LongDay(DateTime day) => LongDate(Stamps.FromDate(day, false));
+
+		/// <summary>A moment by this computer's clock, such as when a backup was made, in the calendar on show</summary>
+		public string Moment(DateTimeOffset local, bool withWeekday)
+		{
+			if (ShowsHebrew(local))
+				return $"{HebrewDateWithYear(Stamps.FromDate(local.DateTime, false))}, {local.ToString("HH:mm", CultureInfo.InvariantCulture)}";
+
+			return local.ToString(withWeekday ? "dddd, d MMMM yyyy, HH:mm" : "d MMMM yyyy, HH:mm", DateCulture);
+		}
+
+		/// <summary>Chooses the calendar and the letters of Hebrew dates. What's on screen is refreshed by whoever chose them.</summary>
+		public void UseCalendar(CalendarKind calendar, bool hebrewInEnglish)
+		{
+			Calendar = calendar;
+			HebrewInEnglish = hebrewInEnglish;
+		}
+
 		/// <summary>Shows the app in this language</summary>
 		public void Use(Language language)
 		{
@@ -75,6 +114,16 @@ namespace Purity.Desktop.Localization
 			OnPropertyChanged(nameof(FlowDirection));
 		}
 
+
+		private bool ShowsHebrew(DateTimeOffset stamp) => IsHebrewOnly && Stamps.IsInHebrewCalendar(stamp);
+
+		private string HebrewDateWithYear(DateTimeOffset stamp) => HebrewInEnglish ? InReadingOrder(DateText.HebrewOfOnahInEnglishWithYear(stamp)) : DateText.HebrewOfOnahWithYear(stamp);
+
+		/// <summary>
+		/// In a right-to-left window the day number of "15 Shevat 5794" parts from the words, and it
+		/// reads "Shevat 5794 15". An invisible left-to-right mark in front keeps the date together.
+		/// </summary>
+		private string InReadingOrder(string text) => Language == Language.Hebrew ? LeftToRightMark + text : text;
 
 		private void CopyNames(DateTimeFormatInfo from)
 		{

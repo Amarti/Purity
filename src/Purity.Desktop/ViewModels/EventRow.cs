@@ -11,8 +11,14 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>The kind of date, in the language being shown</summary>
 		public string TypeText { get; } = Loc.T.EventType(Event.Type);
 
-		/// <summary>The Gregorian date, in the language being shown</summary>
-		public string GregorianText { get; } = Loc.Instance.GregorianText(Event);
+		/// <summary>The Hebrew date, in the letters chosen</summary>
+		public string HebrewText { get; } = Loc.Instance.HebrewDate(Event.Stamp);
+
+		/// <summary>The width of the Hebrew date's column: English letters need more room</summary>
+		public double HebrewWidth { get; } = Loc.Instance.HebrewInEnglish ? 85 : 60;
+
+		/// <summary>The Gregorian date, in the language being shown. With Hebrew dates alone, only what follows it: the interval of a Veset Aflaga.</summary>
+		public string DetailText { get; } = Loc.Instance.IsHebrewOnly ? Event.Note ?? string.Empty : Loc.Instance.GregorianText(Event);
 	}
 
 

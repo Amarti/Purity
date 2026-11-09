@@ -75,7 +75,7 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>When a version was replaced, and what it holds, so the right one can be recognized. Short, for a list.</summary>
 		private string Describe(Backup backup)
 		{
-			var replaced = backup.TakenAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm", Loc.Instance.DateCulture);
+			var replaced = Loc.Instance.Moment(backup.TakenAt.ToLocalTime(), withWeekday: false);
 			var text = new StringBuilder(T.Until(replaced));
 			try
 			{
@@ -87,7 +87,7 @@ namespace Purity.Desktop.ViewModels
 				{
 					var last = periods.MaxBy(el => el.Begin)!;
 					text.Append(T.PeriodCount(periods.Count))
-						.Append(T.LastBeginning(last.Begin.UtcDateTime.ToString("d MMMM yyyy", Loc.Instance.DateCulture)))
+						.Append(T.LastBeginning(Loc.Instance.Date(last.Begin)))
 						.Append(PurityEvent.IsDateAfterDusk(last.Begin) ? T.NightSuffix : "");
 				}
 
@@ -104,7 +104,7 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>The moment the version was replaced, in this computer's time</summary>
 		private static string When(Backup backup) =>
-			backup.TakenAt.ToLocalTime().ToString("dddd, d MMMM yyyy, HH:mm", Loc.Instance.DateCulture);
+			Loc.Instance.Moment(backup.TakenAt.ToLocalTime(), withWeekday: true);
 
 
 		/// <summary>Names the backup being restored while a question about it is open</summary>

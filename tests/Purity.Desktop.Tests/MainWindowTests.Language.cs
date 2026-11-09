@@ -81,7 +81,7 @@ namespace Purity.Desktop.Tests
 			Assert.All(first.EventRows, row =>
 			{
 				Assert.Equal(UiText.Hebrew.EventType(row.Event.Type), row.TypeText);
-				Assert.Equal(row.Event.GregorianText(HebrewDates.ShortMonths), row.GregorianText);
+				Assert.Equal(row.Event.GregorianText(HebrewDates.ShortMonths), row.DetailText);
 			});
 		});
 
@@ -163,6 +163,7 @@ namespace Purity.Desktop.Tests
 			finally
 			{
 				Loc.Instance.Use(Language.English);
+				Loc.Instance.UseCalendar(CalendarKind.Gregorian, false);
 			}
 		});
 	}
