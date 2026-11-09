@@ -26,6 +26,7 @@ syntax: glob
 launchSettings.json
 
 bin/
+TestResults/
 obj/
 ipch/
 packages/
