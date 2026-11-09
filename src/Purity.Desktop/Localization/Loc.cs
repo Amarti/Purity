@@ -6,6 +6,14 @@ using Purity.Core;
 
 namespace Purity.Desktop.Localization
 {
+	/// <summary>The calendar dates are picked and shown in</summary>
+	public enum CalendarKind
+	{
+		Gregorian,
+		Hebrew,
+	}
+
+
 	/// <summary>The app's languages. Saved by name, so their order here doesn't matter.</summary>
 	public enum Language
 	{

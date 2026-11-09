@@ -1,3 +1,6 @@
+using System.Globalization;
+
+
 namespace Purity.Desktop.Localization
 {
 	public sealed partial class UiText
@@ -37,6 +40,9 @@ namespace Purity.Desktop.Localization
 			InDays = days => $"in {days} days",
 			TodayLine = date => $"Today, {date}",
 			HebrewDateTip = (date, night) => $"{date}, {(night ? "night" : "day")}",
+			GregorianNightTip = (first, second) => first.Month == second.Month
+				? $"Night of {first.ToString("dddd d", CultureInfo.InvariantCulture)} to {second.ToString("dddd d MMMM", CultureInfo.InvariantCulture)}"
+				: $"Night of {first.ToString("dddd d MMMM", CultureInfo.InvariantCulture)} to {second.ToString("dddd d MMMM", CultureInfo.InvariantCulture)}",
 
 			DataFilePathLabel = "Data file path:",
 			PickFileTip = "Use a data file you already have, such as the one your other computers use",

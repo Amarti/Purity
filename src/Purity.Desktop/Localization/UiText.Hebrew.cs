@@ -38,6 +38,13 @@ namespace Purity.Desktop.Localization
 			InDays = days => days == 2 ? "בעוד יומיים" : $"בעוד {days} ימים",
 			TodayLine = date => $"היום, {date}",
 			HebrewDateTip = (date, night) => $"{date}, {(night ? "לילה" : "יום")}",
+			GregorianNightTip = (first, second) =>
+			{
+				var names = HebrewDates.Culture.DateTimeFormat;
+				var from = $"{names.GetDayName(first.DayOfWeek)} ה־{first.Day}";
+				var to = $"ל{names.GetDayName(second.DayOfWeek)} ה־{second.Day} {names.MonthGenitiveNames[second.Month - 1]}";
+				return first.Month == second.Month ? $"הלילה שבין {from} {to}" : $"הלילה שבין {from} {names.MonthGenitiveNames[first.Month - 1]} {to}";
+			},
 
 			DataFilePathLabel = "קובץ נתונים:",
 			PickFileTip = "שימוש בקובץ נתונים קיים, למשל זה שמשמש את המחשבים האחרים",

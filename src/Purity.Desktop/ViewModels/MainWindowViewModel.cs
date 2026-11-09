@@ -23,7 +23,8 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="clock">Sets "today" for a new period</param>
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
 		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null)
+		/// <param name="calendar">The calendar dates are picked and shown in</param>
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, CalendarKind calendar = CalendarKind.Gregorian)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
@@ -31,6 +32,7 @@ namespace Purity.Desktop.ViewModels
 			Today = clock.GetLocalNow().Date;
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
+			_calendar = calendar;
 			_settings = DesktopSettings.Load();
 			Loc.Instance.Use(_settings.Language);
 		}
@@ -532,6 +534,9 @@ namespace Purity.Desktop.ViewModels
 
 		public string DataFilePath => _dataFileOverride ?? _settings.DataFilePath;
 
+		/// <summary>Whether dates are picked and shown in the Hebrew calendar</summary>
+		public bool UsesHebrewCalendar => _calendar == CalendarKind.Hebrew;
+
 		/// <summary>How the check of this machine's date calculations went, once it has run</summary>
 		public SelfTestResult? SelfTestResult { get; private set; }
 
@@ -558,6 +563,7 @@ namespace Purity.Desktop.ViewModels
 		private readonly TimeProvider _clock;
 		private readonly Action<Func<Task>> _runOnUiThread;
 		private readonly Func<SelfTestResult> _selfTest;
+		private readonly CalendarKind _calendar;
 		private readonly DesktopSettings _settings;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;

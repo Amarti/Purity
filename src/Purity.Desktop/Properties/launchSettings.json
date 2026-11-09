@@ -8,6 +8,14 @@
         "PURITY_APP_DATA": "app data"
       }
     },
+    "Purity (synthetic data, Hebrew calendar)": {
+      "commandName": "Project",
+      "commandLineArgs": "--data sample.json --calendar hebrew",
+      "workingDirectory": "../../tests/synthetic-data",
+      "environmentVariables": {
+        "PURITY_APP_DATA": "app data"
+      }
+    },
     "Purity (this computer's settings)": {
       "commandName": "Project"
     }

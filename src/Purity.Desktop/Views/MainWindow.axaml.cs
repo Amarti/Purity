@@ -28,7 +28,7 @@ namespace Purity.Desktop.Views
 			_periods = this.FindControl<ListBox>("Periods")!;
 			_periods.AddHandler(KeyDownEvent, OnPeriodsKeyDown, RoutingStrategies.Tunnel);
 
-			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()));
+			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()), calendar: options.Calendar);
 			DataContext = _viewModel;
 			_options = options;
 

@@ -24,18 +24,26 @@ namespace Purity.Core
 		/// <summary>The Hebrew date and onah a stamp stands for. A night belongs to the Hebrew date it opens, the one whose daytime is the next Gregorian day.</summary>
 		public static HebrewOnah ToHebrew(DateTimeOffset stamp)
 		{
-			var night = PurityEvent.IsDateAfterDusk(stamp);
-			var day = (night ? stamp.AddDays(1) : stamp).DateTime;
-			return new HebrewOnah(Calendar.GetYear(day), Calendar.GetMonth(day), Calendar.GetDayOfMonth(day), night);
+			var day = HebrewDaytime(stamp);
+			return new HebrewOnah(Calendar.GetYear(day), Calendar.GetMonth(day), Calendar.GetDayOfMonth(day), PurityEvent.IsDateAfterDusk(stamp));
 		}
 
 		/// <summary>The stamp of a Hebrew date and onah. Its night is stored on the Gregorian day before its daytime.</summary>
 		/// <exception cref="ArgumentOutOfRangeException">The Hebrew calendar has no such date</exception>
 		public static DateTimeOffset FromHebrew(HebrewOnah onah)
 		{
-			var day = Calendar.ToDateTime(onah.Year, onah.Month, onah.Day, 0, 0, 0, 0);
-			return onah.IsNight ? FromDate(day.AddDays(-1), true) : FromDate(day, false);
+			return FromHebrewDaytime(Calendar.ToDateTime(onah.Year, onah.Month, onah.Day, 0, 0, 0, 0), onah.IsNight);
 		}
+
+		/// <summary>The Gregorian day holding the daytime of the Hebrew date a stamp's onah belongs to</summary>
+		public static DateTime HebrewDaytime(DateTimeOffset stamp) => (PurityEvent.IsDateAfterDusk(stamp) ? stamp.AddDays(1) : stamp).DateTime.Date;
+
+		/// <summary>The stamp of one onah of the Hebrew date whose daytime is on this Gregorian day</summary>
+		public static DateTimeOffset FromHebrewDaytime(DateTime daytime, bool night) => night ? FromDate(daytime.AddDays(-1), true) : FromDate(daytime, false);
+
+		/// <summary>Whether .NET's Hebrew calendar reaches this stamp, which covers 1583 to 2239</summary>
+		public static bool IsInHebrewCalendar(DateTimeOffset stamp) =>
+			stamp.DateTime >= Calendar.MinSupportedDateTime && stamp.DateTime.Date < Calendar.MaxSupportedDateTime.Date;
 
 
 		private static readonly HebrewCalendar Calendar = new();

@@ -59,6 +59,7 @@ namespace Purity.Desktop.Localization
 
 		// A date in the other calendar
 		public required Func<string, bool, string> HebrewDateTip { get; init; }
+		public required Func<DateTime, DateTime, string> GregorianNightTip { get; init; }
 
 		// The settings window
 		public required string DataFilePathLabel { get; init; }

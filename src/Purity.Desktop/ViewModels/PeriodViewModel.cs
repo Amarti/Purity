@@ -45,9 +45,24 @@ namespace Purity.Desktop.ViewModels
 					return;
 
 				Period.Begin = Stamps.FromDate(date, BeginIsAfterDusk);
-				OnPropertyChanged();
-				OnPropertyChanged(nameof(SkipLabel));
-				OnPropertyChanged(nameof(BeginInOtherCalendar));
+				BeginChanged();
+			}
+		}
+
+		/// <summary>
+		/// The Hebrew date the start belongs to, given as the Gregorian day holding its daytime.
+		/// Picking one keeps the day or night choice, and a date nobody changes is left alone.
+		/// </summary>
+		public DateTime? BeginHebrewDay
+		{
+			get => HebrewDay(Period.Begin);
+			set
+			{
+				if (value is not { } day || day == BeginHebrewDay)
+					return;
+
+				Period.Begin = Stamps.FromHebrewDaytime(day, BeginIsAfterDusk);
+				BeginChanged();
 			}
 		}
 
@@ -57,9 +72,7 @@ namespace Purity.Desktop.ViewModels
 		private void ToggleBeginNight()
 		{
 			Period.Begin = Toggled(Period.Begin);
-			OnPropertyChanged(nameof(BeginIsAfterDusk));
-			OnPropertyChanged(nameof(SkipLabel));
-			OnPropertyChanged(nameof(BeginInOtherCalendar));
+			BeginChanged();
 		}
 
 		/// <inheritdoc cref="BeginDate"/>
@@ -72,8 +85,21 @@ namespace Purity.Desktop.ViewModels
 					return;
 
 				Period.End = Stamps.FromDate(date, EndIsAfterDusk);
-				OnPropertyChanged();
-				OnPropertyChanged(nameof(EndInOtherCalendar));
+				EndChanged();
+			}
+		}
+
+		/// <inheritdoc cref="BeginHebrewDay"/>
+		public DateTime? EndHebrewDay
+		{
+			get => HebrewDay(Period.End);
+			set
+			{
+				if (value is not { } day || day == EndHebrewDay)
+					return;
+
+				Period.End = Stamps.FromHebrewDaytime(day, EndIsAfterDusk);
+				EndChanged();
 			}
 		}
 
@@ -83,8 +109,7 @@ namespace Purity.Desktop.ViewModels
 		private void ToggleEndNight()
 		{
 			Period.End = Toggled(Period.End);
-			OnPropertyChanged(nameof(EndIsAfterDusk));
-			OnPropertyChanged(nameof(EndInOtherCalendar));
+			EndChanged();
 		}
 
 		public bool SkipStreak
@@ -128,10 +153,10 @@ namespace Purity.Desktop.ViewModels
 		public string EndText => LongDate(Period.End);
 
 		/// <summary>The same onah in the other calendar: a tooltip on desktop, and a line under the field on a touch screen</summary>
-		public string BeginInOtherCalendar => InOtherCalendar(Period.Begin);
+		public string? BeginInOtherCalendar => InOtherCalendar(Period.Begin);
 
 		/// <inheritdoc cref="BeginInOtherCalendar"/>
-		public string EndInOtherCalendar => InOtherCalendar(Period.End);
+		public string? EndInOtherCalendar => InOtherCalendar(Period.End);
 
 		/// <summary>What a folded line's button does, for screen readers</summary>
 		public string OpenLabel => Loc.T.OpenPeriodFrom(BeginText);
@@ -150,6 +175,9 @@ namespace Purity.Desktop.ViewModels
 		}
 
 		public bool IsClosed => Period.Closed;
+
+		/// <summary>Whether dates are picked and shown in the Hebrew calendar</summary>
+		public bool UsesHebrewCalendar => _owner.UsesHebrewCalendar;
 		public bool IsLast => _owner.IsLast(Period);
 		public ObservableCollection<PurityEvent> SubEvents { get; }
 
@@ -180,13 +208,55 @@ namespace Purity.Desktop.ViewModels
 		}
 
 		/// <summary>The text a date field shows, in the language being shown. It never comes from the OS's culture data, so no machine setting can change it.</summary>
-		private static string LongDate(DateTimeOffset stamp) => ShownDate(stamp).ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture);
+		private string LongDate(DateTimeOffset stamp) => UsesHebrewCalendar && Stamps.IsInHebrewCalendar(stamp)
+			? DateText.HebrewOfOnahWithYear(stamp)
+			: ShownDate(stamp).ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture);
 
-		private static string InOtherCalendar(DateTimeOffset stamp) => Loc.T.HebrewDateTip(DateText.HebrewOfOnah(stamp), PurityEvent.IsDateAfterDusk(stamp));
+		/// <summary>The same onah in the calendar not on show, without the year, or null for a date the Hebrew calendar doesn't reach</summary>
+		private string? InOtherCalendar(DateTimeOffset stamp)
+		{
+			if (!Stamps.IsInHebrewCalendar(stamp))
+				return null;
 
-		/// <summary>Moves between the day and night onah of the same date, as the WPF buttons do</summary>
-		private static DateTimeOffset Toggled(DateTimeOffset stamp) =>
-			PurityEvent.IsDateAfterDusk(stamp) ? stamp.AddHours(-12) : stamp.AddHours(12);
+			var night = PurityEvent.IsDateAfterDusk(stamp);
+			if (!UsesHebrewCalendar)
+				return Loc.T.HebrewDateTip(DateText.HebrewOfOnah(stamp), night);
+
+			var day = ShownDate(stamp);
+			return night ? Loc.T.GregorianNightTip(day, day.AddDays(1)) : day.ToString("dddd, d MMMM", Loc.Instance.DateCulture);
+		}
+
+		private static DateTime? HebrewDay(DateTimeOffset stamp) => Stamps.IsInHebrewCalendar(stamp) ? Stamps.HebrewDaytime(stamp) : null;
+
+		private void BeginChanged()
+		{
+			OnPropertyChanged(nameof(BeginDate));
+			OnPropertyChanged(nameof(BeginHebrewDay));
+			OnPropertyChanged(nameof(BeginIsAfterDusk));
+			OnPropertyChanged(nameof(BeginText));
+			OnPropertyChanged(nameof(BeginInOtherCalendar));
+			OnPropertyChanged(nameof(SkipLabel));
+		}
+
+		private void EndChanged()
+		{
+			OnPropertyChanged(nameof(EndDate));
+			OnPropertyChanged(nameof(EndHebrewDay));
+			OnPropertyChanged(nameof(EndIsAfterDusk));
+			OnPropertyChanged(nameof(EndText));
+			OnPropertyChanged(nameof(EndInOtherCalendar));
+		}
+
+		/// <summary>
+		/// Moves between the day and night onah of the same date, as the WPF buttons do. A Gregorian
+		/// date's night comes after its day and a Hebrew date's before it, so the same press moves the
+		/// stored date opposite ways, and the date on show stays put either way.
+		/// </summary>
+		private DateTimeOffset Toggled(DateTimeOffset stamp)
+		{
+			var night = PurityEvent.IsDateAfterDusk(stamp);
+			return stamp.AddHours(UsesHebrewCalendar == night ? 12 : -12);
+		}
 
 
 		private readonly MainWindowViewModel _owner;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 
 namespace Purity.Core
@@ -36,6 +37,42 @@ namespace Purity.Core
 
 		/// <summary>Hebrew date of the onah a stamp stands for: a night belongs to the date it opens</summary>
 		public static string HebrewOfOnah(DateTimeOffset stamp) => Hebrew(PurityEvent.IsDateAfterDusk(stamp) ? stamp.AddDays(1) : stamp);
+
+		/// <summary>Hebrew date and year of the onah a stamp stands for, such as ט"ו שבט תשצ"ד</summary>
+		public static string HebrewOfOnahWithYear(DateTimeOffset stamp) =>
+			$"{HebrewOfOnah(stamp)} {HebrewYearName(Calendar.GetYear(Stamps.HebrewDaytime(stamp)))}";
+
+		/// <summary>A month's name, by the numbers .NET gives it in that year</summary>
+		public static string HebrewMonthName(int year, int month) => (Calendar.IsLeapYear(year) ? LeapYearMonths : CommonYearMonths)[month - 1];
+
+		/// <summary>A day of the month in Hebrew numerals, such as ט"ו</summary>
+		public static string HebrewDayName(int day) => HebrewDays[day - 1];
+
+		/// <summary>A Hebrew year in letters without its thousands, such as תשצ"ד for 5794</summary>
+		public static string HebrewYearName(int year)
+		{
+			var letters = new StringBuilder();
+			var rest = year % 1000;
+			for (; rest >= 400; rest -= 400)
+				letters.Append('ת');
+			if (rest >= 100)
+			{
+				letters.Append("קרש"[rest / 100 - 1]);
+				rest %= 100;
+			}
+
+			if (rest is 15 or 16)
+				letters.Append(rest == 15 ? "טו" : "טז");	// never spelled as the letters of God's name
+			else
+			{
+				if (rest >= 10)
+					letters.Append("יכלמנסעפצ"[rest / 10 - 1]);
+				if (rest % 10 > 0)
+					letters.Append("אבגדהוזחט"[rest % 10 - 1]);
+			}
+
+			return letters.Length == 1 ? letters.Append('\'').ToString() : letters.Insert(letters.Length - 1, '"').ToString();
+		}
 
 		/// <summary>Short Gregorian date, such as 4 Sept</summary>
 		public static string Gregorian(DateTimeOffset stamp) => Gregorian(stamp, GregorianMonths);

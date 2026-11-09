@@ -209,7 +209,31 @@
                 </Border>
             </ControlTemplate>
         </Setter>
+
+        <!-- On a Hebrew date the night comes first -->
+        <Style Selector="^.NightFirst /template/ RadioButton#PART_Day">
+            <Setter Property="Grid.Column" Value="1"/>
+            <Setter Property="CornerRadius" Value="0,4,4,0"/>
+        </Style>
+        <Style Selector="^.NightFirst /template/ RadioButton#PART_Night">
+            <Setter Property="Grid.Column" Value="0"/>
+            <Setter Property="CornerRadius" Value="4,0,0,4"/>
+        </Style>
     </ControlTheme>
+
+    <!-- The small calendar page showing 15, on both kinds of date field -->
+    <ControlTemplate x:Key="CalendarGlyphTemplate">
+                                    <Grid Width="17" Height="17" Background="Transparent">
+                                        <Border Background="{DynamicResource CalendarGlyphPageBrush}" BorderBrush="{DynamicResource CalendarGlyphBorderBrush}" BorderThickness="1">
+                                            <Grid RowDefinitions="4,*">
+                                                <Border Background="{DynamicResource CalendarGlyphTopBrush}"/>
+                                                <Ellipse Width="2" Height="2" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Row="1" Text="15" FontSize="9" Foreground="{DynamicResource CalendarGlyphTextBrush}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </ControlTemplate>
 
     <!-- WPF's date field: a text box and a small calendar page showing 15 -->
     <ControlTheme x:Key="{x:Type CalendarDatePicker}" TargetType="CalendarDatePicker">
@@ -235,22 +259,7 @@
                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                  PlaceholderText="{TemplateBinding PlaceholderText}"/>
-                        <Button Name="PART_Button" Grid.Column="1" Focusable="False" Margin="2,0" VerticalAlignment="Center">
-                            <Button.Template>
-                                <ControlTemplate>
-                                    <Grid Width="17" Height="17" Background="Transparent">
-                                        <Border Background="{DynamicResource CalendarGlyphPageBrush}" BorderBrush="{DynamicResource CalendarGlyphBorderBrush}" BorderThickness="1">
-                                            <Grid RowDefinitions="4,*">
-                                                <Border Background="{DynamicResource CalendarGlyphTopBrush}"/>
-                                                <Ellipse Width="2" Height="2" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Row="1" Text="15" FontSize="9" Foreground="{DynamicResource CalendarGlyphTextBrush}"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
-                                            </Grid>
-                                        </Border>
-                                    </Grid>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <Button Name="PART_Button" Grid.Column="1" Focusable="False" Margin="2,0" VerticalAlignment="Center" Template="{StaticResource CalendarGlyphTemplate}"/>
                         <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
                             <Calendar Name="PART_Calendar"
                                       DisplayDate="{TemplateBinding DisplayDate}"
@@ -265,5 +274,139 @@
             </ControlTemplate>
         </Setter>
     </ControlTheme>
+
+    <!-- The Hebrew month grid, in the look of the calendar popup, whose own theme only reaches Gregorian months -->
+    <ControlTheme x:Key="HebrewMonthArrowTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Background="{TemplateBinding Background}" Content="{TemplateBinding Content}"
+                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource HighlightBrush}"/>
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="HebrewDayButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <Rectangle Name="TodayBackground" Fill="{DynamicResource HighlightBrush}" IsVisible="False"/>
+                    <Rectangle Name="SelectedBackground" Fill="{TemplateBinding Background}" Opacity="0.75" IsVisible="False"/>
+                    <Rectangle Name="Background" Fill="{TemplateBinding Background}" Opacity="0.5" IsVisible="False"/>
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                                      FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Rectangle Name="FocusVisual" Stroke="{DynamicResource HighlightBrush}" StrokeThickness="1" IsHitTestVisible="False" IsVisible="False"/>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ Rectangle#Background">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^:focus-visible /template/ Rectangle#FocusVisual">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Selected /template/ Rectangle#SelectedBackground">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Today /template/ Rectangle#TodayBackground">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Today /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeControlLowBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type views:HebrewMonthView}" TargetType="views:HebrewMonthView">
+        <Setter Property="FlowDirection" Value="RightToLeft"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Margin="0,2" Background="{DynamicResource ThemeBackgroundBrush}" BorderBrush="{DynamicResource ThemeBorderHighBrush}"
+                        BorderThickness="{DynamicResource ThemeBorderThickness}">
+                    <Grid Margin="2" RowDefinitions="Auto,Auto">
+                        <Border Height="22" Background="{DynamicResource ThemeAccentBrush2}">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                <Button Name="PART_PreviousYear" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M7,0 L1,5 L7,10 Z M13,0 L7,5 L13,10 Z"/>
+                                </Button>
+                                <Button Name="PART_Previous" Grid.Column="1" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M6,0 L0,5 L6,10 Z"/>
+                                </Button>
+                                <TextBlock Name="PART_Title" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
+                                <Button Name="PART_Next" Grid.Column="3" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z"/>
+                                </Button>
+                                <Button Name="PART_NextYear" Grid.Column="4" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z M6,0 L12,5 L6,10 Z"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <Grid Name="PART_Days" Grid.Row="1" Margin="6,0,6,6" ColumnDefinitions="28,28,28,28,28,28,28" RowDefinitions="Auto,20,20,20,20,20,20">
+                            <Grid.Styles>
+                                <Style Selector="TextBlock">
+                                    <Setter Property="Margin" Value="0,4"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="FontSize" Value="9.5"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                            </Grid.Styles>
+                            <TextBlock Grid.Column="0" Text="א׳"/>
+                            <TextBlock Grid.Column="1" Text="ב׳"/>
+                            <TextBlock Grid.Column="2" Text="ג׳"/>
+                            <TextBlock Grid.Column="3" Text="ד׳"/>
+                            <TextBlock Grid.Column="4" Text="ה׳"/>
+                            <TextBlock Grid.Column="5" Text="ו׳"/>
+                            <TextBlock Grid.Column="6" Text="ש׳"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- A date in the Hebrew calendar: looks like the date field, and the whole of it opens the month grid -->
+    <ControlTheme x:Key="{x:Type views:HebrewDateField}" TargetType="views:HebrewDateField">
+        <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="4,0,2,0"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Panel>
+                        <Button Name="PART_Button" Theme="{StaticResource PlainButtonTheme}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Margin="{TemplateBinding Padding}" VerticalAlignment="Center" Text="{TemplateBinding Text}"/>
+                                <ContentControl Grid.Column="1" Margin="2,0" VerticalAlignment="Center" Template="{StaticResource CalendarGlyphTemplate}"/>
+                            </Grid>
+                        </Button>
+                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
+                            <views:HebrewMonthView Name="PART_Month"/>
+                        </Popup>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
 
 </ResourceDictionary>
