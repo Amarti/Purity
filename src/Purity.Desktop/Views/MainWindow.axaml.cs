@@ -26,6 +26,18 @@ namespace Purity.Desktop.Views
 
 			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()));
 			DataContext = _viewModel;
+			_options = options;
+
+			// Before the window shows, so it never flashes the other theme or jumps into place
+			App.Apply(_viewModel.Appearance);
+			_viewModel.PropertyChanged += (_, e) =>
+			{
+				if (e.PropertyName == nameof(MainWindowViewModel.Appearance))
+					App.Apply(_viewModel.Appearance);
+			};
+			if (options.PictureFile == null)						// pictures are always of the window's starting size
+				RestorePlacement(_viewModel.WindowPlacement);
+			PositionChanged += (_, _) => Dispatcher.UIThread.Post(TrackPlacement, DispatcherPriority.Background);
 
 			// Like the WPF app, show the newest periods whenever the list changes
 			_viewModel.Periods.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(ScrollToEnd, DispatcherPriority.Background);
@@ -92,8 +104,16 @@ namespace Purity.Desktop.Views
 		/// <inheritdoc cref="WindowFit"/>
 		private void FitToScreen()
 		{
-			if ((Screens.ScreenFromWindow(this) ?? Screens.Primary) is not { } screen)
+			if (WindowState != WindowState.Normal || (Screens.ScreenFromWindow(this) ?? Screens.Primary) is not { } screen)
 				return;
+
+			var frameWidth = FrameSize is { } outerWidth ? Math.Max(0, outerWidth.Width - ClientSize.Width) : 0;
+			var width = WindowFit.Width(Width, frameWidth, screen.WorkingArea.Width / screen.Scaling, MinWidth);
+			if (width < Width)
+			{
+				Width = width;
+				Position = new PixelPoint(screen.WorkingArea.X, Position.Y);
+			}
 
 			var frame = FrameSize is { } outer ? Math.Max(0, outer.Height - ClientSize.Height) : 0;
 			var height = WindowFit.Height(Height, frame, screen.WorkingArea.Height / screen.Scaling);
@@ -103,6 +123,53 @@ namespace Purity.Desktop.Views
 			Height = height;
 			Position = new PixelPoint(Position.X, screen.WorkingArea.Y);
 			_fitted = true;
+		}
+
+		/// <summary>Opens where the window was last time (T8): its size always, its place only while that is still on a screen</summary>
+		private void RestorePlacement(WindowPlacement? placement)
+		{
+			if (placement == null)
+				return;
+
+			Width = Math.Max(MinWidth, placement.Width);
+			Height = Math.Max(MinHeight, placement.Height);
+			var corner = new PixelPoint(placement.X, placement.Y);
+			if (WindowFit.ShowsTitleBar(corner, Screens.All.Select(el => el.WorkingArea)))
+			{
+				WindowStartupLocation = WindowStartupLocation.Manual;
+				Position = corner;
+			}
+			if (placement.Maximized)
+				WindowState = WindowState.Maximized;
+			_lastNormal = placement with { Maximized = false };
+		}
+
+		/// <summary>
+		/// Notes the place and size while the window is neither maximized nor minimized, which is
+		/// where it goes back to. Runs after the window settles, so a window being maximized isn't
+		/// taken for one the person made that big.
+		/// </summary>
+		private void TrackPlacement()
+		{
+			if (IsVisible && WindowState == WindowState.Normal)
+				_lastNormal = new WindowPlacement(Position.X, Position.Y, ClientSize.Width, ClientSize.Height, false);
+		}
+
+		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+		{
+			base.OnPropertyChanged(change);
+			if (change.Property == ClientSizeProperty || change.Property == WindowStateProperty)
+				Dispatcher.UIThread.Post(TrackPlacement, DispatcherPriority.Background);
+		}
+
+		private void RememberPlacement()
+		{
+			if (_options.PictureFile != null)
+				return;
+
+			TrackPlacement();
+			if (_lastNormal is { } normal)
+				_viewModel.RememberWindow(normal with { Maximized = WindowState == WindowState.Maximized });
 		}
 
 		private void TakePictureAndClose(string file)
@@ -139,6 +206,7 @@ namespace Purity.Desktop.Views
 					return;
 
 				_mayClose = true;
+				RememberPlacement();
 				_viewModel.Dispose();
 				Close();
 			}
@@ -150,7 +218,9 @@ namespace Purity.Desktop.Views
 
 
 		private readonly MainWindowViewModel _viewModel;
+		private readonly StartOptions _options;
 		private readonly ListBox _periods;
+		private WindowPlacement? _lastNormal;
 		private bool _closing;
 		private bool _mayClose;
 		private bool _fitted;

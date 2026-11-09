@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Purity.Desktop.Views;
 
@@ -27,6 +28,18 @@ namespace Purity.Desktop
 			}
 
 			base.OnFrameworkInitializationCompleted();
+		}
+
+		/// <summary>Light, dark, or whatever the system uses (tweak T7). Every window follows at once.</summary>
+		public static void Apply(Appearance appearance)
+		{
+			if (Current is { } app)
+				app.RequestedThemeVariant = appearance switch
+				{
+					Appearance.Light => ThemeVariant.Light,
+					Appearance.Dark => ThemeVariant.Dark,
+					_ => ThemeVariant.Default,
+				};
 		}
 	}
 

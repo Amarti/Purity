@@ -1,16 +1,19 @@
 <!--
-  Controls drawn the way WPF draws them on Windows 10 and 11 (its Aero2 theme), with the same sizes
-  and colors, so the app matches the WPF app it replaces. Everything else comes from the Simple theme.
+  Controls drawn the way WPF draws them on Windows 10 and 11 (its Aero2 theme), with the same sizes,
+  so the app matches the WPF app it replaces. Everything else comes from the Simple theme.
+  Changes the owner approved for 2.2.0: rounded corners and lighter buttons (T6), and colors from
+  Palette.axaml, so they have a dark version too (T7).
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
-        <Setter Property="Background" Value="#FFDDDDDD"/>
-        <Setter Property="BorderBrush" Value="#FF707070"/>
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundBrush}"/>
         <Setter Property="Padding" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
@@ -19,6 +22,7 @@
                                   Background="{TemplateBinding Background}"
                                   BorderBrush="{TemplateBinding BorderBrush}"
                                   BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
                                   Padding="{TemplateBinding Padding}"
                                   Content="{TemplateBinding Content}"
                                   ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -28,37 +32,37 @@
             </ControlTemplate>
         </Setter>
         <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#FFBEE6FD"/>
-            <Setter Property="BorderBrush" Value="#FF3C7FB1"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonHoverBorderBrush}"/>
         </Style>
         <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#FFC4E5F6"/>
-            <Setter Property="BorderBrush" Value="#FF2C628B"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonPressedBorderBrush}"/>
         </Style>
         <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#FFF4F4F4"/>
-            <Setter Property="BorderBrush" Value="#FFADB2B5"/>
-            <Setter Property="Foreground" Value="#FF838383"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
         </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="#FF707070"/>
+        <Setter Property="Background" Value="{DynamicResource CheckBoxBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}"/>
         <Setter Property="Padding" Value="4,-1,0,0"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalContentAlignment" Value="Top"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="Auto,*" Background="Transparent">
-                    <Border Name="box" Width="13" Height="13" Margin="1"
+                    <Border Name="box" Width="13" Height="13" Margin="1" CornerRadius="3"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
-                        <Path Name="mark" Margin="1" Stretch="Uniform" Fill="#FF212121" IsVisible="False"
+                        <Path Name="mark" Margin="1" Stretch="Uniform" Fill="{DynamicResource CheckBoxMarkBrush}" IsVisible="False"
                               Data="F1 M 9.97498,1.22334L 4.6983,9.09834L 4.52164,9.09834L 0,5.19331L 1.27664,3.52165L 4.255,6.08833L 8.33331,1.52588e-005L 9.97498,1.22334 Z"/>
                     </Border>
                     <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1"
@@ -75,12 +79,12 @@
             <Setter Property="IsVisible" Value="True"/>
         </Style>
         <Style Selector="^:pointerover /template/ Border#box">
-            <Setter Property="Background" Value="#FFF3F9FF"/>
-            <Setter Property="BorderBrush" Value="#FF5593FF"/>
+            <Setter Property="Background" Value="{DynamicResource CheckBoxHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxHoverBorderBrush}"/>
         </Style>
         <Style Selector="^:pressed /template/ Border#box">
-            <Setter Property="Background" Value="#FFD9ECFF"/>
-            <Setter Property="BorderBrush" Value="#FF3C77DD"/>
+            <Setter Property="Background" Value="{DynamicResource CheckBoxPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxPressedBorderBrush}"/>
         </Style>
     </ControlTheme>
 
@@ -89,12 +93,14 @@
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="4,1"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <ContentPresenter Name="PART_ContentPresenter"
                                   Background="{TemplateBinding Background}"
                                   BorderBrush="{TemplateBinding BorderBrush}"
                                   BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
                                   Padding="{TemplateBinding Padding}"
                                   Content="{TemplateBinding Content}"
                                   ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -107,8 +113,8 @@
             <Setter Property="BorderBrush" Value="#A826A0DA"/>
         </Style>
         <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#3DDADADA"/>
-            <Setter Property="BorderBrush" Value="#FFDADADA"/>
+            <Setter Property="Background" Value="{DynamicResource ItemSelectedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ItemSelectedBorderBrush}"/>
         </Style>
         <Style Selector="^:selected:focus-within /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="#3D26A0DA"/>
@@ -116,18 +122,26 @@
         </Style>
     </ControlTheme>
 
+    <!-- A period in the list (T6): its own gap above and below, so the highlight under the pointer hugs the rounded card -->
+    <ControlTheme x:Key="PeriodItemTheme" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="CornerRadius" Value="8"/>
+    </ControlTheme>
+
     <!-- WPF's date field: a text box and a small calendar page showing 15 -->
     <ControlTheme x:Key="{x:Type CalendarDatePicker}" TargetType="CalendarDatePicker">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="#FFABADB3"/>
+        <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="4,0,2,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBox Name="PART_TextBox"
                                  Padding="{TemplateBinding Padding}"
@@ -142,11 +156,11 @@
                             <Button.Template>
                                 <ControlTemplate>
                                     <Grid Width="17" Height="17" Background="Transparent">
-                                        <Border Background="White" BorderBrush="#FF718597" BorderThickness="1">
+                                        <Border Background="{DynamicResource CalendarGlyphPageBrush}" BorderBrush="{DynamicResource CalendarGlyphBorderBrush}" BorderThickness="1">
                                             <Grid RowDefinitions="4,*">
-                                                <Border Background="#FF6E9ED0"/>
+                                                <Border Background="{DynamicResource CalendarGlyphTopBrush}"/>
                                                 <Ellipse Width="2" Height="2" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Row="1" Text="15" FontSize="9" Foreground="#FF2F3640"
+                                                <TextBlock Grid.Row="1" Text="15" FontSize="9" Foreground="{DynamicResource CalendarGlyphTextBrush}"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
                                             </Grid>
                                         </Border>

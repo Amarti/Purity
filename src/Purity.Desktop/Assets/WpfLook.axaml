@@ -1,17 +1,25 @@
-<!-- WPF's default look on Windows 10 and 11, so the app matches the WPF app it replaces -->
+<!--
+  WPF's default look on Windows 10 and 11, so the app matches the WPF app it replaces, with the
+  changes the owner approved for 2.2.0: rounded, airier periods (T6), a colored chip for each kind
+  of date (T4), and colors from Palette.axaml, so the app has a dark version (T7).
+-->
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:Purity.Desktop.Views">
 
     <Style Selector="Window">
         <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}"/>
         <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}"/>
     </Style>
 
-    <Style Selector="ListBox, TextBox">
-        <Setter Property="BorderBrush" Value="#FFABADB3"/>
+    <Style Selector="ListBox, TextBox, ComboBox">
+        <Setter Property="BorderBrush" Value="{DynamicResource ListBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    <Style Selector="ComboBox">
+        <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="ListBox">
         <Setter Property="Padding" Value="1"/>
@@ -20,8 +28,13 @@
     <Style Selector="TextBox">
         <Setter Property="Padding" Value="2,0,2,1"/>
         <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="VerticalContentAlignment" Value="Top"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+    </Style>
+    <!-- The date field draws its own frame around its text -->
+    <Style Selector="CalendarDatePicker TextBox">
+        <Setter Property="CornerRadius" Value="0"/>
     </Style>
 
     <!-- Not in WPF, whose buttons never turned off: a button that is off shows its icon faded, approved by the owner -->
@@ -29,9 +42,51 @@
         <Setter Property="Opacity" Value="0.35"/>
     </Style>
 
+    <!-- A period: blue once accepted, red while still open. Rounded and airier (T6) -->
+    <Style Selector="Border.Period">
+        <Setter Property="BorderBrush" Value="{DynamicResource PeriodClosedBrush}"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
+        <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="Border.Period.Open">
+        <Setter Property="BorderBrush" Value="{DynamicResource PeriodOpenBrush}"/>
+    </Style>
+
+    <!-- A period's dates: a light line under its Begin and End instead of WPF's box (T6) -->
+    <Style Selector="ListBox.Events">
+        <Setter Property="Margin" Value="12,8,12,0"/>
+        <Setter Property="Padding" Value="0,2,0,0"/>
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource EventsDividerBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
     <!-- WPF lines a list's items up on the left unless told otherwise; only the list of periods stretches them -->
     <Style Selector="ListBox.Events ListBoxItem">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+
+    <!-- The kind of date as a colored chip, one color per kind (T4) -->
+    <Style Selector="views|EventChip">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="9,2"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="views|EventChip:mikveh">
+        <Setter Property="Background" Value="{DynamicResource MikvehChipBackgroundBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource MikvehChipForegroundBrush}"/>
+    </Style>
+    <Style Selector="views|EventChip:ona-beinonit">
+        <Setter Property="Background" Value="{DynamicResource OnaBeinonitChipBackgroundBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource OnaBeinonitChipForegroundBrush}"/>
+    </Style>
+    <Style Selector="views|EventChip:veset-hodesh">
+        <Setter Property="Background" Value="{DynamicResource VesetHodeshChipBackgroundBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource VesetHodeshChipForegroundBrush}"/>
+    </Style>
+    <Style Selector="views|EventChip:veset-aflaga">
+        <Setter Property="Background" Value="{DynamicResource VesetAflagaChipBackgroundBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource VesetAflagaChipForegroundBrush}"/>
     </Style>
 
     <!-- The long date the WPF app shows on the production machine, fixed so every machine shows the same -->

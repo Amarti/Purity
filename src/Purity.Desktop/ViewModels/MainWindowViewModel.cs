@@ -78,7 +78,7 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove);
+			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance);
 			var ok = await _dialogs.ShowSettingsAsync(settings);
 			if (settings.RestoreRequested)
 			{
@@ -97,6 +97,7 @@ namespace Purity.Desktop.ViewModels
 				return;
 			}
 
+			await SetAppearanceAsync(settings.Appearance);
 			var chosen = settings.DataFilePath.Trim();
 			if (_session != null && SamePath(chosen, DataFilePath))
 				return;

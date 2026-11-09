@@ -1,22 +1,23 @@
+<!-- The WPF app's icons. Their blue and the frame of the day and night tiles come from Palette.axaml, so they show in the dark theme too -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <DrawingImage x:Key="AddPeriodIconDrawingImage" Drawing="{DynamicResource AddPeriodIconDrawingGroup}"/>
     <DrawingGroup x:Key="AddPeriodIconDrawingGroup">
         <DrawingGroup.Children>
-            <GeometryDrawing Brush="#FF0061" Geometry="M725.67,0S180.46,471.38,180.46,904.94s378,546.4,545.21,546.4c181.46,0,545.21-118.14,545.21-543.74S725.67,0,725.67,0Z"/>
+            <GeometryDrawing Brush="{DynamicResource DropBrush}" Geometry="M725.67,0S180.46,471.38,180.46,904.94s378,546.4,545.21,546.4c181.46,0,545.21-118.14,545.21-543.74S725.67,0,725.67,0Z"/>
         </DrawingGroup.Children>
     </DrawingGroup>
 
     <DrawingImage x:Key="RefreshIconDrawingImage" Drawing="{DynamicResource RefreshIconDrawingGroup}"/>
     <DrawingGroup x:Key="RefreshIconDrawingGroup">
         <DrawingGroup.Children>
-            <GeometryDrawing Brush="#5683A9" Geometry="F1 M 299.446,228.023C 300.459,231.146 300.287,234.545 299.186,237.638L 301.535,238.818C 301.629,238.859 301.706,238.942
+            <GeometryDrawing Brush="{DynamicResource IconBrush}" Geometry="F1 M 299.446,228.023C 300.459,231.146 300.287,234.545 299.186,237.638L 301.535,238.818C 301.629,238.859 301.706,238.942
                                                         301.746,239.062C 301.821,239.286 301.73,239.539 301.542,239.63L 292.586,246.401L 290.326,234.766L 290.141,233.829L
                                                         290.149,233.83C 290.102,233.614 290.182,233.39 290.347,233.307C 290.458,233.255 290.571,233.278 290.665,233.349L
                                                         293.533,234.791C 293.987,232.873 293.978,230.938 293.402,229.162C 291.841,224.353 286.689,222.237 281.127,223.693L
                                                         280.918,223.049C 281.678,222.449 282.493,221.917 283.373,221.481C 290.001,218.177 297.197,221.105 299.446,228.023 Z"/>
-            <GeometryDrawing Brush="#5683A9" Geometry="F1 M 270.938,235.445C 269.925,232.321 270.098,228.923 271.198,225.831L 268.85,224.648C 268.757,224.608 268.678,224.527
+            <GeometryDrawing Brush="{DynamicResource IconBrush}" Geometry="F1 M 270.938,235.445C 269.925,232.321 270.098,228.923 271.198,225.831L 268.85,224.648C 268.757,224.608 268.678,224.527
                                                         268.638,224.405C 268.566,224.183 268.65,223.927 268.845,223.837L 277.798,217.068L 280.059,228.703L 280.245,229.64L
                                                         280.237,229.639C 280.282,229.852 280.201,230.076 280.034,230.159C 279.926,230.213 279.813,230.188 279.721,230.117L
                                                         276.853,228.676C 276.398,230.595 276.407,232.529 276.982,234.307C 278.545,239.115 283.695,241.229 289.257,239.773L
@@ -27,7 +28,7 @@
     <DrawingImage x:Key="SettingsIconDrawingImage" Drawing="{DynamicResource SettingsIconDrawingGroup}"/>
     <DrawingGroup x:Key="SettingsIconDrawingGroup">
         <DrawingGroup.Children>
-            <GeometryDrawing Brush="#5683A9" Geometry="M2002 4724 c-115 -31 -282 -90 -386 -138 -107 -49 -306 -168 -306
+            <GeometryDrawing Brush="{DynamicResource IconBrush}" Geometry="M2002 4724 c-115 -31 -282 -90 -386 -138 -107 -49 -306 -168 -306
                                                         -183 0 -6 18 -125 39 -264 l40 -251 -78 -78 -78 -79 -249 40 c-137 21 -256 39
                                                         -264 39 -17 0 -132 -189 -186 -306 -70 -152 -164 -443 -164 -508 0 -17 48 -56
                                                         210 -175 l210 -153 0 -112 0 -112 -210 -153 c-162 -118 -210 -158 -210 -174 0
@@ -58,7 +59,7 @@
                 </GeometryGroup>
             </GeometryDrawing.Geometry>
             <GeometryDrawing.Pen>
-                <Pen Thickness="2" Brush="#5683A9" />
+                <Pen Thickness="2" Brush="{DynamicResource IconBrush}" />
             </GeometryDrawing.Pen>
         </GeometryDrawing>
     </DrawingGroup>
@@ -73,7 +74,7 @@
                 </GeometryGroup>
             </GeometryDrawing.Geometry>
             <GeometryDrawing.Pen>
-                <Pen Thickness="2" Brush="#5683A9" />
+                <Pen Thickness="2" Brush="{DynamicResource IconBrush}" />
             </GeometryDrawing.Pen>
         </GeometryDrawing>
     </DrawingGroup>
@@ -83,7 +84,7 @@
         <DrawingGroup.Children>
             <GeometryDrawing Brush="#303A45" Geometry="M0,0 L0,550 L550,550 L550,0"/>
             <GeometryDrawing Brush="Azure" Geometry="M510,365.18c-.81.28-1.65.51-2.44.85a246.77,246.77,0,0,1-200.51-1.3c-84.28-38.08-140.53-122-143.65-214.36a246.89,246.89,0,0,1,20.33-107.8,12.31,12.31,0,0,0,1-2.57c-1.14.51-3,1.27-4.14,1.8a245.92,245.92,0,0,0,79,466.72c31.64,3.4,62.88,1,93.43-8,69.36-20.46,120.33-63.16,153.18-127.59Z"/>
-            <GeometryDrawing Brush="Black" Geometry="M540,10V540H10V10H540M550,0H0V550H550V0Z"/>
+            <GeometryDrawing Brush="{DynamicResource IconFrameBrush}" Geometry="M540,10V540H10V10H540M550,0H0V550H550V0Z"/>
         </DrawingGroup.Children>
     </DrawingGroup>
 
@@ -100,7 +101,7 @@
             <GeometryDrawing Brush="Goldenrod" Geometry="M454.15,92.13c-5.23-2.83-10.53-3.8-15.85-.75a18.5,18.5,0,0,0-3.82,3Q410,118.74,385.69,143.16c-7.83,7.88-5.77,20,4.06,24.57a14.45,14.45,0,0,0,16.74-3c6.24-6.13,12.39-12.36,18.58-18.55q14.48-14.46,28.94-28.94c7.39-7.39,8.17-11.68,3.88-21.32Z"/>
             <GeometryDrawing Brush="Goldenrod" Geometry="M162.82,383.45c-5.23-2.82-10.53-3.79-15.85-.74a18.8,18.8,0,0,0-3.82,3q-24.43,24.36-48.78,48.78c-7.84,7.88-5.78,20,4.06,24.57A14.43,14.43,0,0,0,115.16,456c6.25-6.13,12.4-12.36,18.59-18.55l28.94-28.94c7.39-7.39,8.16-11.68,3.87-21.33Z"/>
             <GeometryDrawing Brush="Goldenrod" Geometry="M383.44,387.2c-2.83,5.23-3.79,10.53-.74,15.85a18.12,18.12,0,0,0,3,3.82q24.36,24.44,48.78,48.78c7.87,7.84,20,5.78,24.57-4.06A14.45,14.45,0,0,0,456,434.86c-6.13-6.25-12.36-12.4-18.55-18.58l-28.94-28.95c-7.39-7.38-11.68-8.16-21.33-3.87Z"/>
-            <GeometryDrawing Brush="Black" Geometry="M540,10V540H10V10H540M550,0H0V550H550V0Z"/>
+            <GeometryDrawing Brush="{DynamicResource IconFrameBrush}" Geometry="M540,10V540H10V10H540M550,0H0V550H550V0Z"/>
         </DrawingGroup.Children>
     </DrawingGroup>
 
@@ -119,7 +120,7 @@
             <GeometryDrawing Brush="Goldenrod" Geometry="M485.47,62.13c-3.37-1.82-6.79-2.44-10.22-.48a12.16,12.16,0,0,0-2.46,1.94Q457,79.28,441.35,95c-5.06,5.07-3.72,12.9,2.61,15.83a9.32,9.32,0,0,0,10.79-2c4-4,8-8,12-12q9.31-9.33,18.65-18.65c4.76-4.76,5.27-7.53,2.5-13.75Z"/>
             <GeometryDrawing Brush="Goldenrod" Geometry="M439.89,252.31c-1.82,3.38-2.44,6.79-.48,10.22a12.16,12.16,0,0,0,1.94,2.46q15.69,15.75,31.44,31.45c5.08,5.05,12.9,3.72,15.83-2.62a9.31,9.31,0,0,0-2-10.79c-4-4-8-8-12-12L456.05,252.4c-4.76-4.76-7.53-5.26-13.75-2.5Z"/>
             <GeometryDrawing Brush="Goldenrod" Geometry="M300.11,252.31l-2.41-2.41c-3.37-1.82-6.79-2.44-10.22-.48a12.16,12.16,0,0,0-2.46,1.94l-16.87,16.83,13.67,13.66,15.79-15.79C302.37,261.3,302.88,258.53,300.11,252.31Z"/>
-            <GeometryDrawing Brush="Black" Geometry="M540,10V540H10V10H540M550,0H0V550H550V0Z"/>
+            <GeometryDrawing Brush="{DynamicResource IconFrameBrush}" Geometry="M540,10V540H10V10H540M550,0H0V550H550V0Z"/>
         </DrawingGroup.Children>
     </DrawingGroup>
 

@@ -1,0 +1,112 @@
+<!--
+  Every color the app draws, in a light and a dark version. Light is the WPF app's look with the
+  owner's approved tweaks for 2.2.0 (T4 chips, T6 softer buttons and fields); dark (T7) follows
+  the same layout. Use these through DynamicResource only, so a change of theme repaints them.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White"/>
+            <SolidColorBrush x:Key="WindowForegroundBrush" Color="Black"/>
+            <SolidColorBrush x:Key="ListBorderBrush" Color="#ABADB3"/>
+            <SolidColorBrush x:Key="FieldBackgroundBrush" Color="White"/>
+            <SolidColorBrush x:Key="DateFieldBorderBrush" Color="#C3C9D0"/>
+
+            <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#EEF1F4"/>
+            <SolidColorBrush x:Key="ButtonBorderBrush" Color="#C5CCD3"/>
+            <SolidColorBrush x:Key="ButtonForegroundBrush" Color="Black"/>
+            <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#BEE6FD"/>
+            <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#3C7FB1"/>
+            <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="#C4E5F6"/>
+            <SolidColorBrush x:Key="ButtonPressedBorderBrush" Color="#2C628B"/>
+            <SolidColorBrush x:Key="ButtonDisabledBackgroundBrush" Color="#F4F4F4"/>
+            <SolidColorBrush x:Key="ButtonDisabledBorderBrush" Color="#ADB2B5"/>
+            <SolidColorBrush x:Key="ButtonDisabledForegroundBrush" Color="#838383"/>
+
+            <SolidColorBrush x:Key="CheckBoxBackgroundBrush" Color="White"/>
+            <SolidColorBrush x:Key="CheckBoxBorderBrush" Color="#707070"/>
+            <SolidColorBrush x:Key="CheckBoxMarkBrush" Color="#212121"/>
+            <SolidColorBrush x:Key="CheckBoxHoverBackgroundBrush" Color="#F3F9FF"/>
+            <SolidColorBrush x:Key="CheckBoxHoverBorderBrush" Color="#5593FF"/>
+            <SolidColorBrush x:Key="CheckBoxPressedBackgroundBrush" Color="#D9ECFF"/>
+            <SolidColorBrush x:Key="CheckBoxPressedBorderBrush" Color="#3C77DD"/>
+
+            <SolidColorBrush x:Key="ItemSelectedBackgroundBrush" Color="#3DDADADA"/>
+            <SolidColorBrush x:Key="ItemSelectedBorderBrush" Color="#DADADA"/>
+
+            <SolidColorBrush x:Key="CalendarGlyphPageBrush" Color="White"/>
+            <SolidColorBrush x:Key="CalendarGlyphBorderBrush" Color="#718597"/>
+            <SolidColorBrush x:Key="CalendarGlyphTextBrush" Color="#2F3640"/>
+
+            <SolidColorBrush x:Key="PeriodClosedBrush" Color="#5683A9"/>
+            <SolidColorBrush x:Key="EventsDividerBrush" Color="#DFE6EE"/>
+            <SolidColorBrush x:Key="IconBrush" Color="#5683A9"/>
+            <SolidColorBrush x:Key="IconFrameBrush" Color="Black"/>
+
+            <SolidColorBrush x:Key="MikvehChipBackgroundBrush" Color="#E2EBF3"/>
+            <SolidColorBrush x:Key="MikvehChipForegroundBrush" Color="#24496A"/>
+            <SolidColorBrush x:Key="OnaBeinonitChipBackgroundBrush" Color="#FAEEDA"/>
+            <SolidColorBrush x:Key="OnaBeinonitChipForegroundBrush" Color="#633806"/>
+            <SolidColorBrush x:Key="VesetHodeshChipBackgroundBrush" Color="#E1F5EE"/>
+            <SolidColorBrush x:Key="VesetHodeshChipForegroundBrush" Color="#085041"/>
+            <SolidColorBrush x:Key="VesetAflagaChipBackgroundBrush" Color="#EEEDFE"/>
+            <SolidColorBrush x:Key="VesetAflagaChipForegroundBrush" Color="#3C3489"/>
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1F2023"/>
+            <SolidColorBrush x:Key="WindowForegroundBrush" Color="#E4E6EA"/>
+            <SolidColorBrush x:Key="ListBorderBrush" Color="#3D4046"/>
+            <SolidColorBrush x:Key="FieldBackgroundBrush" Color="#2A2C30"/>
+            <SolidColorBrush x:Key="DateFieldBorderBrush" Color="#4A4E55"/>
+
+            <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#34373C"/>
+            <SolidColorBrush x:Key="ButtonBorderBrush" Color="#4A4E55"/>
+            <SolidColorBrush x:Key="ButtonForegroundBrush" Color="#E4E6EA"/>
+            <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#3A4654"/>
+            <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#6F9CC4"/>
+            <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="#2F3A47"/>
+            <SolidColorBrush x:Key="ButtonPressedBorderBrush" Color="#8DB4D6"/>
+            <SolidColorBrush x:Key="ButtonDisabledBackgroundBrush" Color="#2A2C30"/>
+            <SolidColorBrush x:Key="ButtonDisabledBorderBrush" Color="#3D4046"/>
+            <SolidColorBrush x:Key="ButtonDisabledForegroundBrush" Color="#6B6F76"/>
+
+            <SolidColorBrush x:Key="CheckBoxBackgroundBrush" Color="#2A2C30"/>
+            <SolidColorBrush x:Key="CheckBoxBorderBrush" Color="#9A9EA6"/>
+            <SolidColorBrush x:Key="CheckBoxMarkBrush" Color="#E4E6EA"/>
+            <SolidColorBrush x:Key="CheckBoxHoverBackgroundBrush" Color="#34373C"/>
+            <SolidColorBrush x:Key="CheckBoxHoverBorderBrush" Color="#7FB0E6"/>
+            <SolidColorBrush x:Key="CheckBoxPressedBackgroundBrush" Color="#2F3A47"/>
+            <SolidColorBrush x:Key="CheckBoxPressedBorderBrush" Color="#8DB4D6"/>
+
+            <SolidColorBrush x:Key="ItemSelectedBackgroundBrush" Color="#22FFFFFF"/>
+            <SolidColorBrush x:Key="ItemSelectedBorderBrush" Color="#555A61"/>
+
+            <SolidColorBrush x:Key="CalendarGlyphPageBrush" Color="#2A2C30"/>
+            <SolidColorBrush x:Key="CalendarGlyphBorderBrush" Color="#8A9BAB"/>
+            <SolidColorBrush x:Key="CalendarGlyphTextBrush" Color="#E4E6EA"/>
+
+            <SolidColorBrush x:Key="PeriodClosedBrush" Color="#6F9CC4"/>
+            <SolidColorBrush x:Key="EventsDividerBrush" Color="#3D4046"/>
+            <SolidColorBrush x:Key="IconBrush" Color="#7FB0E6"/>
+            <SolidColorBrush x:Key="IconFrameBrush" Color="#9A9EA6"/>
+
+            <SolidColorBrush x:Key="MikvehChipBackgroundBrush" Color="#2C4A66"/>
+            <SolidColorBrush x:Key="MikvehChipForegroundBrush" Color="#E2EBF3"/>
+            <SolidColorBrush x:Key="OnaBeinonitChipBackgroundBrush" Color="#633806"/>
+            <SolidColorBrush x:Key="OnaBeinonitChipForegroundBrush" Color="#FAEEDA"/>
+            <SolidColorBrush x:Key="VesetHodeshChipBackgroundBrush" Color="#085041"/>
+            <SolidColorBrush x:Key="VesetHodeshChipForegroundBrush" Color="#E1F5EE"/>
+            <SolidColorBrush x:Key="VesetAflagaChipBackgroundBrush" Color="#3C3489"/>
+            <SolidColorBrush x:Key="VesetAflagaChipForegroundBrush" Color="#EEEDFE"/>
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!-- The same in both: an open period's frame and the drop stay the WPF app's red -->
+    <SolidColorBrush x:Key="PeriodOpenBrush" Color="#FF0061"/>
+    <SolidColorBrush x:Key="DropBrush" Color="#FF0061"/>
+    <SolidColorBrush x:Key="CalendarGlyphTopBrush" Color="#6E9ED0"/>
+</ResourceDictionary>
