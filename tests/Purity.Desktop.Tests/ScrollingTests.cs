@@ -48,12 +48,12 @@ namespace Purity.Desktop.Tests
 			var scroll = periods.Scroll!;
 			var extent = scroll.Extent.Height;
 			Assert.True(LongestScroll(scroll) > 20000, $"The history should be long, not {LongestScroll(scroll)}");
-			Assert.Equal(LongestScroll(scroll), scroll.Offset.Y, 1);			// it opens at the newest periods
+			Assert.Equal(0, scroll.Offset.Y);			// it opens at the newest periods, at the top
 			Assert.True(Built(periods) < 20, $"Only the periods near the screen should be built, not {Built(periods)}");
 
-			var at = new Point(periods.Bounds.Width / 2, periods.Bounds.Height / 2);
-			await WheelUntil(window, at, up: true, () => scroll.Offset.Y <= 0, scroll, extent);
+			var at = periods.TranslatePoint(new Point(periods.Bounds.Width / 2, periods.Bounds.Height / 2), window)!.Value;
 			await WheelUntil(window, at, up: false, () => scroll.Offset.Y >= LongestScroll(scroll) - 0.5, scroll, extent);
+			await WheelUntil(window, at, up: true, () => scroll.Offset.Y <= 0, scroll, extent);
 
 			// By now every period was built, and none changed the list's height when it was
 			Assert.Equal(periods.ItemCount, Built(periods));
@@ -67,7 +67,7 @@ namespace Purity.Desktop.Tests
 			var scroll = periods.Scroll!;
 
 			// Click an event of the newest period, which puts the focus in that period's own list
-			var events = periods.GetVisualDescendants().OfType<ListBox>().Last(el => el.Classes.Contains("Events"));
+			var events = periods.GetVisualDescendants().OfType<ListBox>().First(el => el.Classes.Contains("Events"));
 			var row = events.GetVisualDescendants().OfType<ListBoxItem>().First();
 			var center = row.TranslatePoint(new Point(row.Bounds.Width / 2, row.Bounds.Height / 2), window)!.Value;
 			window.MouseDown(center, MouseButton.Left);
@@ -78,14 +78,31 @@ namespace Purity.Desktop.Tests
 			var start = scroll.Offset.Y;
 			for (var page = 1; page <= 3; page++)
 			{
-				Press(window, Key.PageUp);
+				Press(window, Key.PageDown);
 				await Ui.WaitUntil(() => true);
-				Assert.Equal(start - page * scroll.Viewport.Height, scroll.Offset.Y, 1);
+				Assert.Equal(start + page * scroll.Viewport.Height, scroll.Offset.Y, 1);
 			}
-			Press(window, Key.PageDown);
+			Press(window, Key.PageUp);
 			await Ui.WaitUntil(() => true);
-			Assert.Equal(start - 2 * scroll.Viewport.Height, scroll.Offset.Y, 1);
+			Assert.Equal(start + 2 * scroll.Viewport.Height, scroll.Offset.Y, 1);
 
+			await CloseAsync(window);
+		});
+
+		[Fact]
+		public Task ANewPeriodIsBroughtIntoViewFromAnywhereInTheList() => Ui.Run(async () =>
+		{
+			var (window, periods) = await OpenAsync(150);
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var scroll = periods.Scroll!;
+			((ScrollViewer)scroll).ScrollToEnd();
+			await Ui.WaitUntil(() => scroll.Offset.Y > 20000);
+
+			viewModel.AddPeriodCommand.Execute(null);
+			await Ui.WaitUntil(() => scroll.Offset.Y == 0);
+
+			Assert.False(viewModel.Periods[0].IsClosed);
+			Assert.Equal(151, viewModel.Periods.Count);
 			await CloseAsync(window);
 		});
 

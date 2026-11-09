@@ -39,8 +39,8 @@ namespace Purity.Desktop.Views
 				RestorePlacement(_viewModel.WindowPlacement);
 			PositionChanged += (_, _) => Dispatcher.UIThread.Post(TrackPlacement, DispatcherPriority.Background);
 
-			// Like the WPF app, show the newest periods whenever the list changes
-			_viewModel.Periods.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(ScrollToEnd, DispatcherPriority.Background);
+			// Show the newest periods whenever the list changes, as the WPF app does; here they're at the top
+			_viewModel.Periods.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(ScrollToNewest, DispatcherPriority.Background);
 			Opened += async (_, _) =>
 			{
 				FitToScreen();
@@ -75,10 +75,10 @@ namespace Purity.Desktop.Views
 		public Task<string?> PickDataFileAsync() => DataFilePicker.OpenAsync(StorageProvider);
 
 
-		private void ScrollToEnd()
+		private void ScrollToNewest()
 		{
 			if (_periods.Scroll is ScrollViewer viewer)
-				viewer.ScrollToEnd();
+				viewer.ScrollToHome();
 		}
 
 		/// <summary>

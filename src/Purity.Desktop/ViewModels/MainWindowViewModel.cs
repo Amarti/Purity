@@ -125,7 +125,7 @@ namespace Purity.Desktop.ViewModels
 			if (period == null)
 				return;
 
-			Periods.Add(new PeriodViewModel(period, this));
+			Periods.Insert(0, new PeriodViewModel(period, this));
 			RefreshAll();
 			UpdateCommands();
 		}
@@ -152,7 +152,7 @@ namespace Purity.Desktop.ViewModels
 		{
 			Ledger.AcceptPeriod(period.Period);
 
-			var ordered = Periods.OrderBy(el => el.Period.Begin).ToList();
+			var ordered = Periods.OrderByDescending(el => el.Period.Begin).ToList();
 			Periods.Clear();
 			foreach (var item in ordered)
 				Periods.Add(item);
@@ -395,7 +395,7 @@ namespace Purity.Desktop.ViewModels
 		private void Rebuild()
 		{
 			Periods.Clear();
-			foreach (var period in Ledger.Data)
+			foreach (var period in Enumerable.Reverse(Ledger.Data))
 				Periods.Add(new PeriodViewModel(period, this));
 			UpdateCommands();
 		}
@@ -439,6 +439,7 @@ namespace Purity.Desktop.ViewModels
 		}
 
 
+		/// <summary>The periods as the list shows them, newest first. <see cref="Ledger"/> keeps them oldest first, as the data file does.</summary>
 		public ObservableCollection<PeriodViewModel> Periods { get; } = new();
 
 		/// <summary>A problem with the data file the person should know about, or null</summary>

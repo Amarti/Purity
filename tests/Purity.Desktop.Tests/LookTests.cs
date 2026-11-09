@@ -266,7 +266,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var period = viewModel.Periods[^1];
+			var period = viewModel.Periods[0];
 			var begin = period.Period.Begin;
 			var end = period.Period.End;
 			var (beginSwitch, endSwitch) = SwitchesOf(window, period);
@@ -298,7 +298,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var (beginSwitch, endSwitch) = SwitchesOf(window, viewModel.Periods[^1]);
+			var (beginSwitch, endSwitch) = SwitchesOf(window, viewModel.Periods[0]);
 			var card = beginSwitch.FindAncestorOfType<Border>(includeSelf: false)!;
 			while (!card.Classes.Contains("Period"))
 				card = card.FindAncestorOfType<Border>(includeSelf: false)!;
@@ -319,6 +319,61 @@ namespace Purity.Desktop.Tests
 			window.Close();
 			await Ui.WaitUntil(() => !window.IsVisible);
 		});
+
+		[Fact]
+		public Task TheButtonsAreAboveTheListAndTheNewestPeriodIsOnTop() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var periods = window.FindControl<ListBox>("Periods")!;
+			double Top(Visual visual) => visual.TranslatePoint(default, window)!.Value.Y;
+
+			var buttons = TopButtons(window);
+			Assert.Equal(3, buttons.Length);
+			Assert.All(buttons, el => Assert.True(Top(el) + el.Bounds.Height < Top(periods), "The buttons should be above the list"));
+
+			Assert.Equal(0, periods.Scroll!.Offset.Y);
+			Assert.Equal(viewModel.Periods.Max(el => el.Period.Begin), viewModel.Periods[0].Period.Begin);
+			var shown = periods.GetVisualDescendants().OfType<LazyPeriod>().Where(el => el.IsBuilt).OrderBy(Top).ToArray();
+			Assert.Same(viewModel.Periods[0], shown[0].DataContext);
+			Assert.Same(viewModel.Periods[1], shown[1].DataContext);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task TabGoesFromTheButtonsToTheNewestPeriod() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var names = new List<string?>();
+			Control Focused() => (Control)window.FocusManager!.GetFocusedElement()!;
+			void Tab()
+			{
+				window.KeyPress(Key.Tab, RawInputModifiers.None, PhysicalKey.None, null);
+				window.KeyRelease(Key.Tab, RawInputModifiers.None, PhysicalKey.None, null);
+				Dispatcher.UIThread.RunJobs();
+			}
+
+			TopButtons(window)[0].Focus();
+			names.Add(AutomationProperties.GetName(Focused()));
+			Tab();
+			names.Add(AutomationProperties.GetName(Focused()));
+			Tab();
+			names.Add(AutomationProperties.GetName(Focused()));
+			Assert.Equal(new[] { "Settings", "Add period", "Refresh" }, names);
+
+			Tab();
+			Assert.Same(viewModel.Periods[0], Focused().DataContext);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+
+		private static Button[] TopButtons(Window window) =>
+			window.GetVisualDescendants().OfType<Button>().Where(el => AutomationProperties.GetName(el) is "Settings" or "Add period" or "Refresh").ToArray();
 
 
 		private async Task<MainWindow> OpenPeriodsAsync()

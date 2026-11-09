@@ -102,7 +102,7 @@ namespace Purity.Desktop.Tests
 			WriteHistory();
 			var window = await OpenAsync();
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.Equal(4, window.Periods.Count);
 			return window;
 		}

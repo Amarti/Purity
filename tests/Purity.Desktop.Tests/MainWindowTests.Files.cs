@@ -23,7 +23,7 @@ namespace Purity.Desktop.Tests
 			Assert.Empty(window.Periods);
 
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.Single(PurityFile.Parse(File.ReadAllText(DefaultDataFile)));
 		}
 
@@ -95,7 +95,7 @@ namespace Purity.Desktop.Tests
 			await window.OpenSettingsCommand.ExecuteAsync(null);
 			Assert.True(offered);
 			_dialogs.Answers.Enqueue(0);						// Yes, remove it
-			await window.Periods[^1].RemoveCommand.ExecuteAsync(null);
+			await window.Periods[0].RemoveCommand.ExecuteAsync(null);
 			Assert.Equal(3, PurityFile.Parse(File.ReadAllText(target)).Count);
 			Assert.Equal(content, File.ReadAllBytes(_dataFile));
 		}
@@ -137,7 +137,7 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(target, window.DataFilePath);
 
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.Single(PurityFile.Parse(File.ReadAllText(target)));
 			Assert.False(File.Exists(DefaultDataFile));
 		}
@@ -183,7 +183,7 @@ namespace Purity.Desktop.Tests
 			new DesktopSettings { DataFilePath = _dataFile }.Save();
 			var window = await StartFreshAsync();
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.Equal(4, window.Periods.Count);
 			Assert.Empty(_dialogs.Shown);
 			return window;

@@ -42,12 +42,12 @@ namespace Purity.Desktop.Tests
 			var window = await OpenAsync();
 
 			Assert.Equal(3, window.Periods.Count);
-			Assert.Equal(window.Periods.Select(el => el.Period.Begin).Order(), window.Periods.Select(el => el.Period.Begin));
+			Assert.Equal(window.Periods.Select(el => el.Period.Begin).OrderDescending(), window.Periods.Select(el => el.Period.Begin));
 			Assert.All(window.Periods, el => Assert.True(el.IsClosed));
-			Assert.True(window.Periods[^1].IsLast);
+			Assert.True(window.Periods[0].IsLast);
 			var engine = new PeriodLedger();
 			engine.Load(PurityFile.Parse(History()));
-			Assert.Equal(new[] { "Skip", engine.SkipLabel(engine.Data[1]), engine.SkipLabel(engine.Data[2]) }, window.Periods.Select(el => el.SkipLabel));
+			Assert.Equal(new[] { engine.SkipLabel(engine.Data[2]), engine.SkipLabel(engine.Data[1]), "Skip" }, window.Periods.Select(el => el.SkipLabel));
 			Assert.StartsWith("Skip (", window.Periods[1].SkipLabel);
 			Assert.Null(window.Warning);
 			Assert.True(window.SelfTestResult?.Passed, window.SelfTestResult?.ToString());
@@ -62,7 +62,7 @@ namespace Purity.Desktop.Tests
 			var window = await OpenAsync();
 
 			window.AddPeriodCommand.Execute(null);
-			var added = window.Periods[^1];
+			var added = window.Periods[0];
 			Assert.False(added.IsClosed);
 			Assert.Equal(Today, added.BeginDate);
 			Assert.Equal(Today.AddDays(7), added.EndDate);
@@ -76,8 +76,8 @@ namespace Purity.Desktop.Tests
 			expected.AcceptPeriod(period);
 
 			Assert.Equal(PurityFile.Format(expected.Data), ReadData());
-			Assert.True(window.Periods[^1].IsClosed);
-			Assert.Equal(expected.Data[^1].SubEvents.Count, window.Periods[^1].SubEvents.Count);
+			Assert.True(window.Periods[0].IsClosed);
+			Assert.Equal(expected.Data[^1].SubEvents.Count, window.Periods[0].SubEvents.Count);
 			Assert.Null(window.Warning);
 		}
 
@@ -112,16 +112,16 @@ namespace Purity.Desktop.Tests
 			Assert.False(window.AddPeriodCommand.CanExecute(null));
 			Assert.Equal("Accept or remove the open period first", window.AddPeriodTip);
 
-			window.Periods[^1].BeginDate = Today.AddDays(1);	// a different day, which WPF would have let through
+			window.Periods[0].BeginDate = Today.AddDays(1);	// a different day, which WPF would have let through
 			window.AddPeriodCommand.Execute(null);
 			Assert.Equal(4, window.Periods.Count);
 
-			await window.Periods[^1].RemoveCommand.ExecuteAsync(null);	// an open period goes without asking
+			await window.Periods[0].RemoveCommand.ExecuteAsync(null);	// an open period goes without asking
 			Assert.Equal(3, window.Periods.Count);
 			Assert.True(window.AddPeriodCommand.CanExecute(null));
 
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.True(window.AddPeriodCommand.CanExecute(null));
 			Assert.Equal("Add period", window.AddPeriodTip);
 			Assert.Empty(_dialogs.Shown);
@@ -136,10 +136,10 @@ namespace Purity.Desktop.Tests
 			File.WriteAllText(_dataFile, PurityFile.Format(ledger.Data), new UTF8Encoding(false));
 
 			var window = await OpenAsync();
-			Assert.False(window.Periods[^1].IsClosed);
+			Assert.False(window.Periods[0].IsClosed);
 			Assert.False(window.AddPeriodCommand.CanExecute(null));
 
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.True(window.AddPeriodCommand.CanExecute(null));
 		}
 
@@ -149,7 +149,7 @@ namespace Purity.Desktop.Tests
 			WriteHistory();
 			var window = await OpenAsync();
 			window.AddPeriodCommand.Execute(null);
-			var added = window.Periods[^1];
+			var added = window.Periods[0];
 
 			added.ToggleBeginNightCommand.Execute(null);
 			added.BeginDate = new DateTime(2031, 6, 3);
@@ -167,7 +167,7 @@ namespace Purity.Desktop.Tests
 		{
 			var content = WriteHistory();
 			var window = await OpenAsync();
-			var last = window.Periods[^1];
+			var last = window.Periods[0];
 
 			_dialogs.Answers.Enqueue(1);					// No
 			await last.RemoveCommand.ExecuteAsync(null);
@@ -177,7 +177,7 @@ namespace Purity.Desktop.Tests
 			_dialogs.Answers.Enqueue(0);					// Yes
 			await last.RemoveCommand.ExecuteAsync(null);
 			Assert.Equal(2, window.Periods.Count);
-			Assert.True(window.Periods[^1].IsLast);
+			Assert.True(window.Periods[0].IsLast);
 
 			var expected = new PeriodLedger();
 			expected.Load(PurityFile.Parse(History()));
@@ -197,7 +197,7 @@ namespace Purity.Desktop.Tests
 			Assert.Contains("can't be read", window.Warning);
 
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.Single(_dialogs.Shown);					// told once, not on every save
 			Assert.Equal(damaged, File.ReadAllBytes(_dataFile));
 
@@ -222,7 +222,7 @@ namespace Purity.Desktop.Tests
 
 			_dialogs.Answers.Enqueue(1);					// Keep the file's
 			window.AddPeriodCommand.Execute(null);
-			await window.Periods[^1].AcceptCommand.ExecuteAsync(null);
+			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 
 			Assert.Contains("disagree", Assert.Single(_dialogs.Shown));
 			var saved = PurityFile.Parse(ReadData());

@@ -82,7 +82,7 @@ namespace Purity.Desktop.Tests
 			var stamps = Stamps();
 			Assert.All(periods.GetVisualDescendants().OfType<CalendarDatePicker>(), el => Assert.IsType<DateField>(el));
 
-			// Scroll up the list one notch at a time, always with the pointer over a date field. The
+			// Scroll down the list one notch at a time, always with the pointer over a date field. The
 			// list builds periods as they come near, so the periods themselves are what's checked.
 			var offsets = new HashSet<double>();
 			for (var notch = 0; notch < 6; notch++)
@@ -90,12 +90,12 @@ namespace Purity.Desktop.Tests
 				var field = periods.GetVisualDescendants().OfType<CalendarDatePicker>()
 					.Where(el => el.IsEffectivelyVisible && el.Bounds.Height > 0)
 					.Select(el => (Field: el, At: Center(el, window)))
-					.Where(el => el.At.Y > 0 && el.At.Y < window.Bounds.Height - 60)
+					.Where(el => el.At.Y > 60 && el.At.Y < window.Bounds.Height - 30)			// on the list, not the buttons above it
 					.OrderBy(el => el.At.Y)
 					.First();
 				offsets.Add(periods.Scroll!.Offset.Y);
 
-				window.MouseWheel(field.At, new Vector(0, 1));
+				window.MouseWheel(field.At, new Vector(0, -1));
 				await Ui.WaitUntil(() => true);
 				Assert.Equal(stamps, Stamps());
 			}

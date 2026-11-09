@@ -179,10 +179,10 @@ if run_app_picture && [ "$manual" = yes ]; then
 	echo "Last step: the app opens with a made-up history for you to try. In it:"
 	echo "  1. Scroll the list with the mouse wheel or trackpad, keeping the pointer over the"
 	echo "     date boxes. No date should change."
-	echo "  2. Click the pink drop at the bottom to add a period. Click the little calendar in"
+	echo "  2. Click the pink drop at the top to add a period. Click the little calendar in"
 	echo "     its End box and pick a date, then click the sun next to it so it shows a moon."
 	echo "  3. Click the tick on the right of the new period to accept it. Its dates appear under it."
-	echo "  4. Click the gear at the bottom left, then \"...\" next to the data file path. Cancel"
+	echo "  4. Click the gear at the top left, then \"...\" next to the data file path. Cancel"
 	echo "     the file chooser, then press Cancel in Settings."
 	echo "  5. Close the window. The questions follow."
 	printf 'Press Return to open the app ... '
