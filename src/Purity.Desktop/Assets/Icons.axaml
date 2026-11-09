@@ -19,6 +19,18 @@
         </DrawingGroup.Children>
     </DrawingGroup>
 
+    <!-- The same drop hollow, before the end date of a period still open -->
+    <DrawingImage x:Key="OpenEndIconDrawingImage" Drawing="{DynamicResource OpenEndIconDrawingGroup}"/>
+    <DrawingGroup x:Key="OpenEndIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Geometry="{StaticResource DropGeometry}">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="120" Brush="{DynamicResource IconBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
     <DrawingImage x:Key="RefreshIconDrawingImage" Drawing="{DynamicResource RefreshIconDrawingGroup}"/>
     <DrawingGroup x:Key="RefreshIconDrawingGroup">
         <DrawingGroup.Children>

@@ -5,10 +5,10 @@
   kind of date has a colored chip (T4). For 2.2.1: Begin and End on their own lines, each with a
   Day | Night switch (T3b), and date fields wide enough for the whole date. For 2.2.2: the buttons
   are above the list and the newest period comes first, where WPF has them at the bottom. For
-  2.2.3: all but the first period fold to one line (T2), an arrow joins the two dates in place of
-  the Begin and End labels, Remove is at the left, the wide button closes the open period, in place
-  of the tick WPF has on each period (E4), that open period stays above the list, and an empty list
-  says what to do first (E3).
+  2.2.3: all but the first period fold to one line (T2), a drop before each date replaces the Begin
+  and End labels and shows whether the end is final, Remove is at the left, the wide button closes
+  the open period, in place of the tick WPF has on each period (E4), that open period stays above
+  the list, and an empty list says what to do first (E3).
 -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -17,8 +17,8 @@
         xmlns:views="using:Purity.Desktop.Views"
         x:Class="Purity.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="Purity" Width="694" Height="861"
-        MinWidth="650" MinHeight="400"
+        Title="Purity" Width="620" Height="861"
+        MinWidth="620" MinHeight="400"
         WindowStartupLocation="CenterScreen"
         Icon="/Assets/Purity.ico">
 
@@ -27,8 +27,8 @@
         <DataTemplate x:Key="PeriodCardTemplate" x:DataType="vm:PeriodViewModel">
             <Border Classes="Period" Classes.Open="{Binding !IsClosed}">
                 <StackPanel>
-                    <!-- The two dates on their own lines (T3b), joined by an arrow that starts where the line under them starts -->
-                    <Grid Margin="4,0,12,0" ColumnDefinitions="25,28,Auto,Auto,*,Auto" RowDefinitions="25,25" RowSpacing="5">
+                    <!-- The two dates on their own lines (T3b), their drops starting where the line under them starts -->
+                    <Grid Margin="4,0,12,0" ColumnDefinitions="25,Auto,Auto,Auto,*,Auto" RowDefinitions="25,25" RowSpacing="5">
                         <!-- The first period has Remove here, and every other accepted one the arrow that folds it -->
                         <Button Grid.RowSpan="2" Height="25" Width="25" VerticalAlignment="Center" ToolTip.Tip="Remove period" AutomationProperties.Name="Remove period" Command="{Binding RemoveCommand}" IsVisible="{Binding IsLast}">
                             <Image Height="18" Width="18" Source="{StaticResource RemoveIconDrawingImage}"/>
@@ -37,16 +37,15 @@
                                 Command="{Binding ToggleFoldCommand}" ToolTip.Tip="Fold this period" AutomationProperties.Name="Fold this period">
                             <Path HorizontalAlignment="Center" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round" Data="M1,1 L6,6 L11,1"/>
                         </Button>
-                        <!-- From the upper date field's edge, down, and into the lower one's: the line in one piece, its dot and head filled -->
-                        <Panel Grid.Column="1" Grid.RowSpan="2" Margin="6,0,0,0">
-                            <Path Stroke="{DynamicResource IconBrush}" StrokeThickness="1.4" StrokeLineCap="Round" StrokeJoin="Round"
-                                  Data="M18.8,12.5 L9,12.5 Q5,12.5 5,16.5 L5,38.5 Q5,42.5 9,42.5 L21,42.5"/>
-                            <Path Stroke="{DynamicResource IconBrush}" StrokeThickness="1.4" StrokeLineCap="Round" StrokeJoin="Round" Fill="{DynamicResource IconBrush}"
-                                  Data="M18.8,12.5 a1.6,1.6 0 1,0 3.2,0 a1.6,1.6 0 1,0 -3.2,0 M16.9,38.3 L21.4,42.5 L16.9,46.7"/>
-                        </Panel>
-                        <views:DateField Grid.Column="2" Classes="Wpf" Width="210" SelectedDate="{Binding BeginDate}" AutomationProperties.Name="From"/>
+                        <!-- A full pink drop for the start, and for the end a blue one, hollow until the period is closed. The start drop sits exactly where a folded line's does. -->
+                        <Image Grid.Column="1" Margin="6,0,0,0" Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource AddPeriodIconDrawingImage}"/>
+                        <views:DateField Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding BeginDate}" AutomationProperties.Name="From"/>
                         <views:DayNightSwitch Grid.Column="3" Margin="6,0,0,0" IsNight="{Binding BeginIsAfterDusk}" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="From day or night"/>
-                        <views:DateField Grid.Row="1" Grid.Column="2" Classes="Wpf" Width="210" SelectedDate="{Binding EndDate}" AutomationProperties.Name="To"/>
+                        <Panel Grid.Row="1" Grid.Column="1" Margin="6,0,0,0" Height="16" Width="13" VerticalAlignment="Center">
+                            <Image Source="{StaticResource OpenEndIconDrawingImage}" IsVisible="{Binding !IsClosed}"/>
+                            <Image Source="{StaticResource ClosePeriodIconDrawingImage}" IsVisible="{Binding IsClosed}"/>
+                        </Panel>
+                        <views:DateField Grid.Row="1" Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding EndDate}" AutomationProperties.Name="To"/>
                         <views:DayNightSwitch Grid.Row="1" Grid.Column="3" Margin="6,0,0,0" IsNight="{Binding EndIsAfterDusk}" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="To day or night"/>
                         <!-- Last, so it ends exactly where a folded line's number ends -->
                         <CheckBox Grid.Column="5" Grid.RowSpan="2" Margin="15,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
@@ -81,8 +80,8 @@
         </DataTemplate>
     </Window.Resources>
 
-    <!-- The periods follow the window's width up to 660, and in a wider window stay that wide in the middle -->
-    <Grid MaxWidth="700" ColumnDefinitions="20,*,20" RowDefinitions="Auto,Auto,*,Auto,20">
+    <!-- The periods keep the width their longest line needs, and in a wider window stay in the middle -->
+    <Grid MaxWidth="620" ColumnDefinitions="20,*,20" RowDefinitions="Auto,Auto,*,Auto,20">
 
         <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" ColumnDefinitions="40,*,40">
             <Button Grid.Column="0" Margin="-10,10,0,0" Height="30" Width="30" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings" AutomationProperties.Name="Settings">
@@ -127,30 +126,30 @@
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:PeriodViewModel">
                     <views:LazyPeriod IsFolded="{Binding IsFolded}" PeriodTemplate="{StaticResource PeriodCardTemplate}">
-                        <!-- A past period as one line (T2): its two dates joined by an arrow, the arrows lined up from line to line -->
+                        <!-- A past period as one line (T2): its two dates, each with its drop, lined up from line to line -->
                         <views:LazyPeriod.FoldedTemplate>
                             <DataTemplate x:DataType="vm:PeriodViewModel">
                                 <Border Classes="Period">
                                     <Button Theme="{StaticResource PlainButtonTheme}" Command="{Binding ToggleFoldCommand}" AutomationProperties.Name="{Binding BeginText, StringFormat='Open the period from {0}'}">
-                                        <Grid Margin="4,0,12,0" Height="28" ColumnDefinitions="25,Auto,Auto,Auto,*,Auto">
+                                        <Grid Margin="4,0,12,0" Height="28" ColumnDefinitions="25,Auto,Auto,*,Auto">
                                             <Path HorizontalAlignment="Center" VerticalAlignment="Center" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round" Data="M1,1 L6,6 L1,11"/>
-                                            <StackPanel Grid.Column="1" Margin="6,0,0,0" Width="200" Orientation="Horizontal" Spacing="5">
+                                            <StackPanel Grid.Column="1" Margin="6,0,0,0" Width="210" Orientation="Horizontal" Spacing="5">
+                                                <Image Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource AddPeriodIconDrawingImage}"/>
                                                 <TextBlock Text="{Binding BeginText}" VerticalAlignment="Center"/>
                                                 <Panel Height="15" Width="15" VerticalAlignment="Center">
                                                     <Image Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !BeginIsAfterDusk}"/>
                                                     <Image Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding BeginIsAfterDusk}"/>
                                                 </Panel>
                                             </StackPanel>
-                                            <Path Grid.Column="2" Margin="6,0,16,0" VerticalAlignment="Center" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.4" StrokeLineCap="Round" StrokeJoin="Round"
-                                                  Fill="{DynamicResource IconBrush}" Data="M0,5 a1.6,1.6 0 1,0 3.2,0 a1.6,1.6 0 1,0 -3.2,0 M3.2,5 L34,5 M29.5,0.8 L34,5 L29.5,9.2"/>
-                                            <StackPanel Grid.Column="3" Width="200" Orientation="Horizontal" Spacing="5">
+                                            <StackPanel Grid.Column="2" Margin="16,0,0,0" Width="210" Orientation="Horizontal" Spacing="5">
+                                                <Image Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource ClosePeriodIconDrawingImage}"/>
                                                 <TextBlock Text="{Binding EndText}" VerticalAlignment="Center"/>
                                                 <Panel Height="15" Width="15" VerticalAlignment="Center">
                                                     <Image Source="{StaticResource AfterDawnIconDrawingImage}" IsVisible="{Binding !EndIsAfterDusk}"/>
                                                     <Image Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding EndIsAfterDusk}"/>
                                                 </Panel>
                                             </StackPanel>
-                                            <TextBlock Grid.Column="5" Text="{Binding FoldedNote}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding FoldedNote}" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Button>
                                 </Border>

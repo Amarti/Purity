@@ -128,14 +128,14 @@ namespace Purity.Desktop.Tests
 			var window = new MainWindow(new StartOptions(Path.Combine(_root, "pureData.json")));
 
 			Assert.True(window.CanResize);
-			Assert.Equal(694, window.Width);
+			Assert.Equal(620, window.Width);
 			Assert.Equal(861, window.Height);
-			Assert.Equal(650, window.MinWidth);
+			Assert.Equal(620, window.MinWidth);
 			Assert.Equal(WindowFit.MinimumHeight, window.MinHeight);
 		});
 
 		[Fact]
-		public Task ThePeriodsNarrowWithTheWindowAndStayInTheMiddleOfAWiderOne() => Ui.Run(async () =>
+		public Task ThePeriodsKeepTheirWidthAndStayInTheMiddleOfAWiderWindow() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();
 			var periods = window.FindControl<ListBox>("Periods")!;
@@ -146,15 +146,15 @@ namespace Purity.Desktop.Tests
 				Dispatcher.UIThread.RunJobs();
 			}
 
-			Assert.Equal(654, periods.Bounds.Width);
+			Assert.Equal(580, periods.Bounds.Width);
 			Assert.Equal(20, Left());
 
 			Resize(1000);
-			Assert.Equal(660, periods.Bounds.Width);
-			Assert.Equal(170, Left());
+			Assert.Equal(580, periods.Bounds.Width);
+			Assert.Equal(210, Left());
 
 			Resize(window.MinWidth);
-			Assert.Equal(610, periods.Bounds.Width);
+			Assert.Equal(580, periods.Bounds.Width);
 			Assert.Equal(20, Left());
 
 			// Only Skip, 78 wide at its widest, depends on the font
@@ -178,11 +178,11 @@ namespace Purity.Desktop.Tests
 			// Never smaller than the window allows, and pictures always show the starting size
 			new DesktopSettings { DataFilePath = Path.Combine(_root, "pureData.json"), Window = new WindowPlacement(40, 30, 300, 200, false) }.Save();
 			window = new MainWindow(new StartOptions(null));
-			Assert.Equal(650, window.Width);
+			Assert.Equal(620, window.Width);
 			Assert.Equal(WindowFit.MinimumHeight, window.Height);
 			Assert.Equal(WindowState.Normal, window.WindowState);
 			window = new MainWindow(new StartOptions(Path.Combine(_root, "pureData.json"), Path.Combine(_root, "picture.png")));
-			Assert.Equal(694, window.Width);
+			Assert.Equal(620, window.Width);
 			Assert.Equal(861, window.Height);
 		});
 
@@ -307,7 +307,6 @@ namespace Purity.Desktop.Tests
 			while (!card.Classes.Contains("Period"))
 				card = card.FindAncestorOfType<Border>(includeSelf: false)!;
 			var fields = card.GetVisualDescendants().OfType<DateField>().ToArray();
-			var arrow = ((Grid)fields[0].Parent!).Children.OfType<Panel>().Single(el => Grid.GetColumn(el) == 1);
 			var events = card.GetVisualDescendants().OfType<ListBox>().Single(el => el.Classes.Contains("Events"));
 			Point At(Visual visual) => visual.TranslatePoint(default, card)!.Value;
 
@@ -317,8 +316,9 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(At(fields[0]).Y + 30, At(fields[1]).Y);
 			Assert.Equal(At(beginSwitch).X, At(endSwitch).X);
 			Assert.Equal(At(fields[0]).Y, At(beginSwitch).Y);
-			Assert.Equal(At(events).X, At(arrow).X);
-			Assert.Equal(At(fields[0]).X, At(arrow).X + arrow.Bounds.Width);			// it runs right up to the fields
+			var startDrop = ((Grid)fields[0].Parent!).Children.OfType<Image>().Single();
+			Assert.Equal(At(events).X, At(startDrop).X);
+			Assert.True(At(startDrop).X + startDrop.Bounds.Width <= At(fields[0]).X, "The drop should be before the date");
 			Assert.Equal(126, beginSwitch.Bounds.Width);
 
 			window.Close();
@@ -359,11 +359,6 @@ namespace Purity.Desktop.Tests
 			var viewModel = (MainWindowViewModel)window.DataContext!;
 			var button = window.GetVisualDescendants().OfType<Button>().Single(el => AutomationProperties.GetName(el) == "New period");
 			Image Shown() => button.GetVisualDescendants().OfType<Panel>().Single(el => el.Classes.Contains("Shown")).Children.OfType<Image>().Single();
-			object Resource(string key)
-			{
-				Assert.True(Application.Current!.TryGetResource(key, Application.Current.ActualThemeVariant, out var value));
-				return value!;
-			}
 
 			Assert.Same(Resource("AddPeriodIconDrawingImage"), Shown().Source);
 			Assert.Equal(Color.Parse("#FF0061"), IconColor("AddPeriodIconDrawingGroup"));
@@ -378,6 +373,35 @@ namespace Purity.Desktop.Tests
 			App.Apply(Appearance.Dark);
 			Dispatcher.UIThread.RunJobs();
 			Assert.Equal(Color.Parse("#7FB0E6"), IconColor("ClosePeriodIconDrawingGroup"));
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task EachDateHasADropAndAnOpenPeriodsEndDropIsHollow() => Themed(async () =>
+		{
+			App.Apply(Appearance.Light);
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var pink = Resource("AddPeriodIconDrawingImage");
+			var blue = Resource("ClosePeriodIconDrawingImage");
+			var hollow = Resource("OpenEndIconDrawingImage");
+
+			Assert.Equal(new[] { pink, blue }, DropsOf(window, viewModel.Periods[0]));
+
+			viewModel.AddPeriodCommand.Execute(null);
+			var open = viewModel.Periods[0];
+			await Ui.WaitUntil(() => SwitchCount(window, open) == 2);
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(new[] { pink, hollow }, DropsOf(window, open));
+
+			var outline = Icon("OpenEndIconDrawingGroup").Children.OfType<GeometryDrawing>().Single();
+			Assert.Equal(Colors.Transparent, ColorOf(outline.Brush));
+			Assert.Equal(Color.Parse("#5683A9"), ColorOf(outline.Pen!.Brush));
+			App.Apply(Appearance.Dark);
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(Color.Parse("#7FB0E6"), ColorOf(outline.Pen!.Brush));
 
 			window.Close();
 			await Ui.WaitUntil(() => !window.IsVisible);
@@ -528,6 +552,20 @@ namespace Purity.Desktop.Tests
 			return (switches[0], switches[1]);
 		}
 
+		private static object Resource(string key)
+		{
+			Assert.True(Application.Current!.TryGetResource(key, Application.Current.ActualThemeVariant, out var value));
+			return value!;
+		}
+
+		/// <summary>The drops showing before a period's two dates, start first</summary>
+		private static object?[] DropsOf(Window window, PeriodViewModel period)
+		{
+			var field = window.GetVisualDescendants().OfType<DateField>().First(el => el.DataContext == period);
+			var column = ((Grid)field.Parent!).Children.Where(el => Grid.GetColumn(el) == 1).ToArray();
+			return column.SelectMany(el => el is Image ? new[] { (Image)el } : el.GetVisualDescendants().OfType<Image>()).Where(el => el.IsVisible).Select(el => (object?)el.Source).ToArray();
+		}
+
 		private static int SwitchCount(Window window, PeriodViewModel period) =>
 			window.GetVisualDescendants().OfType<DayNightSwitch>().Count(el => el.DataContext == period);
 
@@ -604,8 +642,8 @@ namespace Purity.Desktop.Tests
 		/// <summary>The longest date, "Wednesday, 29 September ...", is 170 wide in Segoe UI and 175 in Linux's Liberation Sans; the field's frame and calendar page take 29</summary>
 		private const double WholeDateWidth = 210;
 
-		/// <summary>A date line's arrow, date field and switch, with their gaps and the one before Skip</summary>
-		private const double RestOfTheDateLine = 22 + 210 + 132 + 15;
+		/// <summary>A date line's drop, date field and switch, with their gaps and the one before Skip</summary>
+		private const double RestOfTheDateLine = 13 + 215 + 132 + 15;
 
 		private readonly string _root = Path.Combine(Path.GetTempPath(), $"purity-desktop-{Guid.NewGuid():N}");
 	}

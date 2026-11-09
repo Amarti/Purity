@@ -150,7 +150,7 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task AFoldedLineHasItsDatesJoinedByAnArrowAndEndsWhereSkipEnds() => Ui.Run(async () =>
+		public Task AFoldedLineSaysItsDatesAndLinesUpWithAnOpenPeriod() => Ui.Run(async () =>
 		{
 			var (window, periods) = await OpenAsync(30, folded: true);
 			var skip = periods.GetVisualDescendants().OfType<CheckBox>().Single();
@@ -160,7 +160,13 @@ namespace Purity.Desktop.Tests
 			var number = line.GetVisualDescendants().OfType<TextBlock>().Single(el => el.Text == period.FoldedNote);
 
 			Assert.Equal(new[] { period.BeginText, period.EndText, period.FoldedNote }, texts);
-			Assert.Equal(2, line.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>().Count());			// the arrow that opens it, and the one between the dates
+			Assert.Single(line.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>());			// only the arrow that opens it
+			var shown = line.GetVisualDescendants().OfType<Image>().Where(el => el.IsVisible).Select(el => el.Source).ToArray();
+			Assert.True(Application.Current!.TryGetResource("AddPeriodIconDrawingImage", Application.Current.ActualThemeVariant, out var pink));
+			Assert.True(Application.Current!.TryGetResource("ClosePeriodIconDrawingImage", Application.Current.ActualThemeVariant, out var blue));
+			Assert.Same(pink, shown[0]);			// each date has its drop, then its day or night
+			Assert.Same(blue, shown[2]);
+			Assert.Equal(4, shown.Length);
 
 			// Each is last on a line with the same right margin. The test screen's made-up font is wider than any
 			// real one and pushes Skip out past the edge, so the positions themselves are checked in the real app.
@@ -170,6 +176,12 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(Avalonia.Layout.HorizontalAlignment.Right, skip.HorizontalAlignment);
 			Assert.Equal(skipLine.ColumnDefinitions.Count - 1, Grid.GetColumn(skip));
 			Assert.Equal(numberLine.ColumnDefinitions.Count - 1, Grid.GetColumn(number));
+
+			// The start drop is in the same place whether a period is folded or not
+			var openDrop = skipLine.Children.OfType<Image>().Single();
+			var foldedDrop = line.GetVisualDescendants().OfType<Image>().First(el => el.IsVisible);
+			Assert.Equal(openDrop.TranslatePoint(default, periods)!.Value.X, foldedDrop.TranslatePoint(default, periods)!.Value.X);
+			Assert.Equal(openDrop.Bounds.Width, foldedDrop.Bounds.Width);
 
 			await CloseAsync(window);
 		});
