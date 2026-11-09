@@ -38,6 +38,6 @@ cat "$work/app.txt"
 
 grep -q '^result: passed' "$work/app.txt" || fail "The app couldn't picture its window" "$work/app.txt"
 grep -q '^self-test: passed' "$work/app.txt" || fail "The app's check of its date calculations didn't pass" "$work/app.txt"
-grep -q '^font: Liberation Sans' "$work/app.txt" || fail "The package didn't bring in Liberation Sans" "$work/app.txt"
+grep -q '^font: Heebo' "$work/app.txt" || fail "The app isn't using its built-in Heebo" "$work/app.txt"
 cmp -s "$sample" "$work/sample.json" || fail "Opening the app changed the data file"
 echo "The package works on $system"

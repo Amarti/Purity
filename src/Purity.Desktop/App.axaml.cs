@@ -15,7 +15,7 @@ namespace Purity.Desktop
 		{
 			Loc.Instance.TakeOverCulture();
 			AvaloniaXamlLoader.Load(this);
-			Resources[AppFont.ResourceKey] = AppFont.Choose();
+			Resources[AppFont.ResourceKey] = AppFont.Family;
 		}
 
 		public override void OnFrameworkInitializationCompleted()

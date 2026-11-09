@@ -16,7 +16,7 @@
     <AssemblyName>Purity</AssemblyName>
     <Product>Purity</Product>
     <!-- The one place the version is set: the window title, the Mac bundle and the Linux package all take it from here -->
-    <Version>2.3.1</Version>
+    <Version>2.3.2</Version>
     <ApplicationIcon>Assets\Purity.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
     <!-- dotnet run starts where Visual Studio's launch profile does, so the profile's relative paths work for both -->

@@ -736,7 +736,7 @@ namespace Purity.Desktop.Tests
 		}
 
 
-		/// <summary>The longest date, "Wednesday, 29 September ...", is 170 wide in Segoe UI and 175 in Linux's Liberation Sans; the field's frame and calendar page take 29</summary>
+		/// <summary>The longest date, "Wednesday, 29 September ...", has to fit in Heebo, beside the field's frame and calendar page, which take 29</summary>
 		private const double WholeDateWidth = 210;
 
 		/// <summary>A date line's drop, date field and switch, with their gaps and the one before Skip</summary>

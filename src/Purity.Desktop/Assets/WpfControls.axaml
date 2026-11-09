@@ -45,6 +45,29 @@
             <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
         </Style>
+
+        <!-- The button that confirms a window: filled, so it stands out from the ones beside it -->
+        <Style Selector="^.Confirm">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.Confirm /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="^.Confirm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Confirm:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmPressedBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Confirm:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
