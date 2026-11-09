@@ -82,7 +82,7 @@ namespace Purity.Desktop
 		/// </summary>
 		public void Listen() => _listening = Task.Run(() => ListenAsync(_stop.Token));
 
-		/// <summary>Brings the window to the front. Called on a pool thread.</summary>
+		/// <summary>Brings the window to the front. Called on the thread that answers later starts, so it must not wait for anything.</summary>
 		public Action? Show
 		{
 			set

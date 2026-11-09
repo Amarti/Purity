@@ -42,13 +42,13 @@ namespace Purity.Desktop.Tests
 		{
 			using var running = SingleInstance.TryAcquire(_folder)!;
 			running.Listen();
-			var shown = new TaskCompletionSource();
+			var shown = NewSignal();
 			running.Show = () => shown.TrySetResult();
 
 			Assert.True(SingleInstance.AskRunningToShow(_folder));
 			await shown.Task.WaitAsync(TimeSpan.FromSeconds(10));
 
-			shown = new TaskCompletionSource();
+			shown = NewSignal();
 			running.Show = () => shown.TrySetResult();
 			Assert.True(SingleInstance.AskRunningToShow(_folder));	// and again, as often as it's started
 			await shown.Task.WaitAsync(TimeSpan.FromSeconds(10));
@@ -61,7 +61,7 @@ namespace Purity.Desktop.Tests
 			running.Listen();
 			Assert.True(SingleInstance.AskRunningToShow(_folder));	// before the window exists
 
-			var shown = new TaskCompletionSource();
+			var shown = NewSignal();
 			await Task.Delay(200);
 			running.Show = () => shown.TrySetResult();
 			await shown.Task.WaitAsync(TimeSpan.FromSeconds(10));
@@ -97,7 +97,7 @@ namespace Purity.Desktop.Tests
 			using var next = SingleInstance.TryAcquire(_folder);
 			Assert.NotNull(next);
 			next!.Listen();
-			var shown = new TaskCompletionSource();
+			var shown = NewSignal();
 			next.Show = () => shown.TrySetResult();
 			Assert.True(SingleInstance.AskRunningToShow(_folder));
 			await shown.Task.WaitAsync(TimeSpan.FromSeconds(10));
@@ -121,6 +121,12 @@ namespace Purity.Desktop.Tests
 			await Task.Delay(TimeSpan.FromSeconds(60));
 		}
 
+
+		/// <summary>
+		/// Show runs on the thread that answers requests. A plain completion source would carry the
+		/// test on right there, and the test's next request would then wait for its own thread to answer.
+		/// </summary>
+		private static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 		private Process StartHolder()
 		{
