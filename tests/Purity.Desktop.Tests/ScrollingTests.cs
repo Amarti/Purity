@@ -1,9 +1,11 @@
 using System.Text;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Purity.Core;
 using Purity.Desktop.ViewModels;
@@ -106,8 +108,111 @@ namespace Purity.Desktop.Tests
 			await CloseAsync(window);
 		});
 
+		[Fact]
+		public Task AFoldedHistoryScrollsSteadilyToBothEnds() => Ui.Run(async () =>
+		{
+			var (window, periods) = await OpenAsync(150, folded: true);
+			var scroll = periods.Scroll!;
+			var extent = scroll.Extent.Height;
+			Assert.True(LongestScroll(scroll) > 3000, $"The history should still need scrolling, not {LongestScroll(scroll)}");
+			Assert.Single(periods.GetVisualDescendants().OfType<LazyPeriod>(), el => !el.IsFolded);
 
-		private async Task<(MainWindow, ListBox)> OpenAsync(int periodCount)
+			var at = periods.TranslatePoint(new Point(periods.Bounds.Width / 2, periods.Bounds.Height / 2), window)!.Value;
+			await WheelUntil(window, at, up: false, () => scroll.Offset.Y >= LongestScroll(scroll) - 0.5, scroll, extent);
+			await WheelUntil(window, at, up: true, () => scroll.Offset.Y <= 0, scroll, extent);
+
+			await CloseAsync(window);
+		});
+
+		[Fact]
+		public Task PressingAFoldedLineOpensItAndItsArrowFoldsItBack() => Ui.Run(async () =>
+		{
+			var (window, periods) = await OpenAsync(30, folded: true);
+			var scroll = periods.Scroll!;
+			var extent = scroll.Extent.Height;
+			var line = FoldedLines(periods).First();
+			var period = (PeriodViewModel)line.DataContext!;
+			Assert.Equal(2, periods.GetVisualDescendants().OfType<DateField>().Count());
+
+			PressOn(line, window);
+			await Ui.WaitUntil(() => !period.IsFolded && periods.GetVisualDescendants().OfType<DateField>().Count() == 4);
+			await Ui.WaitUntil(() => scroll.Extent.Height > extent);
+
+			var arrow = periods.GetVisualDescendants().OfType<Button>().Single(el => AutomationProperties.GetName(el) == "Fold this period" && el.DataContext == period);
+			PressOn(arrow, window);
+			await Ui.WaitUntil(() => period.IsFolded && periods.GetVisualDescendants().OfType<DateField>().Count() == 2);
+			await Ui.WaitUntil(() => scroll.Extent.Height == extent);			// back to exactly the height it had
+
+			await CloseAsync(window);
+		});
+
+		[Fact]
+		public Task AFoldedLineHasItsDatesJoinedByAnArrowAndEndsWhereSkipEnds() => Ui.Run(async () =>
+		{
+			var (window, periods) = await OpenAsync(30, folded: true);
+			var skip = periods.GetVisualDescendants().OfType<CheckBox>().Single();
+			var line = FoldedLines(periods).First();
+			var period = (PeriodViewModel)line.DataContext!;
+			var texts = line.GetVisualDescendants().OfType<TextBlock>().Select(el => el.Text).ToArray();
+			var number = line.GetVisualDescendants().OfType<TextBlock>().Single(el => el.Text == period.FoldedNote);
+
+			Assert.Equal(new[] { period.BeginText, period.EndText, period.FoldedNote }, texts);
+			Assert.Equal(2, line.GetVisualDescendants().OfType<Avalonia.Controls.Shapes.Path>().Count());			// the arrow that opens it, and the one between the dates
+
+			// Each is last on a line with the same right margin. The test screen's made-up font is wider than any
+			// real one and pushes Skip out past the edge, so the positions themselves are checked in the real app.
+			var skipLine = (Grid)skip.Parent!;
+			var numberLine = (Grid)number.Parent!;
+			Assert.Equal(numberLine.Margin.Right, skipLine.Margin.Right);
+			Assert.Equal(Avalonia.Layout.HorizontalAlignment.Right, skip.HorizontalAlignment);
+			Assert.Equal(skipLine.ColumnDefinitions.Count - 1, Grid.GetColumn(skip));
+			Assert.Equal(numberLine.ColumnDefinitions.Count - 1, Grid.GetColumn(number));
+
+			await CloseAsync(window);
+		});
+
+		[Fact]
+		public Task APeriodOpenedAtTheBottomComesFullyIntoView() => Ui.Run(async () =>
+		{
+			var (window, periods) = await OpenAsync(60, folded: true);
+			var scroll = (ScrollViewer)periods.Scroll!;
+			scroll.ScrollToEnd();
+			await Ui.WaitUntil(() => scroll.Offset.Y >= LongestScroll(scroll) - 0.5);
+			await Task.Delay(50);
+			await Ui.WaitUntil(() => FoldedLines(periods).Any());
+
+			var line = FoldedLines(periods).OrderBy(el => el.TranslatePoint(default, periods)!.Value.Y).Last();
+			var period = (PeriodViewModel)line.DataContext!;
+			PressOn(line, window);
+			await Ui.WaitUntil(() => !period.IsFolded);
+			await Task.Delay(100);
+			await Ui.WaitUntil(() => true);
+
+			var row = periods.GetVisualDescendants().OfType<LazyPeriod>().Single(el => el.DataContext == period);
+			var bottom = row.TranslatePoint(new Point(0, row.Bounds.Height), periods)!.Value.Y;
+			Assert.True(bottom <= periods.Bounds.Height + 1, $"The opened period ends at {bottom:0}, past the list's {periods.Bounds.Height:0}");
+
+			await CloseAsync(window);
+		});
+
+
+		private static IEnumerable<Button> FoldedLines(ListBox periods) =>
+			periods.GetVisualDescendants().OfType<Button>().Where(el => AutomationProperties.GetName(el)?.StartsWith("Open the period") == true);
+
+		private static void PressOn(Control control, Window window)
+		{
+			// The pointer finds what was last drawn, so a frame has to be drawn first
+			Dispatcher.UIThread.RunJobs();
+			AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+			Dispatcher.UIThread.RunJobs();
+
+			var center = control.TranslatePoint(new Point(control.Bounds.Width / 2, control.Bounds.Height / 2), window)!.Value;
+			window.MouseDown(center, MouseButton.Left);
+			window.MouseUp(center, MouseButton.Left);
+			Dispatcher.UIThread.RunJobs();
+		}
+
+		private async Task<(MainWindow, ListBox)> OpenAsync(int periodCount, bool folded = false)
 		{
 			var dataFile = Path.Combine(_root, "pureData.json");
 			File.WriteAllBytes(dataFile, Encoding.UTF8.GetBytes(History(periodCount)));
@@ -117,8 +222,13 @@ namespace Purity.Desktop.Tests
 			var viewModel = (MainWindowViewModel)window.DataContext!;
 			var periods = window.FindControl<ListBox>("Periods")!;
 			await Ui.WaitUntil(() => viewModel.Periods.Count == periodCount && periods.GetVisualDescendants().OfType<CalendarDatePicker>().Any());
+			if (!folded)
+				foreach (var period in viewModel.Periods)
+					period.IsFolded = false;
 			await Task.Delay(200);
 			await Ui.WaitUntil(() => true);					// the list scrolls to the newest periods first
+			((ScrollViewer)periods.Scroll!).ScrollToHome();			// opening them all scrolled to the last one opened
+			await Ui.WaitUntil(() => true);
 			return (window, periods);
 		}
 

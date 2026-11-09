@@ -123,10 +123,32 @@
         </Style>
     </ControlTheme>
 
-    <!-- A period in the list (T6): its own gap above and below, so the highlight under the pointer hugs the rounded card -->
+    <!-- A period in the list (T6): its own gap above and below, so the highlight under the pointer hugs the rounded card, equally on every side -->
     <ControlTheme x:Key="PeriodItemTheme" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
         <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="Padding" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
+    </ControlTheme>
+
+    <!-- A button that is only its content: a folded period's line, and the arrow that folds one (T2) -->
+    <ControlTheme x:Key="PlainButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </ControlTemplate>
+        </Setter>
     </ControlTheme>
 
     <!-- One half of the Day | Night switch (T3b) -->

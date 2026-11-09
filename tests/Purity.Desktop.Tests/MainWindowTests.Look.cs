@@ -55,6 +55,20 @@ namespace Purity.Desktop.Tests
 		}
 
 		[Fact]
+		public async Task AWindowOpenedOnADataFileForThisRunOnlyIsKeptToo()
+		{
+			WriteHistory();
+			var window = await OpenAsync();					// given for this run only, as --data does
+			var placement = new WindowPlacement(120, 80, 820, 640, false);
+
+			window.RememberWindow(placement);
+
+			var settings = DesktopSettings.Load();
+			Assert.Equal(placement, settings.Window);
+			Assert.True(string.IsNullOrWhiteSpace(settings.DataFilePath), "A file given for one run mustn't reach the settings");
+		}
+
+		[Fact]
 		public async Task ClosingTheFirstQuestionKeepsNoWindowPlaceEither()
 		{
 			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue);

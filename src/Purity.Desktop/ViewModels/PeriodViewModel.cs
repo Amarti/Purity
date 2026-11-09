@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Purity.Core;
@@ -93,6 +94,37 @@ namespace Purity.Desktop.ViewModels
 		}
 
 		public string SkipLabel => _owner.Ledger.SkipLabel(Period);
+
+		/// <summary>Whether the period shows as a single line (T2). Only a matter of what's on screen, so nothing about it is saved.</summary>
+		[ObservableProperty]
+		public partial bool IsFolded { get; set; }
+
+		/// <summary>The first period in the list always shows in full, and one still open is waiting to be accepted or removed</summary>
+		public bool CanFold => IsClosed && !IsLast;
+
+		[RelayCommand]
+		private void ToggleFold()
+		{
+			if (IsFolded || CanFold)
+				IsFolded = !IsFolded;
+		}
+
+		public string BeginText => LongDate(Period.Begin);
+		public string EndText => LongDate(Period.End);
+
+		/// <summary>The end of a folded line: that the period is skipped, or else the interval before it</summary>
+		public string FoldedNote
+		{
+			get
+			{
+				if (Period.SkipStreak)
+					return "Skipped";
+
+				var length = _owner.Ledger.PeriodLength(Period);
+				return length > 0 ? string.Create(CultureInfo.InvariantCulture, $"({length})") : string.Empty;
+			}
+		}
+
 		public bool IsClosed => Period.Closed;
 		public bool IsLast => _owner.IsLast(Period);
 		public ObservableCollection<PurityEvent> SubEvents { get; }
@@ -107,6 +139,9 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>The WPF picker showed the UTC date. For the +00:00 stamps the app writes, that is the stamp's own date.</summary>
 		private static DateTime ShownDate(DateTimeOffset stamp) => stamp.UtcDateTime.Date;
+
+		/// <summary>The text a date field shows. The app runs without OS culture data, so that's the invariant culture everywhere.</summary>
+		private static string LongDate(DateTimeOffset stamp) => ShownDate(stamp).ToString("dddd, d MMMM yyyy", CultureInfo.InvariantCulture);
 
 		/// <summary>Moves between the day and night onah of the same date, as the WPF buttons do</summary>
 		private static DateTimeOffset Toggled(DateTimeOffset stamp) =>

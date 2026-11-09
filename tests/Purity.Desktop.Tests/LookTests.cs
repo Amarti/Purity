@@ -97,6 +97,10 @@ namespace Purity.Desktop.Tests
 			File.WriteAllText(dataFile, History());
 			var window = new MainWindow(new StartOptions(dataFile));
 			window.Show();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			await Ui.WaitUntil(() => viewModel.Periods.Count == 4);
+			foreach (var period in viewModel.Periods)
+				period.IsFolded = false;
 			await Ui.WaitUntil(() => Chips(window).Select(el => el.Type).Distinct().Count() == 4);
 
 			var light = Chips(window).GroupBy(el => el.Type).ToDictionary(el => el.Key, el => el.Select(chip => ColorOf(chip.Background)).Distinct().Single());
@@ -153,9 +157,9 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(610, periods.Bounds.Width);
 			Assert.Equal(20, Left());
 
-			// Only the "Begin" label, 30 wide in Segoe UI, depends on the font; the rest of the line is fixed
+			// Only Skip, 78 wide at its widest, depends on the font
 			var events = periods.GetVisualDescendants().OfType<ListBox>().First(el => el.Classes.Contains("Events"));
-			Assert.True(events.Bounds.Width - RestOfTheDateLine >= 40, $"The lines have {events.Bounds.Width} to fit in");
+			Assert.True(events.Bounds.Width - RestOfTheDateLine >= 78, $"The lines have {events.Bounds.Width} to fit in");
 
 			window.Close();
 			await Ui.WaitUntil(() => !window.IsVisible);
@@ -271,8 +275,8 @@ namespace Purity.Desktop.Tests
 			var end = period.Period.End;
 			var (beginSwitch, endSwitch) = SwitchesOf(window, period);
 
-			Assert.Equal("Begin day or night", AutomationProperties.GetName(beginSwitch));
-			Assert.Equal("End day or night", AutomationProperties.GetName(endSwitch));
+			Assert.Equal("From day or night", AutomationProperties.GetName(beginSwitch));
+			Assert.Equal("To day or night", AutomationProperties.GetName(endSwitch));
 			Assert.False(beginSwitch.IsNight);
 
 			Press(Halves(beginSwitch).Night, window);
@@ -303,7 +307,7 @@ namespace Purity.Desktop.Tests
 			while (!card.Classes.Contains("Period"))
 				card = card.FindAncestorOfType<Border>(includeSelf: false)!;
 			var fields = card.GetVisualDescendants().OfType<DateField>().ToArray();
-			var begin = card.GetVisualDescendants().OfType<TextBlock>().First(el => el.Text == "Begin");
+			var arrow = ((Grid)fields[0].Parent!).Children.OfType<Panel>().Single(el => Grid.GetColumn(el) == 1);
 			var events = card.GetVisualDescendants().OfType<ListBox>().Single(el => el.Classes.Contains("Events"));
 			Point At(Visual visual) => visual.TranslatePoint(default, card)!.Value;
 
@@ -313,8 +317,35 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(At(fields[0]).Y + 30, At(fields[1]).Y);
 			Assert.Equal(At(beginSwitch).X, At(endSwitch).X);
 			Assert.Equal(At(fields[0]).Y, At(beginSwitch).Y);
-			Assert.Equal(At(events).X, At(begin).X);
+			Assert.Equal(At(events).X, At(arrow).X);
+			Assert.Equal(At(fields[0]).X, At(arrow).X + arrow.Bounds.Width);			// it runs right up to the fields
 			Assert.Equal(126, beginSwitch.Bounds.Width);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task TheFirstPeriodHasRemoveAtTheLeftAndTheOthersTheArrowThatFoldsThem() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var periods = window.FindControl<ListBox>("Periods")!;
+			var (first, second) = (viewModel.Periods[0], viewModel.Periods[1]);
+			second.IsFolded = false;
+			await Ui.WaitUntil(() => SwitchCount(window, second) == 2);
+			Button Named(PeriodViewModel period, string name) =>
+				window.GetVisualDescendants().OfType<Button>().Single(el => el.DataContext == period && AutomationProperties.GetName(el) == name);
+
+			var remove = Named(first, "Remove period");
+			Assert.Equal(0, Grid.GetColumn(remove));
+			Assert.True(remove.IsEffectivelyVisible);
+			Assert.False(Named(first, "Fold this period").IsEffectivelyVisible);
+			Assert.False(Named(second, "Remove period").IsEffectivelyVisible);
+			Assert.True(Named(second, "Fold this period").IsEffectivelyVisible);
+
+			// The highlight around a period is as thin at the sides as above and below
+			Assert.Equal(new Thickness(1), ((ListBoxItem)periods.ContainerFromIndex(0)!).Padding);
 
 			window.Close();
 			await Ui.WaitUntil(() => !window.IsVisible);
@@ -395,6 +426,9 @@ namespace Purity.Desktop.Tests
 			return (switches[0], switches[1]);
 		}
 
+		private static int SwitchCount(Window window, PeriodViewModel period) =>
+			window.GetVisualDescendants().OfType<DayNightSwitch>().Count(el => el.DataContext == period);
+
 		private static (RadioButton Day, RadioButton Night) Halves(DayNightSwitch control)
 		{
 			var halves = control.GetVisualDescendants().OfType<RadioButton>().ToArray();
@@ -468,8 +502,8 @@ namespace Purity.Desktop.Tests
 		/// <summary>The longest date, "Wednesday, 29 September ...", is 170 wide in Segoe UI and 175 in Linux's Liberation Sans; the field's frame and calendar page take 29</summary>
 		private const double WholeDateWidth = 210;
 
-		/// <summary>A date line's date field, switch, Skip and two buttons, with their gaps</summary>
-		private const double RestOfTheDateLine = 215 + 132 + 80 + 40 + 40;
+		/// <summary>A date line's arrow, date field, switch and Accept button, with their gaps and the one before Skip</summary>
+		private const double RestOfTheDateLine = 22 + 210 + 132 + 25 + 15;
 
 		private readonly string _root = Path.Combine(Path.GetTempPath(), $"purity-desktop-{Guid.NewGuid():N}");
 	}

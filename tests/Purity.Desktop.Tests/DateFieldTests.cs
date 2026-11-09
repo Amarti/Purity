@@ -75,6 +75,8 @@ namespace Purity.Desktop.Tests
 			var viewModel = (ViewModels.MainWindowViewModel)window.DataContext!;
 			var periods = window.FindControl<ListBox>("Periods")!;
 			await Ui.WaitUntil(() => viewModel.Periods.Count > 0 && periods.GetVisualDescendants().OfType<CalendarDatePicker>().Any());
+			foreach (var period in viewModel.Periods)
+				period.IsFolded = false;
 			await Task.Delay(200);
 			await Ui.WaitUntil(() => true);					// the list scrolls to the newest periods first
 

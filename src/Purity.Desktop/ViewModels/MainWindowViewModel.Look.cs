@@ -10,13 +10,13 @@ namespace Purity.Desktop.ViewModels
 		public WindowPlacement? WindowPlacement => _settings.Window;
 
 		/// <summary>
-		/// Keeps the main window's place for next time. Only once a data file is chosen, so closing
-		/// the first question still leaves no settings behind. Not being able to save it only means
-		/// the window opens where it did before.
+		/// Keeps the main window's place for next time. Only with a data file open, whether from the
+		/// settings or for this run only, so closing the first question still leaves no settings
+		/// behind. Not being able to save it only means the window opens where it did before.
 		/// </summary>
 		public void RememberWindow(WindowPlacement placement)
 		{
-			if (string.IsNullOrWhiteSpace(_settings.DataFilePath) || placement == _settings.Window)
+			if (string.IsNullOrWhiteSpace(DataFilePath) || placement == _settings.Window)
 				return;
 
 			_settings.Window = placement;

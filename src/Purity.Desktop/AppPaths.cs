@@ -11,13 +11,16 @@ namespace Purity.Desktop
 	/// </summary>
 	public static class AppPaths
 	{
+		/// <summary>Relative paths given at the start mean this folder, even after a file dialog changes the current one</summary>
+		internal static readonly string StartFolder = Environment.CurrentDirectory;
+
 		public static string Folder
 		{
 			get
 			{
 				var custom = Environment.GetEnvironmentVariable("PURITY_APP_DATA");
 				if (!string.IsNullOrWhiteSpace(custom))
-					return Path.GetFullPath(custom);
+					return Path.GetFullPath(custom, StartFolder);
 
 				var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
 				return Path.Combine(local, "Purity");

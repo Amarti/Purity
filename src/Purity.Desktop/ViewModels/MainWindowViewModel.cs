@@ -25,7 +25,7 @@ namespace Purity.Desktop.ViewModels
 		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null)
 		{
 			_dialogs = dialogs;
-			_dataFileOverride = dataFileOverride;
+			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
 			_clock = clock;
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
@@ -125,6 +125,8 @@ namespace Purity.Desktop.ViewModels
 			if (period == null)
 				return;
 
+			if (Periods.Count > 0)
+				Periods[0].IsFolded = true;				// only the first period shows in full, and that's the new one now
 			Periods.Insert(0, new PeriodViewModel(period, this));
 			RefreshAll();
 			UpdateCommands();
@@ -156,6 +158,7 @@ namespace Purity.Desktop.ViewModels
 			Periods.Clear();
 			foreach (var item in ordered)
 				Periods.Add(item);
+			KeepFirstPeriodOpen();
 			RefreshAll();
 			UpdateCommands();
 
@@ -170,6 +173,7 @@ namespace Purity.Desktop.ViewModels
 				return;
 
 			Periods.Remove(period);
+			KeepFirstPeriodOpen();
 			RefreshAll();
 			UpdateCommands();
 
@@ -395,9 +399,17 @@ namespace Purity.Desktop.ViewModels
 		private void Rebuild()
 		{
 			Periods.Clear();
+			var first = Ledger.Data.LastOrDefault();
 			foreach (var period in Enumerable.Reverse(Ledger.Data))
-				Periods.Add(new PeriodViewModel(period, this));
+				Periods.Add(new PeriodViewModel(period, this) { IsFolded = period.Closed && period != first });
 			UpdateCommands();
+		}
+
+		/// <summary>The first period in the list always shows in full, whichever one that has become</summary>
+		private void KeepFirstPeriodOpen()
+		{
+			if (Periods.Count > 0)
+				Periods[0].IsFolded = false;
 		}
 
 		private void RefreshAll()

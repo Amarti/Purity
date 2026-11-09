@@ -16,9 +16,11 @@
     <AssemblyName>Purity</AssemblyName>
     <Product>Purity</Product>
     <!-- The one place the version is set: the window title, the Mac bundle and the Linux package all take it from here -->
-    <Version>2.2.2</Version>
+    <Version>2.2.3</Version>
     <ApplicationIcon>Assets\Purity.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- dotnet run starts where Visual Studio's launch profile does, so the profile's relative paths work for both -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)/../../tests/synthetic-data</RunWorkingDirectory>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

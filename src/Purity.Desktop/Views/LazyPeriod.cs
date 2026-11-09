@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Avalonia.Threading;
 using Purity.Core;
 using Purity.Desktop.ViewModels;
 
@@ -12,8 +13,8 @@ namespace Purity.Desktop.Views
 	/// <summary>
 	/// One period in the main window's list, built only once it comes near the part of the list on
 	/// screen. Until then it takes exactly the height it will have, which it knows from a period with
-	/// as many events, since everything in a period has a fixed height. So the list knows its full
-	/// height from the start, and the scroll bar never has to guess.
+	/// as many events, or from any other folded one, since everything in a period has a fixed height.
+	/// So the list knows its full height from the start, and the scroll bar never has to guess.
 	/// </summary>
 	/// <remarks>
 	/// Avalonia's virtualizing list guesses the height of the items it hasn't built yet. With periods
@@ -25,6 +26,12 @@ namespace Purity.Desktop.Views
 	{
 		public static readonly StyledProperty<IDataTemplate?> PeriodTemplateProperty =
 			AvaloniaProperty.Register<LazyPeriod, IDataTemplate?>(nameof(PeriodTemplate));
+
+		public static readonly StyledProperty<IDataTemplate?> FoldedTemplateProperty =
+			AvaloniaProperty.Register<LazyPeriod, IDataTemplate?>(nameof(FoldedTemplate));
+
+		public static readonly StyledProperty<bool> IsFoldedProperty =
+			AvaloniaProperty.Register<LazyPeriod, bool>(nameof(IsFolded));
 
 		public LazyPeriod()
 		{
@@ -42,9 +49,38 @@ namespace Purity.Desktop.Views
 			set => SetValue(PeriodTemplateProperty, value);
 		}
 
+		/// <summary>The single line a folded period shows instead (T2)</summary>
+		public IDataTemplate? FoldedTemplate
+		{
+			get => GetValue(FoldedTemplateProperty);
+			set => SetValue(FoldedTemplateProperty, value);
+		}
+
+		public bool IsFolded
+		{
+			get => GetValue(IsFoldedProperty);
+			set => SetValue(IsFoldedProperty, value);
+		}
+
 		/// <summary>Whether the period's controls exist, for tests</summary>
 		internal bool IsBuilt => Child != null;
 
+
+		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+		{
+			base.OnPropertyChanged(change);
+			if (change.Property != IsFoldedProperty)
+				return;
+
+			InvalidateMeasure();				// even one not built yet changes height
+			if (Child == null)
+				return;
+
+			Child = null;
+			Build();
+			if (!IsFolded)
+				Dispatcher.UIThread.Post(() => Child?.BringIntoView(), DispatcherPriority.Background);		// opened near the bottom, it would be mostly out of sight
+		}
 
 		protected override void OnDataContextChanged(EventArgs e)
 		{
@@ -60,15 +96,15 @@ namespace Purity.Desktop.Views
 
 		protected override Size MeasureOverride(Size availableSize)
 		{
-			var count = _events?.Count ?? 0;
-			if (Child == null && Heights.TryGetValue(count, out var height))
+			var kind = IsFolded ? Folded : _events?.Count ?? 0;
+			if (Child == null && Heights.TryGetValue(kind, out var height))
 				return new Size(0, height);
 
-			// The first period with this many events shows how tall they all are
+			// The first period of this kind shows how tall they all are
 			Build();
 			var size = base.MeasureOverride(availableSize);
 			if (Child != null)
-				Heights[count] = size.Height;
+				Heights[kind] = size.Height;
 			return size;
 		}
 
@@ -79,14 +115,17 @@ namespace Purity.Desktop.Views
 
 		private void Build()
 		{
-			if (Child == null && PeriodTemplate != null)
-				Child = PeriodTemplate.Build(DataContext);
+			if (Child == null && (IsFolded ? FoldedTemplate : PeriodTemplate) is { } template)
+				Child = template.Build(DataContext);
 		}
 
 		private void OnEventsChanged(object? sender, NotifyCollectionChangedEventArgs e) => InvalidateMeasure();
 
 
-		/// <summary>The height of a period, by its number of events</summary>
+		/// <summary>The kind of period in <see cref="Heights"/> that a folded one is; otherwise the kind is its number of events</summary>
+		private const int Folded = -1;
+
+		/// <summary>The height of a period, by its kind</summary>
 		private static readonly Dictionary<int, double> Heights = new();
 
 		private ObservableCollection<PurityEvent>? _events;

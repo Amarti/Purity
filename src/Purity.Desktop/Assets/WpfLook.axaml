@@ -54,7 +54,7 @@
 
     <!-- A period's dates: a light line under its Begin and End instead of WPF's box (T6) -->
     <Style Selector="ListBox.Events">
-        <Setter Property="Margin" Value="12,8,12,0"/>
+        <Setter Property="Margin" Value="35,8,12,0"/>
         <Setter Property="Padding" Value="0,2,0,0"/>
         <Setter Property="BorderThickness" Value="0,1,0,0"/>
         <Setter Property="BorderBrush" Value="{DynamicResource EventsDividerBrush}"/>
