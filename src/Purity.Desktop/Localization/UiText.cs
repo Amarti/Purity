@@ -57,6 +57,9 @@ namespace Purity.Desktop.Localization
 		public required Func<int, string> InDays { get; init; }
 		public required Func<string, string> TodayLine { get; init; }
 
+		// A date in the other calendar
+		public required Func<string, bool, string> HebrewDateTip { get; init; }
+
 		// The settings window
 		public required string DataFilePathLabel { get; init; }
 		public required string PickFileTip { get; init; }

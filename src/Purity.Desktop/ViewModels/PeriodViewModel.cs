@@ -47,6 +47,7 @@ namespace Purity.Desktop.ViewModels
 				Period.Begin = Stamps.FromDate(date, BeginIsAfterDusk);
 				OnPropertyChanged();
 				OnPropertyChanged(nameof(SkipLabel));
+				OnPropertyChanged(nameof(BeginInOtherCalendar));
 			}
 		}
 
@@ -58,6 +59,7 @@ namespace Purity.Desktop.ViewModels
 			Period.Begin = Toggled(Period.Begin);
 			OnPropertyChanged(nameof(BeginIsAfterDusk));
 			OnPropertyChanged(nameof(SkipLabel));
+			OnPropertyChanged(nameof(BeginInOtherCalendar));
 		}
 
 		/// <inheritdoc cref="BeginDate"/>
@@ -71,6 +73,7 @@ namespace Purity.Desktop.ViewModels
 
 				Period.End = Stamps.FromDate(date, EndIsAfterDusk);
 				OnPropertyChanged();
+				OnPropertyChanged(nameof(EndInOtherCalendar));
 			}
 		}
 
@@ -81,6 +84,7 @@ namespace Purity.Desktop.ViewModels
 		{
 			Period.End = Toggled(Period.End);
 			OnPropertyChanged(nameof(EndIsAfterDusk));
+			OnPropertyChanged(nameof(EndInOtherCalendar));
 		}
 
 		public bool SkipStreak
@@ -122,6 +126,12 @@ namespace Purity.Desktop.ViewModels
 
 		public string BeginText => LongDate(Period.Begin);
 		public string EndText => LongDate(Period.End);
+
+		/// <summary>The same onah in the other calendar: a tooltip on desktop, and a line under the field on a touch screen</summary>
+		public string BeginInOtherCalendar => InOtherCalendar(Period.Begin);
+
+		/// <inheritdoc cref="BeginInOtherCalendar"/>
+		public string EndInOtherCalendar => InOtherCalendar(Period.End);
 
 		/// <summary>What a folded line's button does, for screen readers</summary>
 		public string OpenLabel => Loc.T.OpenPeriodFrom(BeginText);
@@ -171,6 +181,8 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>The text a date field shows, in the language being shown. It never comes from the OS's culture data, so no machine setting can change it.</summary>
 		private static string LongDate(DateTimeOffset stamp) => ShownDate(stamp).ToString("dddd, d MMMM yyyy", Loc.Instance.DateCulture);
+
+		private static string InOtherCalendar(DateTimeOffset stamp) => Loc.T.HebrewDateTip(DateText.HebrewOfOnah(stamp), PurityEvent.IsDateAfterDusk(stamp));
 
 		/// <summary>Moves between the day and night onah of the same date, as the WPF buttons do</summary>
 		private static DateTimeOffset Toggled(DateTimeOffset stamp) =>

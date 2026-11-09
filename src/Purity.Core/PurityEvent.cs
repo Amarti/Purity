@@ -48,7 +48,7 @@ namespace Purity.Core
 		[JsonIgnore]
 		public bool IsFullDay => Type == PurityEventType.OnaBeinonit;
 		[JsonIgnore]
-		public string StampHebRepr => DateText.Hebrew(IsDateAfterDusk(Stamp) ? Stamp.AddDays(1) : Stamp);
+		public string StampHebRepr => DateText.HebrewOfOnah(Stamp);
 		[JsonIgnore]
 		public string StampHebReprAvalonia => DateText.ReversedForOldAvalonia(StampHebRepr);
 		[JsonIgnore]

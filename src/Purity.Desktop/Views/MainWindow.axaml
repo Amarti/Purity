@@ -9,7 +9,9 @@
   and End labels and shows whether the end is final, Remove is at the left, the wide button closes
   the open period, in place of the tick WPF has on each period (E4), that open period stays above
   the list, and an empty list says what to do first (E3). For 2.2.4: a strip above the list shows
-  the next date (T1), and dates already past are greyed with a line marking today (T5).
+  the next date (T1), and dates already past are greyed with a line marking today (T5). For
+  2.3.0: English or Hebrew, chosen in Settings, with Hebrew right to left. For 2.3.1: each date's
+  tooltip names the same onah in the Hebrew calendar.
 -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -42,13 +44,13 @@
                         </Button>
                         <!-- A full pink drop for the start, and for the end a blue one, hollow until the period is closed. The start drop sits exactly where a folded line's does. -->
                         <Image Grid.Column="1" Margin="6,0,0,0" Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource AddPeriodIconDrawingImage}"/>
-                        <views:DateField Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding BeginDate}" AutomationProperties.Name="{Binding Text.From, Source={x:Static loc:Loc.Instance}}"/>
+                        <views:DateField Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding BeginDate}" ToolTip.Tip="{Binding BeginInOtherCalendar}" AutomationProperties.Name="{Binding Text.From, Source={x:Static loc:Loc.Instance}}"/>
                         <views:DayNightSwitch Grid.Column="3" Margin="6,0,0,0" IsNight="{Binding BeginIsAfterDusk}" Command="{Binding ToggleBeginNightCommand}" AutomationProperties.Name="{Binding Text.FromDayOrNight, Source={x:Static loc:Loc.Instance}}"/>
                         <Panel Grid.Row="1" Grid.Column="1" Margin="6,0,0,0" Height="16" Width="13" VerticalAlignment="Center">
                             <Image Source="{StaticResource OpenEndIconDrawingImage}" IsVisible="{Binding !IsClosed}"/>
                             <Image Source="{StaticResource ClosePeriodIconDrawingImage}" IsVisible="{Binding IsClosed}"/>
                         </Panel>
-                        <views:DateField Grid.Row="1" Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding EndDate}" AutomationProperties.Name="{Binding Text.To, Source={x:Static loc:Loc.Instance}}"/>
+                        <views:DateField Grid.Row="1" Grid.Column="2" Classes="Wpf" Margin="5,0,0,0" Width="210" SelectedDate="{Binding EndDate}" ToolTip.Tip="{Binding EndInOtherCalendar}" AutomationProperties.Name="{Binding Text.To, Source={x:Static loc:Loc.Instance}}"/>
                         <views:DayNightSwitch Grid.Row="1" Grid.Column="3" Margin="6,0,0,0" IsNight="{Binding EndIsAfterDusk}" Command="{Binding ToggleEndNightCommand}" AutomationProperties.Name="{Binding Text.ToDayOrNight, Source={x:Static loc:Loc.Instance}}"/>
                         <!-- Last, so it ends exactly where a folded line's number ends -->
                         <CheckBox Grid.Column="5" Grid.RowSpan="2" Margin="15,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="{Binding SkipStreak}" Content="{Binding SkipLabel}"
@@ -161,7 +163,7 @@
                                     <Button Theme="{StaticResource PlainButtonTheme}" Command="{Binding ToggleFoldCommand}" AutomationProperties.Name="{Binding OpenLabel}">
                                         <Grid Margin="4,0,12,0" Height="28" ColumnDefinitions="25,Auto,Auto,*,Auto">
                                             <Path HorizontalAlignment="Center" VerticalAlignment="Center" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round" Data="M1,1 L6,6 L1,11"/>
-                                            <StackPanel Grid.Column="1" Margin="6,0,0,0" Width="210" Orientation="Horizontal" Spacing="5">
+                                            <StackPanel Grid.Column="1" Margin="6,0,0,0" Width="210" Orientation="Horizontal" Spacing="5" Background="Transparent" ToolTip.Tip="{Binding BeginInOtherCalendar}">
                                                 <Image Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource AddPeriodIconDrawingImage}"/>
                                                 <TextBlock Text="{Binding BeginText}" VerticalAlignment="Center"/>
                                                 <Panel Height="15" Width="15" VerticalAlignment="Center">
@@ -169,7 +171,7 @@
                                                     <Image Source="{StaticResource AfterDuskIconDrawingImage}" IsVisible="{Binding BeginIsAfterDusk}"/>
                                                 </Panel>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2" Margin="16,0,0,0" Width="210" Orientation="Horizontal" Spacing="5">
+                                            <StackPanel Grid.Column="2" Margin="16,0,0,0" Width="210" Orientation="Horizontal" Spacing="5" Background="Transparent" ToolTip.Tip="{Binding EndInOtherCalendar}">
                                                 <Image Height="16" Width="13" VerticalAlignment="Center" Source="{StaticResource ClosePeriodIconDrawingImage}"/>
                                                 <TextBlock Text="{Binding EndText}" VerticalAlignment="Center"/>
                                                 <Panel Height="15" Width="15" VerticalAlignment="Center">

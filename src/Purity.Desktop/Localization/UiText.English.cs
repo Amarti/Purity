@@ -36,6 +36,7 @@ namespace Purity.Desktop.Localization
 			Tomorrow = "Tomorrow",
 			InDays = days => $"in {days} days",
 			TodayLine = date => $"Today, {date}",
+			HebrewDateTip = (date, night) => $"{date}, {(night ? "night" : "day")}",
 
 			DataFilePathLabel = "Data file path:",
 			PickFileTip = "Use a data file you already have, such as the one your other computers use",

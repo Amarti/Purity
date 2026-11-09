@@ -140,6 +140,7 @@ namespace Purity.Desktop.Tests
 					Func<string, string> oneName => oneName("x"),
 					Func<int, string> oneCount => oneCount(3),
 					Func<string, string, string> twoNames => twoNames("x", "y"),
+					Func<string, bool, string> nameAndChoice => nameAndChoice("x", true),
 					Func<int, string, string> countAndName => countAndName(3, "x"),
 					Func<int, int, string> twoCounts => twoCounts(3, 2),
 					_ => throw new InvalidOperationException($"{property.Name} has a type this test doesn't know"),

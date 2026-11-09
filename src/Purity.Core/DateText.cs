@@ -34,6 +34,9 @@ namespace Purity.Core
 			return $"{HebrewDays[Calendar.GetDayOfMonth(date) - 1]} {months[Calendar.GetMonth(date) - 1]}";
 		}
 
+		/// <summary>Hebrew date of the onah a stamp stands for: a night belongs to the date it opens</summary>
+		public static string HebrewOfOnah(DateTimeOffset stamp) => Hebrew(PurityEvent.IsDateAfterDusk(stamp) ? stamp.AddDays(1) : stamp);
+
 		/// <summary>Short Gregorian date, such as 4 Sept</summary>
 		public static string Gregorian(DateTimeOffset stamp) => Gregorian(stamp, GregorianMonths);
 

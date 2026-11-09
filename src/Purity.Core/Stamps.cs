@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 
 namespace Purity.Core
@@ -19,5 +20,32 @@ namespace Purity.Core
 
 		/// <summary>Same, for pickers that return a date with an offset: the date the user saw is the one kept</summary>
 		public static DateTimeOffset FromDate(DateTimeOffset pickedDate, bool afterDusk) => FromDate(pickedDate.DateTime, afterDusk);
+
+		/// <summary>The Hebrew date and onah a stamp stands for. A night belongs to the Hebrew date it opens, the one whose daytime is the next Gregorian day.</summary>
+		public static HebrewOnah ToHebrew(DateTimeOffset stamp)
+		{
+			var night = PurityEvent.IsDateAfterDusk(stamp);
+			var day = (night ? stamp.AddDays(1) : stamp).DateTime;
+			return new HebrewOnah(Calendar.GetYear(day), Calendar.GetMonth(day), Calendar.GetDayOfMonth(day), night);
+		}
+
+		/// <summary>The stamp of a Hebrew date and onah. Its night is stored on the Gregorian day before its daytime.</summary>
+		/// <exception cref="ArgumentOutOfRangeException">The Hebrew calendar has no such date</exception>
+		public static DateTimeOffset FromHebrew(HebrewOnah onah)
+		{
+			var day = Calendar.ToDateTime(onah.Year, onah.Month, onah.Day, 0, 0, 0, 0);
+			return onah.IsNight ? FromDate(day.AddDays(-1), true) : FromDate(day, false);
+		}
+
+
+		private static readonly HebrewCalendar Calendar = new();
 	}
+
+
+	/// <summary>One onah, named by its Hebrew date</summary>
+	/// <param name="Year">The Hebrew year</param>
+	/// <param name="Month">As .NET numbers them: Tishrei is 1, and in a leap year Adar I is 6 and Adar II is 7</param>
+	/// <param name="Day">The day of the month</param>
+	/// <param name="IsNight">The night that opens this date, rather than its daytime</param>
+	public readonly record struct HebrewOnah(int Year, int Month, int Day, bool IsNight);
 }
