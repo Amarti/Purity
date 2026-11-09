@@ -115,21 +115,63 @@ namespace Purity.Desktop.ViewModels
 		/// Unlike WPF, only while no other period is open: that one must be accepted or removed first.
 		/// </summary>
 		[RelayCommand(CanExecute = nameof(CanAddPeriod))]
-		private void AddPeriod()
+		private void AddPeriod() => TryAddPeriod();
+
+		/// <returns>False when a period already begins at that moment, which the ledger refuses</returns>
+		private bool TryAddPeriod()
 		{
 			if (!CanAddPeriod)
-				return;
+				return false;
 
 			var today = new DateTimeOffset(_clock.GetUtcNow().UtcDateTime.Date, TimeSpan.Zero);
 			var period = Ledger.AddPeriod(today, today.AddDays(7));
 			if (period == null)
-				return;
+				return false;
 
 			if (Periods.Count > 0)
 				Periods[0].IsFolded = true;				// only the first period shows in full, and that's the new one now
 			Periods.Insert(0, new PeriodViewModel(period, this));
 			RefreshAll();
 			UpdateCommands();
+			return true;
+		}
+
+		/// <summary>
+		/// The wide button: adds a period, or closes the one that's open. Since one button does both, a
+		/// second click right after the first is taken for a double click and does nothing, or a double
+		/// click would add a period and at once save it with the dates it was given.
+		/// </summary>
+		[RelayCommand(CanExecute = nameof(HasDataFile))]
+		private async Task AddOrClosePeriod()
+		{
+			var now = _clock.GetUtcNow();
+			if (now - _lastAddOrClose < DoubleClickTime)
+				return;
+
+			_lastAddOrClose = now;
+			if (Periods.FirstOrDefault(el => !el.IsClosed) is not { } open)
+				await AddOrExplainAsync();
+			else if (await MayCloseAsync(open))
+				await AcceptAsync(open);
+		}
+
+		/// <summary>The wide button would otherwise look broken, doing nothing and saying nothing</summary>
+		private async Task AddOrExplainAsync()
+		{
+			if (!TryAddPeriod())
+				await _dialogs.AskAsync("A period beginning today is already in the history, and two periods can't begin at the same time.\n\nTo add another, first change that period's start date.", "OK");
+		}
+
+		/// <summary>
+		/// Asks first when the end date hasn't come yet, as it is when it's still the week-ahead date a
+		/// new period starts with, since the wide button is easy to press by accident.
+		/// </summary>
+		private async Task<bool> MayCloseAsync(PeriodViewModel open)
+		{
+			if (open.EndDate <= _clock.GetLocalNow().Date)
+				return true;
+
+			return await _dialogs.AskAsync($"This period's end date, {open.EndText}, hasn't come yet.\n\nClose the period anyway?", "Close period", "Keep open") == 0;
 		}
 
 		/// <summary>
@@ -231,8 +273,13 @@ namespace Purity.Desktop.ViewModels
 		private void UpdateCommands()
 		{
 			AddPeriodCommand.NotifyCanExecuteChanged();
+			AddOrClosePeriodCommand.NotifyCanExecuteChanged();
 			RecalculateCommand.NotifyCanExecuteChanged();
-			OnPropertyChanged(nameof(AddPeriodTip));
+			OnPropertyChanged(nameof(HasOpenPeriod));
+			OnPropertyChanged(nameof(AddOrCloseLabel));
+			OnPropertyChanged(nameof(ShowsEmptyHint));
+			Show(OpenPeriods, Periods.Where(el => !el.IsClosed));
+			Show(ClosedPeriods, Periods.Where(el => el.IsClosed));
 		}
 
 		private void OnHistoryReplaced(object? sender, EventArgs e) => Rebuild();
@@ -394,6 +441,7 @@ namespace Purity.Desktop.ViewModels
 				_ when _session.VaultFailed => "This computer's backup copy couldn't be written or read. Saving to the data file still works.",
 				_ => null,
 			};
+			OnPropertyChanged(nameof(ShowsEmptyHint));
 		}
 
 		private void Rebuild()
@@ -403,6 +451,18 @@ namespace Purity.Desktop.ViewModels
 			foreach (var period in Enumerable.Reverse(Ledger.Data))
 				Periods.Add(new PeriodViewModel(period, this) { IsFolded = period.Closed && period != first });
 			UpdateCommands();
+		}
+
+		/// <summary>Touches the list only when it's different, so adding an open period doesn't disturb it</summary>
+		private static void Show(ObservableCollection<PeriodViewModel> shown, IEnumerable<PeriodViewModel> periods)
+		{
+			var wanted = periods.ToList();
+			if (shown.SequenceEqual(wanted))
+				return;
+
+			shown.Clear();
+			foreach (var item in wanted)
+				shown.Add(item);
 		}
 
 		/// <summary>The first period in the list always shows in full, whichever one that has become</summary>
@@ -454,6 +514,12 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>The periods as the list shows them, newest first. <see cref="Ledger"/> keeps them oldest first, as the data file does.</summary>
 		public ObservableCollection<PeriodViewModel> Periods { get; } = new();
 
+		/// <summary>Those still open, which stay in view above the list</summary>
+		public ObservableCollection<PeriodViewModel> OpenPeriods { get; } = new();
+
+		/// <summary>What the list shows: the accepted ones, newest first</summary>
+		public ObservableCollection<PeriodViewModel> ClosedPeriods { get; } = new();
+
 		/// <summary>A problem with the data file the person should know about, or null</summary>
 		[ObservableProperty]
 		public partial string? Warning { get; private set; }
@@ -468,13 +534,19 @@ namespace Purity.Desktop.ViewModels
 		private bool HasDataFile => _session != null;
 
 		/// <summary>A period that is still open, with the pink frame, waiting to be accepted or removed</summary>
-		private bool HasOpenPeriod => Ledger.Data.Any(el => !el.Closed);
+		public bool HasOpenPeriod => Ledger.Data.Any(el => !el.Closed);
 
 		private bool CanAddPeriod => HasDataFile && !HasOpenPeriod;
 
-		/// <summary>Says why the add button is off, since nothing else on screen does</summary>
-		public string AddPeriodTip => HasDataFile && HasOpenPeriod ? "Accept or remove the open period first" : "Add period";
+		/// <summary>What the wide button does now, for its tooltip and screen readers</summary>
+		public string AddOrCloseLabel => HasOpenPeriod ? ClosePeriodLabel : NewPeriodLabel;
 
+		/// <summary>An empty history that opened properly, so the list can say what to do first</summary>
+		public bool ShowsEmptyHint => _session?.State == SessionState.Ready && Periods.Count == 0;
+
+
+		public const string NewPeriodLabel = "New period";
+		public const string ClosePeriodLabel = "Close period";
 
 		private const string UnreadableMessage =
 			"The data file couldn't be read, so you're seeing the copy this computer kept last time, if it has one. Recent entries may be missing.\n\n" +
@@ -489,6 +561,7 @@ namespace Purity.Desktop.ViewModels
 			"Some entries couldn't be saved to the data file yet.\n\nThey're kept on this computer, and Purity saves them the next time it opens. Close anyway?";
 
 		private static readonly PeriodLedger NoLedger = new();
+		private static readonly TimeSpan DoubleClickTime = TimeSpan.FromMilliseconds(600);
 
 		private readonly IAppDialogs _dialogs;
 		private readonly TimeProvider _clock;
@@ -502,5 +575,6 @@ namespace Purity.Desktop.ViewModels
 		private bool _saveFailed;
 		private bool _toldUnreadable;
 		private bool _resolving;
+		private DateTimeOffset _lastAddOrClose = DateTimeOffset.MinValue;
 	}
 }

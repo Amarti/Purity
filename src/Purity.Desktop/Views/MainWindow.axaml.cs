@@ -1,8 +1,12 @@
 using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Purity.Desktop.ViewModels;
@@ -30,17 +34,21 @@ namespace Purity.Desktop.Views
 
 			// Before the window shows, so it never flashes the other theme or jumps into place
 			App.Apply(_viewModel.Appearance);
+			_newPeriodDrop = this.FindControl<Image>("NewPeriodDrop")!;
+			_closePeriodDrop = this.FindControl<Image>("ClosePeriodDrop")!;
 			_viewModel.PropertyChanged += (_, e) =>
 			{
 				if (e.PropertyName == nameof(MainWindowViewModel.Appearance))
 					App.Apply(_viewModel.Appearance);
+				else if (e.PropertyName == nameof(MainWindowViewModel.HasOpenPeriod))
+					PopDropIfChanged();
 			};
 			if (options.PictureFile == null)						// pictures are always of the window's starting size
 				RestorePlacement(_viewModel.WindowPlacement);
 			PositionChanged += (_, _) => Dispatcher.UIThread.Post(TrackPlacement, DispatcherPriority.Background);
 
 			// Show the newest periods whenever the list changes, as the WPF app does; here they're at the top
-			_viewModel.Periods.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(ScrollToNewest, DispatcherPriority.Background);
+			_viewModel.ClosedPeriods.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(ScrollToNewest, DispatcherPriority.Background);
 			Opened += async (_, _) =>
 			{
 				FitToScreen();
@@ -74,6 +82,26 @@ namespace Purity.Desktop.Views
 
 		public Task<string?> PickDataFileAsync() => DataFilePicker.OpenAsync(StorageProvider);
 
+
+		/// <summary>Draws the eye to the wide button when what it does changes (E4), along with the fade between its faces in the styles</summary>
+		private void PopDropIfChanged()
+		{
+			if (_viewModel.HasOpenPeriod == _dropClosesPeriod)
+				return;
+
+			_dropClosesPeriod = _viewModel.HasOpenPeriod;
+			_ = DropPop.RunAsync(_dropClosesPeriod ? _closePeriodDrop : _newPeriodDrop);
+		}
+
+		private static KeyFrame DropSize(double cue, double scale) => new()
+		{
+			Cue = new Cue(cue),
+			Setters =
+			{
+				new Setter(ScaleTransform.ScaleXProperty, scale),
+				new Setter(ScaleTransform.ScaleYProperty, scale),
+			},
+		};
 
 		private void ScrollToNewest()
 		{
@@ -217,9 +245,19 @@ namespace Purity.Desktop.Views
 		}
 
 
+		private static readonly Animation DropPop = new()
+		{
+			Duration = TimeSpan.FromMilliseconds(380),
+			Easing = new CubicEaseOut(),
+			Children = { DropSize(0, 0.6), DropSize(0.6, 1.25), DropSize(1, 1) },
+		};
+
 		private readonly MainWindowViewModel _viewModel;
 		private readonly StartOptions _options;
 		private readonly ListBox _periods;
+		private readonly Image _newPeriodDrop;
+		private readonly Image _closePeriodDrop;
+		private bool _dropClosesPeriod;
 		private WindowPlacement? _lastNormal;
 		private bool _closing;
 		private bool _mayClose;

@@ -352,6 +352,108 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
+		public Task TheWideButtonIsAPinkDropThenABlueOneAndPeriodsHaveNoTick() => Themed(async () =>
+		{
+			App.Apply(Appearance.Light);
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var button = window.GetVisualDescendants().OfType<Button>().Single(el => AutomationProperties.GetName(el) == "New period");
+			Image Shown() => button.GetVisualDescendants().OfType<Panel>().Single(el => el.Classes.Contains("Shown")).Children.OfType<Image>().Single();
+			object Resource(string key)
+			{
+				Assert.True(Application.Current!.TryGetResource(key, Application.Current.ActualThemeVariant, out var value));
+				return value!;
+			}
+
+			Assert.Same(Resource("AddPeriodIconDrawingImage"), Shown().Source);
+			Assert.Equal(Color.Parse("#FF0061"), IconColor("AddPeriodIconDrawingGroup"));
+			Assert.Equal(Color.Parse("#5683A9"), IconColor("ClosePeriodIconDrawingGroup"));
+
+			await viewModel.AddOrClosePeriodCommand.ExecuteAsync(null);
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal("Close period", AutomationProperties.GetName(button));
+			Assert.Same(Resource("ClosePeriodIconDrawingImage"), Shown().Source);
+			Assert.DoesNotContain(window.GetVisualDescendants().OfType<Button>(), el => AutomationProperties.GetName(el) == "Accept period");
+
+			App.Apply(Appearance.Dark);
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(Color.Parse("#7FB0E6"), IconColor("ClosePeriodIconDrawingGroup"));
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task AnOpenPeriodStaysAboveTheListInLineWithItsPeriods() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var periods = window.FindControl<ListBox>("Periods")!;
+			var count = periods.ItemCount;
+			viewModel.AddPeriodCommand.Execute(null);
+			var open = viewModel.Periods[0];
+			await Ui.WaitUntil(() => SwitchCount(window, open) == 2);
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.Equal(count, periods.ItemCount);
+			Assert.DoesNotContain(periods.GetVisualDescendants().OfType<DayNightSwitch>(), el => el.DataContext == open);
+			var card = window.GetVisualDescendants().OfType<Border>().Single(el => el.Classes.Contains("Period") && el.DataContext == open);
+			var inList = periods.GetVisualDescendants().OfType<Border>().First(el => el.Classes.Contains("Period"));
+			double Left(Visual visual) => visual.TranslatePoint(default, window)!.Value.X;
+			double Bottom(Control control) => control.TranslatePoint(new Point(0, control.Bounds.Height), window)!.Value.Y;
+			Assert.True(Bottom(card) <= periods.TranslatePoint(default, window)!.Value.Y, "The open period should be above the list");
+			Assert.Equal(Left(inList), Left(card));
+			Assert.Equal(inList.Bounds.Width, card.Bounds.Width);
+			Assert.DoesNotContain(card.GetVisualDescendants().OfType<ListBox>(), el => el.IsEffectivelyVisible);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task AnEmptyHistorySaysWhatToDoUntilAPeriodIsAdded() => Ui.Run(async () =>
+		{
+			var dataFile = Path.Combine(_root, "pureData.json");
+			File.WriteAllText(dataFile, "[]");
+			var window = new MainWindow(new StartOptions(dataFile));
+			window.Show();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var hint = window.GetVisualDescendants().OfType<StackPanel>().Single(el => el.Classes.Contains("EmptyHint"));
+
+			await Ui.WaitUntil(() => hint.IsVisible);
+			Assert.True(Application.Current!.TryGetResource("AddPeriodIconDrawingImage", Application.Current.ActualThemeVariant, out var drop));
+			Assert.Same(drop, hint.GetVisualDescendants().OfType<Image>().Single().Source);
+			viewModel.AddPeriodCommand.Execute(null);
+			await Ui.WaitUntil(() => !hint.IsVisible);
+
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
+		public Task ADateTypedJustBeforeClosingIsTheOneThatCounts() => Ui.Run(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			viewModel.AddPeriodCommand.Execute(null);
+			var open = viewModel.Periods[0];
+			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<DateField>().Count(el => el.DataContext == open) == 2);
+
+			var to = window.GetVisualDescendants().OfType<DateField>().Where(el => el.DataContext == open).ElementAt(1);
+			var text = to.GetVisualDescendants().OfType<TextBox>().Single();
+			text.Focus();
+			text.Text = "Thursday, 18 March 2010";		// already past, so closing asks nothing
+			var wide = window.GetVisualDescendants().OfType<Button>().Single(el => AutomationProperties.GetName(el) == "Close period");
+
+			Press(wide, window);
+			await Ui.WaitUntil(() => open.IsClosed);
+
+			Assert.Equal(new DateTime(2010, 3, 18), open.EndDate);
+			window.Close();
+			await Ui.WaitUntil(() => !window.IsVisible);
+		});
+
+		[Fact]
 		public Task TheButtonsAreAboveTheListAndTheNewestPeriodIsOnTop() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();
@@ -393,7 +495,7 @@ namespace Purity.Desktop.Tests
 			names.Add(AutomationProperties.GetName(Focused()));
 			Tab();
 			names.Add(AutomationProperties.GetName(Focused()));
-			Assert.Equal(new[] { "Settings", "Add period", "Refresh" }, names);
+			Assert.Equal(new[] { "Settings", "New period", "Refresh" }, names);
 
 			Tab();
 			Assert.Same(viewModel.Periods[0], Focused().DataContext);
@@ -404,7 +506,7 @@ namespace Purity.Desktop.Tests
 
 
 		private static Button[] TopButtons(Window window) =>
-			window.GetVisualDescendants().OfType<Button>().Where(el => AutomationProperties.GetName(el) is "Settings" or "Add period" or "Refresh").ToArray();
+			window.GetVisualDescendants().OfType<Button>().Where(el => AutomationProperties.GetName(el) is "Settings" or "New period" or "Refresh").ToArray();
 
 
 		private async Task<MainWindow> OpenPeriodsAsync()
@@ -502,8 +604,8 @@ namespace Purity.Desktop.Tests
 		/// <summary>The longest date, "Wednesday, 29 September ...", is 170 wide in Segoe UI and 175 in Linux's Liberation Sans; the field's frame and calendar page take 29</summary>
 		private const double WholeDateWidth = 210;
 
-		/// <summary>A date line's arrow, date field, switch and Accept button, with their gaps and the one before Skip</summary>
-		private const double RestOfTheDateLine = 22 + 210 + 132 + 25 + 15;
+		/// <summary>A date line's arrow, date field and switch, with their gaps and the one before Skip</summary>
+		private const double RestOfTheDateLine = 22 + 210 + 132 + 15;
 
 		private readonly string _root = Path.Combine(Path.GetTempPath(), $"purity-desktop-{Guid.NewGuid():N}");
 	}

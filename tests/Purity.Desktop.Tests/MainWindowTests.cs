@@ -106,11 +106,11 @@ namespace Purity.Desktop.Tests
 			WriteHistory();
 			var window = await OpenAsync();
 			Assert.True(window.AddPeriodCommand.CanExecute(null));
-			Assert.Equal("Add period", window.AddPeriodTip);
+			Assert.Equal("New period", window.AddOrCloseLabel);
 
 			window.AddPeriodCommand.Execute(null);
 			Assert.False(window.AddPeriodCommand.CanExecute(null));
-			Assert.Equal("Accept or remove the open period first", window.AddPeriodTip);
+			Assert.Equal("Close period", window.AddOrCloseLabel);
 
 			window.Periods[0].BeginDate = Today.AddDays(1);	// a different day, which WPF would have let through
 			window.AddPeriodCommand.Execute(null);
@@ -123,7 +123,7 @@ namespace Purity.Desktop.Tests
 			window.AddPeriodCommand.Execute(null);
 			await window.Periods[0].AcceptCommand.ExecuteAsync(null);
 			Assert.True(window.AddPeriodCommand.CanExecute(null));
-			Assert.Equal("Add period", window.AddPeriodTip);
+			Assert.Equal("New period", window.AddOrCloseLabel);
 			Assert.Empty(_dialogs.Shown);
 		}
 
@@ -252,9 +252,9 @@ namespace Purity.Desktop.Tests
 
 		private string ReadData() => File.ReadAllText(_dataFile);
 
-		private async Task<MainWindowViewModel> OpenAsync()
+		private async Task<MainWindowViewModel> OpenAsync(FixedClock? clock = null)
 		{
-			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, new FixedClock(), _pending.Enqueue);
+			_viewModel = new MainWindowViewModel(_dialogs, _dataFile, clock ?? new FixedClock(), _pending.Enqueue);
 			await _viewModel.StartAsync();
 			return _viewModel;
 		}
@@ -272,7 +272,12 @@ namespace Purity.Desktop.Tests
 
 		private sealed class FixedClock : TimeProvider
 		{
-			public override DateTimeOffset GetUtcNow() => new(Today.AddHours(9), TimeSpan.Zero);
+			/// <summary>For what happens a moment later; the date stays the same</summary>
+			public TimeSpan Elapsed { get; set; }
+
+			public override DateTimeOffset GetUtcNow() => new DateTimeOffset(Today.AddHours(9), TimeSpan.Zero) + Elapsed;
+
+			public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
 		}
 
 		private sealed class FakeDialogs : IAppDialogs

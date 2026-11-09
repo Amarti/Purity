@@ -2,10 +2,20 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <StreamGeometry x:Key="DropGeometry">M725.67,0S180.46,471.38,180.46,904.94s378,546.4,545.21,546.4c181.46,0,545.21-118.14,545.21-543.74S725.67,0,725.67,0Z</StreamGeometry>
+
     <DrawingImage x:Key="AddPeriodIconDrawingImage" Drawing="{DynamicResource AddPeriodIconDrawingGroup}"/>
     <DrawingGroup x:Key="AddPeriodIconDrawingGroup">
         <DrawingGroup.Children>
-            <GeometryDrawing Brush="{DynamicResource DropBrush}" Geometry="M725.67,0S180.46,471.38,180.46,904.94s378,546.4,545.21,546.4c181.46,0,545.21-118.14,545.21-543.74S725.67,0,725.67,0Z"/>
+            <GeometryDrawing Brush="{DynamicResource DropBrush}" Geometry="{StaticResource DropGeometry}"/>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <!-- The same drop in the buttons' blue, for when the wide button closes the open period -->
+    <DrawingImage x:Key="ClosePeriodIconDrawingImage" Drawing="{DynamicResource ClosePeriodIconDrawingGroup}"/>
+    <DrawingGroup x:Key="ClosePeriodIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="{DynamicResource IconBrush}" Geometry="{StaticResource DropGeometry}"/>
         </DrawingGroup.Children>
     </DrawingGroup>
 
@@ -47,21 +57,6 @@
                                                         -241 64 -448 211 -577 410 -201 311 -206 711 -14 1023 206 335 597 512 981
                                                         445z"/>
         </DrawingGroup.Children>
-    </DrawingGroup>
-
-    <DrawingImage x:Key="AcceptIconDrawingImage" Drawing="{DynamicResource AcceptIconDrawingGroup}"/>
-    <DrawingGroup x:Key="AcceptIconDrawingGroup">
-        <GeometryDrawing>
-            <GeometryDrawing.Geometry>
-                <GeometryGroup>
-                    <LineGeometry StartPoint="0,5" EndPoint="5,9"/>
-                    <LineGeometry StartPoint="5,10" EndPoint="13,0"/>
-                </GeometryGroup>
-            </GeometryDrawing.Geometry>
-            <GeometryDrawing.Pen>
-                <Pen Thickness="2" Brush="{DynamicResource IconBrush}" />
-            </GeometryDrawing.Pen>
-        </GeometryDrawing>
     </DrawingGroup>
 
     <DrawingImage x:Key="RemoveIconDrawingImage" Drawing="{DynamicResource RemoveIconDrawingGroup}"/>

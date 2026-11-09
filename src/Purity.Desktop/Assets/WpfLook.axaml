@@ -51,6 +51,41 @@
     <Style Selector="Border.Period.Open">
         <Setter Property="BorderBrush" Value="{DynamicResource PeriodOpenBrush}"/>
     </Style>
+    <Style Selector="Border.Period > StackPanel">
+        <Setter Property="Margin" Value="0,8,0,4"/>
+    </Style>
+    <Style Selector="Border.Period.Open > StackPanel">
+        <Setter Property="Margin" Value="0,8"/>
+    </Style>
+
+    <!-- The wide button's two faces, one fading into the other when what it does changes (E4) -->
+    <Style Selector="Panel.WideFace">
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.25"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Panel.WideFace.Shown">
+        <Setter Property="Opacity" Value="1"/>
+    </Style>
+
+    <!-- What an empty list says to do first (E3) -->
+    <Style Selector="StackPanel.EmptyHint">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Spacing" Value="6"/>
+    </Style>
+    <Style Selector="StackPanel.EmptyHint TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Foreground" Value="{DynamicResource IconBrush}"/>
+    </Style>
+    <Style Selector="StackPanel.EmptyHint TextBlock.Title">
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Light"/>
+    </Style>
 
     <!-- A period's dates: a light line under its Begin and End instead of WPF's box (T6) -->
     <Style Selector="ListBox.Events">

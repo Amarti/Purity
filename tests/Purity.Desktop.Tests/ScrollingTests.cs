@@ -92,7 +92,7 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task ANewPeriodIsBroughtIntoViewFromAnywhereInTheList() => Ui.Run(async () =>
+		public Task AddingAPeriodLeavesTheListWhereItIs() => Ui.Run(async () =>
 		{
 			var (window, periods) = await OpenAsync(150);
 			var viewModel = (MainWindowViewModel)window.DataContext!;
@@ -100,11 +100,14 @@ namespace Purity.Desktop.Tests
 			((ScrollViewer)scroll).ScrollToEnd();
 			await Ui.WaitUntil(() => scroll.Offset.Y > 20000);
 
+			var offset = scroll.Offset.Y;
 			viewModel.AddPeriodCommand.Execute(null);
-			await Ui.WaitUntil(() => scroll.Offset.Y == 0);
+			await Task.Delay(100);
+			await Ui.WaitUntil(() => viewModel.OpenPeriods.Count == 1);
 
 			Assert.False(viewModel.Periods[0].IsClosed);
-			Assert.Equal(151, viewModel.Periods.Count);
+			Assert.Equal(150, periods.ItemCount);
+			Assert.True(scroll.Offset.Y > offset - 2000, $"The list went from {offset:0} to {scroll.Offset.Y:0}");
 			await CloseAsync(window);
 		});
 
