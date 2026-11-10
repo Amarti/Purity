@@ -81,7 +81,9 @@ namespace Purity.Desktop.Localization
 			Close = "Close",
 			KeepOpen = "Keep open",
 			DuplicateToday = "A period beginning today is already in the history, and two periods can't begin at the same time.\n\nTo add another, first change that period's start date.",
-			EndNotYet = end => $"This period's end date, {end}, hasn't come yet.\n\nClose the period anyway?",
+			EndNotYet = end => $"This period's end date, {end}, hasn't come yet.",
+			ClosePeriodAnyway = "Close the period anyway?",
+			CloseAnyway = "Close anyway?",
 			RemoveQuestion = "Are you sure you want to remove this period?",
 
 			InCopy = name => $"In the copy \"{name}\"",
@@ -92,7 +94,7 @@ namespace Purity.Desktop.Localization
 			KeepFile = "Keep the file's",
 			KeepThisComputer = "Keep this computer's",
 			ConflictIntro = "Your history was changed in two places, and the two versions disagree here.\n\nOn this computer:\n",
-			WhichVersion = "\nWhich version do you want to keep?",
+			WhichVersion = "Which version do you want to keep?",
 			Nothing = "nothing",
 			PeriodRange = (begin, end) => $"{begin} to {end}",
 			OpenSuffix = ", open",
@@ -117,7 +119,7 @@ namespace Purity.Desktop.Localization
 				"Purity checks its date calculations every time it starts, and on this computer they came out different from the approved ones. " +
 				"So it shows no dates, and it hasn't opened your data file, so nothing in it can change.\n\n" +
 				"Please don't rely on this copy of the app, and let the developer know what the check found:\n\n",
-			UnsavedOnClose = "Some entries couldn't be saved to the data file yet.\n\nThey're kept on this computer, and Purity saves them the next time it opens. Close anyway?",
+			UnsavedOnClose = "Some entries couldn't be saved to the data file yet.\n\nThey're kept on this computer, and Purity saves them the next time it opens.",
 
 			BringThemIn = "Bring them in",
 			NotNow = "Not now",
@@ -133,9 +135,10 @@ namespace Purity.Desktop.Localization
 			CopiesQuestion = (count, names) =>
 				(count == 1 ? "Your sync app left a copy" : $"Your sync app left {count} copies") +
 				" of the data file beside it, from a time when two devices saved at once:\n\n" + names + "\n\n" +
-				(count == 1 ? "It may hold entries that are missing here. Bring it in?" : "They may hold entries that are missing here. Bring them in?") +
+				(count == 1 ? "It may hold entries that are missing here." : "They may hold entries that are missing here.") +
 				"\n\nNothing in your history is removed. If a copy disagrees about a period, you choose which version to keep. " +
 				"Afterwards each copy moves to this computer's backups.",
+			BringInTitle = count => count == 1 ? "Bring it in?" : "Bring them in?",
 			CopiesReport = (setAside, added) =>
 			{
 				var copies = setAside == 1 ? "1 copy" : $"{setAside} copies";
@@ -148,8 +151,8 @@ namespace Purity.Desktop.Localization
 				return $"Brought in {copies}. {periods}, and {(setAside == 1 ? "it is" : "they are")} now in this computer's backups.";
 			},
 
+			FirstStartTitle = "Purity keeps your history in one data file.",
 			FirstStart =
-				"Purity keeps your history in one data file.\n\n" +
 				"Start a new history on this computer, or open the data file you already have, such as the one your other computers use in Dropbox. " +
 				"A new history can move to a synced folder later, in Settings.",
 			StartNew = "Start a new history",
@@ -162,8 +165,8 @@ namespace Purity.Desktop.Localization
 			CopyFailed = "The history couldn't be copied there, so it stays where it is.\n\n",
 			Moved = (to, from) => $"Your history is now kept in {to}.\n\nThe old file is still in {from}, unchanged, and Purity no longer uses it.",
 
-			RestoreConfirm = when =>
-				$"Bring back your history as it was until {when}?\n\n" +
+			RestoreConfirm = when => $"Bring back your history as it was until {when}?",
+			RestoreConfirmBody =
 				"The history as it is now is kept as a backup too, so you can go back to it the same way. " +
 				"Entries that haven't reached the data file yet are kept.",
 			Restore = "Restore",

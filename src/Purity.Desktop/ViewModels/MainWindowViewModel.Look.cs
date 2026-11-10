@@ -73,7 +73,7 @@ namespace Purity.Desktop.ViewModels
 			RefreshAll();
 		}
 
-		private async Task SetCalendarAsync(CalendarKind calendar, bool hebrewInEnglish)
+		private void SetCalendar(CalendarKind calendar, bool hebrewInEnglish)
 		{
 			if (calendar == _settings.Calendar && hebrewInEnglish == _settings.HebrewDatesInEnglish)
 				return;
@@ -86,11 +86,11 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				await _dialogs.AskAsync(T.CalendarNotSaved + e.Message, T.Ok);
+				_dialogs.Tell(T.CalendarNotSaved + e.Message, MessageKind.Problem);
 			}
 		}
 
-		private async Task SetLanguageAsync(Language language)
+		private void SetLanguage(Language language)
 		{
 			if (language == _settings.Language)
 				return;
@@ -102,12 +102,12 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				await _dialogs.AskAsync(T.LanguageNotSaved + e.Message, T.Ok);
+				_dialogs.Tell(T.LanguageNotSaved + e.Message, MessageKind.Problem);
 			}
 		}
 
 
-		private async Task SetAppearanceAsync(Appearance appearance)
+		private void SetAppearance(Appearance appearance)
 		{
 			if (appearance == _settings.Appearance)
 				return;
@@ -120,7 +120,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				await _dialogs.AskAsync(T.AppearanceNotSaved + e.Message, T.Ok);
+				_dialogs.Tell(T.AppearanceNotSaved + e.Message, MessageKind.Problem);
 			}
 		}
 	}

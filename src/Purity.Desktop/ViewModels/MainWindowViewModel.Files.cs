@@ -16,7 +16,7 @@ namespace Purity.Desktop.ViewModels
 		{
 			while (true)
 			{
-				var answer = await _dialogs.AskAsync(T.FirstStart, T.StartNew, T.OpenMine);
+				var answer = await _dialogs.AskAsync(new Question(T.FirstStartTitle, T.FirstStart), T.StartNew, T.OpenMine);
 				if (answer == 0)
 					return AppPaths.DefaultDataFile;
 				if (answer != 1)
@@ -37,7 +37,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				await _dialogs.AskAsync(T.SettingsNotSaved + e.Message, T.Ok);
+				_dialogs.Tell(T.SettingsNotSaved + e.Message, MessageKind.Problem);
 			}
 			await OpenDataFileAsync();
 		}
@@ -62,7 +62,7 @@ namespace Purity.Desktop.ViewModels
 				return;
 			if (File.Exists(to))
 			{
-				await _dialogs.AskAsync(T.MoveOntoFile, T.Ok);
+				_dialogs.Tell(T.MoveOntoFile, MessageKind.Problem);
 				return;
 			}
 
@@ -70,7 +70,7 @@ namespace Purity.Desktop.ViewModels
 				await SaveAsync();
 			if (_session is not { State: SessionState.Ready, HasUnsavedChanges: false })
 			{
-				await _dialogs.AskAsync(T.CantMoveYet, T.Ok);
+				_dialogs.Tell(T.CantMoveYet, MessageKind.Problem);
 				return;
 			}
 
@@ -87,12 +87,12 @@ namespace Purity.Desktop.ViewModels
 			{
 				if (madeVault)
 					TryDeleteFolder(vault);
-				await _dialogs.AskAsync(T.CopyFailed + e.Message, T.Ok);
+				_dialogs.Tell(T.CopyFailed + e.Message, MessageKind.Problem);
 				return;
 			}
 
 			await UseDataFileAsync(to);
-			await _dialogs.AskAsync(T.Moved(to, from), T.Ok);
+			_dialogs.Tell(T.Moved(to, from), MessageKind.Done);
 		}
 
 		/// <exception cref="IOException">The copy failed, or came out different; nothing is left behind</exception>

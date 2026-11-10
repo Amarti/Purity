@@ -96,6 +96,7 @@
         </DataTemplate>
     </Window.Resources>
 
+    <Panel>
     <!-- The periods keep the width their longest line needs, and in a wider window stay in the middle -->
     <Grid MaxWidth="620" ColumnDefinitions="20,*,20" RowDefinitions="Auto,Auto,Auto,*,Auto,20">
 
@@ -207,4 +208,6 @@
         <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="#FF0061"
                    Text="{Binding Warning}" IsVisible="{Binding Warning, Converter={x:Static ObjectConverters.IsNotNull}}"/>
     </Grid>
+    <views:MessageLayer x:Name="Messages"/>
+    </Panel>
 </Window>

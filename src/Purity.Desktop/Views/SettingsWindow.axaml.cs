@@ -61,7 +61,7 @@ namespace Purity.Desktop.Views
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 			{
-				await MessageWindow.ShowAsync(this, Loc.T.ReportFailed + "\n\n" + ex.Message, Loc.T.Ok);
+				this.FindControl<MessageLayer>("Messages")!.Tell(Loc.T.ReportFailed + "\n\n" + ex.Message, MessageKind.Problem);
 			}
 		}
 

@@ -102,6 +102,8 @@ namespace Purity.Desktop.Localization
 		public required string KeepOpen { get; init; }
 		public required string DuplicateToday { get; init; }
 		public required Func<string, string> EndNotYet { get; init; }
+		public required string ClosePeriodAnyway { get; init; }
+		public required string CloseAnyway { get; init; }
 		public required string RemoveQuestion { get; init; }
 
 		// Two versions of the history
@@ -148,10 +150,12 @@ namespace Purity.Desktop.Localization
 		public required Func<string, string> CopyNotRemoved { get; init; }
 		public required Func<int, string> AndMore { get; init; }
 		public required Func<int, string, string> CopiesQuestion { get; init; }
+		public required Func<int, string> BringInTitle { get; init; }
 		public required Func<int, int, string> CopiesReport { get; init; }
 
 		// Where the history is kept
 		public required string FirstStart { get; init; }
+		public required string FirstStartTitle { get; init; }
 		public required string StartNew { get; init; }
 		public required string OpenMine { get; init; }
 		public required string SettingsNotSaved { get; init; }
@@ -162,6 +166,7 @@ namespace Purity.Desktop.Localization
 
 		// Earlier versions of the history
 		public required Func<string, string> RestoreConfirm { get; init; }
+		public required string RestoreConfirmBody { get; init; }
 		public required string Restore { get; init; }
 		public required string BackupUnreadable { get; init; }
 		public required string RestoreNotWritten { get; init; }

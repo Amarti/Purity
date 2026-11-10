@@ -38,7 +38,7 @@ namespace Purity.Desktop.ViewModels
 				return;
 
 			var when = When(backup);
-			var confirm = T.RestoreConfirm(when);
+			var confirm = new Question(T.RestoreConfirm(when), T.RestoreConfirmBody);
 			if (await _dialogs.AskAsync(confirm, T.Restore, T.Cancel) != 0)
 				return;
 
@@ -52,7 +52,7 @@ namespace Purity.Desktop.ViewModels
 			catch (InvalidDataException)
 			{
 				_restoringFrom = null;
-				await _dialogs.AskAsync(T.BackupUnreadable, T.Ok);
+				_dialogs.Tell(T.BackupUnreadable, MessageKind.Problem);
 				return;
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
@@ -60,7 +60,7 @@ namespace Purity.Desktop.ViewModels
 				_restoringFrom = null;
 				_saveFailed = true;
 				UpdateWarning();
-				await _dialogs.AskAsync(T.RestoreNotWritten, T.Ok);
+				_dialogs.Tell(T.RestoreNotWritten, MessageKind.Problem);
 				return;
 			}
 
@@ -69,7 +69,7 @@ namespace Purity.Desktop.ViewModels
 			UpdateWarning();
 
 			if (_session?.State == SessionState.Ready && !_session.HasUnsavedChanges)
-				await _dialogs.AskAsync(T.Restored(when), T.Ok);
+				_dialogs.Tell(T.Restored(when), MessageKind.Done);
 		}
 
 		/// <summary>When a version was replaced, and what it holds, so the right one can be recognized. Short, for a list.</summary>

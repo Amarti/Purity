@@ -163,4 +163,54 @@
         </DrawingGroup.Children>
     </DrawingGroup>
 
+    <!-- The marks on messages: drawn with a line, in the colors of good news and of trouble -->
+    <DrawingImage x:Key="MessageDoneIconDrawingImage" Drawing="{DynamicResource MessageDoneIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageDoneIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M3,12 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 M8.5,12 l2.5,2.5 l4.5,-4.5">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource MessageDoneBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="MessageProblemIconDrawingImage" Drawing="{DynamicResource MessageProblemIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageProblemIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M12,3.5 L2.5,20 H21.5 Z M12,10 V14 M12,17 V17.05">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource MessageProblemBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="MessageCriticalIconDrawingImage" Drawing="{DynamicResource MessageCriticalIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageCriticalIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M8.3,3 H15.7 L21,8.3 V15.7 L15.7,21 H8.3 L3,15.7 V8.3 Z M12,8 V12.5 M12,16 V16.05">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource MessageProblemBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="MessageCloseIconDrawingImage" Drawing="{DynamicResource MessageCloseIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageCloseIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M6,6 L18,18 M18,6 L6,18">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" Brush="{DynamicResource MessageSecondaryBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+
 </ResourceDictionary>

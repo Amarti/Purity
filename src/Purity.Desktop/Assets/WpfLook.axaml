@@ -160,4 +160,82 @@
         <Setter Property="CustomDateFormatString" Value="dddd, d MMMM yyyy"/>
     </Style>
 
+    <!-- What the app says: a pill, or for a question a sheet rising from the bottom (P2) -->
+    <Style Selector="StackPanel.Pills">
+        <Setter Property="Spacing" Value="6"/>
+        <Setter Property="Margin" Value="12,12,12,14"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+    </Style>
+    <Style Selector="Border.Pill">
+        <Setter Property="Background" Value="{DynamicResource MessageBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MessageBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="17"/>
+        <Setter Property="Padding" Value="14,7"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.25"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Border.Pill TextBlock">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MaxWidth" Value="520"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}"/>
+    </Style>
+    <Style Selector="Border.Pill Image.MessageIcon">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Margin" Value="0,1,7,0"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+    </Style>
+    <Style Selector="Border.Pill Button.MessageClose">
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Margin" Value="8,0,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Border.MessageDim">
+        <Setter Property="Background" Value="#61000000"/>
+    </Style>
+    <Style Selector="Border.Sheet">
+        <Setter Property="Background" Value="{DynamicResource MessageBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MessageBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        <Setter Property="CornerRadius" Value="16,16,0,0"/>
+        <Setter Property="Padding" Value="20,14,20,16"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+    </Style>
+    <Style Selector="Border.Sheet TextBlock.SheetTitle">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="MaxWidth" Value="580"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="Border.Sheet TextBlock.SheetBody">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MaxWidth" Value="580"/>
+        <Setter Property="Margin" Value="0,5,0,0"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Foreground" Value="{DynamicResource MessageSecondaryBrush}"/>
+    </Style>
+    <Style Selector="Border.Sheet StackPanel.SheetButtons">
+        <Setter Property="Spacing" Value="8"/>
+        <Setter Property="Margin" Value="0,13,0,0"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Border.Sheet StackPanel.SheetButtons Button">
+        <Setter Property="MinWidth" Value="90"/>
+        <Setter Property="Padding" Value="18,6"/>
+    </Style>
+
+
 </Styles>

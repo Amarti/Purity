@@ -56,7 +56,7 @@ namespace Purity.Desktop.ViewModels
 				}
 
 				_copiesWaiting = ReadCopies().Count;
-				await _dialogs.AskAsync(CopiesReport(setAside, Ledger.Data.Count - before, problems), T.Ok);
+				_dialogs.Tell(CopiesReport(setAside, Ledger.Data.Count - before, problems), problems.Count > 0 ? MessageKind.Problem : MessageKind.Done);
 			}
 			finally
 			{
@@ -114,7 +114,7 @@ namespace Purity.Desktop.ViewModels
 				_copiesPutOff.Add(copy.Key);
 			_copiesWaiting = ReadCopies().Count;
 			UpdateWarning();
-			await _dialogs.AskAsync(problem ?? T.CopyBroughtIn(copy.Name), T.Ok);
+			_dialogs.Tell(problem ?? T.CopyBroughtIn(copy.Name), problem == null ? MessageKind.Done : MessageKind.Problem);
 		}
 
 		/// <summary>
@@ -188,13 +188,13 @@ namespace Purity.Desktop.ViewModels
 			_resolvingCopy = null;
 		}
 
-		private static string CopiesQuestion(IReadOnlyList<ConflictedCopy> copies)
+		private static Question CopiesQuestion(IReadOnlyList<ConflictedCopy> copies)
 		{
 			var names = string.Join("\n", copies.Take(5).Select(el => "    " + el.Name));
 			if (copies.Count > 5)
 				names += "\n    " + T.AndMore(copies.Count - 5);
 
-			return T.CopiesQuestion(copies.Count, names);
+			return new Question(T.BringInTitle(copies.Count), T.CopiesQuestion(copies.Count, names));
 		}
 
 		private static string CopiesReport(int setAside, int added, IReadOnlyList<string> problems)

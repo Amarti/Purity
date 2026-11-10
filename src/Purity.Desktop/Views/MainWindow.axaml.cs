@@ -26,6 +26,7 @@ namespace Purity.Desktop.Views
 			AvaloniaXamlLoader.Load(this);
 			Title = "Purity " + AppVersion.Number;			// WPF's title was "Purity" alone
 			_periods = this.FindControl<ListBox>("Periods")!;
+			_messages = this.FindControl<MessageLayer>("Messages")!;
 			_periods.AddHandler(KeyDownEvent, OnPeriodsKeyDown, RoutingStrategies.Tunnel);
 
 			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()));
@@ -74,7 +75,9 @@ namespace Purity.Desktop.Views
 		}
 
 
-		public Task<int?> AskAsync(string text, params string[] buttons) => MessageWindow.ShowAsync(this, text, buttons);
+		public void Tell(string text, MessageKind kind) => _messages.Tell(text, kind);
+
+		public Task<int?> AskAsync(Question question, params string[] buttons) => _messages.AskAsync(question, buttons);
 
 		/// <summary>Another start of Purity asked for this window instead of opening a second one</summary>
 		public void BringToFront()
@@ -236,6 +239,7 @@ namespace Purity.Desktop.Views
 				return;
 
 			_closing = true;
+			_messages.CancelQuestion();							// closing the window answers nothing, as closing a message box did
 			try
 			{
 				if (!await _viewModel.PrepareToCloseAsync())
@@ -263,6 +267,7 @@ namespace Purity.Desktop.Views
 		private readonly MainWindowViewModel _viewModel;
 		private readonly StartOptions _options;
 		private readonly ListBox _periods;
+		private readonly MessageLayer _messages;
 		private readonly Image _newPeriodDrop;
 		private readonly Image _closePeriodDrop;
 		private bool _dropClosesPeriod;

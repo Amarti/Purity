@@ -49,7 +49,7 @@ namespace Purity.Desktop.ViewModels
 			if (!SelfTestResult.Passed)
 			{
 				UpdateWarning();
-				await _dialogs.AskAsync(T.SelfTestFailed + SelfTestResult, T.Ok);
+				_dialogs.Tell(T.SelfTestFailed + SelfTestResult, MessageKind.Critical);
 				return true;
 			}
 
@@ -73,7 +73,7 @@ namespace Purity.Desktop.ViewModels
 			if (!_session.HasUnsavedChanges)
 				return true;
 
-			return await _dialogs.AskAsync(T.UnsavedOnClose, T.Close, T.KeepOpen) == 0;
+			return await _dialogs.AskAsync(new Question(T.CloseAnyway, T.UnsavedOnClose), T.Close, T.KeepOpen) == 0;
 		}
 
 		public void Dispose() => CloseDataFile();
@@ -106,9 +106,9 @@ namespace Purity.Desktop.ViewModels
 				return;
 			}
 
-			await SetAppearanceAsync(settings.Appearance);
-			await SetLanguageAsync(settings.Language);
-			await SetCalendarAsync(settings.Calendar, settings.HebrewInEnglish);
+			SetAppearance(settings.Appearance);
+			SetLanguage(settings.Language);
+			SetCalendar(settings.Calendar, settings.HebrewInEnglish);
 			var chosen = settings.DataFilePath.Trim();
 			if (_session != null && SamePath(chosen, DataFilePath))
 				return;
@@ -161,16 +161,16 @@ namespace Purity.Desktop.ViewModels
 
 			_lastAddOrClose = now;
 			if (Periods.FirstOrDefault(el => !el.IsClosed) is not { } open)
-				await AddOrExplainAsync();
+				AddOrExplain();
 			else if (await MayCloseAsync(open))
 				await AcceptAsync(open);
 		}
 
 		/// <summary>The wide button would otherwise look broken, doing nothing and saying nothing</summary>
-		private async Task AddOrExplainAsync()
+		private void AddOrExplain()
 		{
 			if (!TryAddPeriod())
-				await _dialogs.AskAsync(T.DuplicateToday, T.Ok);
+				_dialogs.Tell(T.DuplicateToday, MessageKind.Problem);
 		}
 
 		/// <summary>
@@ -182,7 +182,7 @@ namespace Purity.Desktop.ViewModels
 			if (open.EndDate <= _clock.GetLocalNow().Date)
 				return true;
 
-			return await _dialogs.AskAsync(T.EndNotYet(open.EndText), T.ClosePeriod, T.KeepOpen) == 0;
+			return await _dialogs.AskAsync(new Question(T.ClosePeriodAnyway, T.EndNotYet(open.EndText)), T.ClosePeriod, T.KeepOpen) == 0;
 		}
 
 		/// <summary>
@@ -220,7 +220,7 @@ namespace Purity.Desktop.ViewModels
 
 		internal async Task RemoveAsync(PeriodViewModel period)
 		{
-			if (period.IsClosed && await _dialogs.AskAsync(T.RemoveQuestion, T.Yes, T.No) != 0)
+			if (period.IsClosed && await _dialogs.AskAsync(new Question(T.RemoveQuestion), T.Yes, T.No) != 0)
 				return;
 			if (!Ledger.RemovePeriod(period.Period))
 				return;
@@ -340,7 +340,7 @@ namespace Purity.Desktop.ViewModels
 			{
 				_toldUnreadable = true;
 				UpdateWarning();
-				await _dialogs.AskAsync(T.Unreadable, T.Ok);
+				_dialogs.Tell(T.Unreadable, MessageKind.Critical);
 			}
 			else if (_session?.State == SessionState.NeedsResolution)
 			{
@@ -385,7 +385,7 @@ namespace Purity.Desktop.ViewModels
 					var answers = new Dictionary<MergeConflict, MergeSide>();
 					foreach (var conflict in question.Conflicts)
 					{
-						var answer = await _dialogs.AskAsync(ConflictText(conflict, other), T.KeepThisComputer, keepOther);
+						var answer = await _dialogs.AskAsync(new Question(T.WhichVersion, ConflictText(conflict, other), NoPreference: true), T.KeepThisComputer, keepOther);
 						if (answer == null)
 							return false;			// asked again on Refresh; nothing is saved until then
 
@@ -497,8 +497,7 @@ namespace Purity.Desktop.ViewModels
 			Describe(text, conflict.Local);
 			text.Append('\n').Append(other).Append(":\n");
 			Describe(text, conflict.Remote);
-			text.Append(T.WhichVersion);
-			return text.ToString();
+			return text.ToString().TrimEnd();
 		}
 
 		private static void Describe(StringBuilder text, IReadOnlyList<PeriodRecord> periods)
