@@ -66,6 +66,19 @@ namespace Purity.Desktop.ViewModels
 			}
 		}
 
+		/// <summary>The day the start's date field holds, in the calendar on show</summary>
+		public DateTime? BeginDay
+		{
+			get => UsesHebrewCalendar ? BeginHebrewDay : BeginDate;
+			set
+			{
+				if (UsesHebrewCalendar)
+					BeginHebrewDay = value;
+				else
+					BeginDate = value;
+			}
+		}
+
 		public bool BeginIsAfterDusk => PurityEvent.IsDateAfterDusk(Period.Begin);
 
 		[RelayCommand]
@@ -100,6 +113,19 @@ namespace Purity.Desktop.ViewModels
 
 				Period.End = Stamps.FromHebrewDaytime(day, EndIsAfterDusk);
 				EndChanged();
+			}
+		}
+
+		/// <inheritdoc cref="BeginDay"/>
+		public DateTime? EndDay
+		{
+			get => UsesHebrewCalendar ? EndHebrewDay : EndDate;
+			set
+			{
+				if (UsesHebrewCalendar)
+					EndHebrewDay = value;
+				else
+					EndDate = value;
 			}
 		}
 
@@ -176,8 +202,6 @@ namespace Purity.Desktop.ViewModels
 
 		public bool IsClosed => Period.Closed;
 
-		/// <summary>Whether dates are picked and shown in the Hebrew calendar</summary>
-		public bool UsesHebrewCalendar => _owner.UsesHebrewCalendar;
 		public bool IsLast => _owner.IsLast(Period);
 		public ObservableCollection<PurityEvent> SubEvents { get; }
 
@@ -224,10 +248,13 @@ namespace Purity.Desktop.ViewModels
 			return night ? Loc.T.GregorianNightTip(day, day.AddDays(1)) : day.ToString("dddd, d MMMM", Loc.Instance.DateCulture);
 		}
 
+		private bool UsesHebrewCalendar => _owner.UsesHebrewCalendar;
+
 		private static DateTime? HebrewDay(DateTimeOffset stamp) => Stamps.IsInHebrewCalendar(stamp) ? Stamps.HebrewDaytime(stamp) : null;
 
 		private void BeginChanged()
 		{
+			OnPropertyChanged(nameof(BeginDay));
 			OnPropertyChanged(nameof(BeginDate));
 			OnPropertyChanged(nameof(BeginHebrewDay));
 			OnPropertyChanged(nameof(BeginIsAfterDusk));
@@ -238,6 +265,7 @@ namespace Purity.Desktop.ViewModels
 
 		private void EndChanged()
 		{
+			OnPropertyChanged(nameof(EndDay));
 			OnPropertyChanged(nameof(EndDate));
 			OnPropertyChanged(nameof(EndHebrewDay));
 			OnPropertyChanged(nameof(EndIsAfterDusk));

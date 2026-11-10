@@ -236,7 +236,7 @@ namespace Purity.Desktop.Tests
 			window.Show();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
 			var periods = window.FindControl<ListBox>("Periods")!;
-			await Ui.WaitUntil(() => viewModel.Periods.Count == periodCount && periods.GetVisualDescendants().OfType<CalendarDatePicker>().Any());
+			await Ui.WaitUntil(() => viewModel.Periods.Count == periodCount && periods.GetVisualDescendants().OfType<DateField>().Any());
 			if (!folded)
 				foreach (var period in viewModel.Periods)
 					period.IsFolded = false;

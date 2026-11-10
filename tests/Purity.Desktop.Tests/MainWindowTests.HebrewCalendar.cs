@@ -81,10 +81,34 @@ namespace Purity.Desktop.Tests
 
 			foreach (var name in new[]
 			{
-				nameof(PeriodViewModel.BeginDate), nameof(PeriodViewModel.BeginHebrewDay), nameof(PeriodViewModel.BeginIsAfterDusk), nameof(PeriodViewModel.BeginText), nameof(PeriodViewModel.BeginInOtherCalendar), nameof(PeriodViewModel.SkipLabel),
-				nameof(PeriodViewModel.EndDate), nameof(PeriodViewModel.EndHebrewDay), nameof(PeriodViewModel.EndIsAfterDusk), nameof(PeriodViewModel.EndText), nameof(PeriodViewModel.EndInOtherCalendar),
+				nameof(PeriodViewModel.BeginDay), nameof(PeriodViewModel.BeginDate), nameof(PeriodViewModel.BeginHebrewDay), nameof(PeriodViewModel.BeginIsAfterDusk), nameof(PeriodViewModel.BeginText), nameof(PeriodViewModel.BeginInOtherCalendar), nameof(PeriodViewModel.SkipLabel),
+				nameof(PeriodViewModel.EndDay), nameof(PeriodViewModel.EndDate), nameof(PeriodViewModel.EndHebrewDay), nameof(PeriodViewModel.EndIsAfterDusk), nameof(PeriodViewModel.EndText), nameof(PeriodViewModel.EndInOtherCalendar),
 			})
 				Assert.Contains(name, changes);
+		}
+
+		[Fact]
+		public async Task TheFieldHoldsTheDateOfTheCalendarOnShow()
+		{
+			var period = (await OpenInHebrewAsync()).Periods[0];
+			period.BeginHebrewDay = FifteenShevat;
+			period.EndHebrewDay = FifteenShevat;
+			if (!period.BeginIsAfterDusk)
+				period.ToggleBeginNightCommand.Execute(null);
+			if (period.EndIsAfterDusk)
+				period.ToggleEndNightCommand.Execute(null);
+
+			Assert.Equal(FifteenShevat, period.BeginDay);					// a night is stored on the Gregorian day before
+			Assert.Equal(FifteenShevat.AddDays(-1), period.BeginDate);
+			Assert.Equal(FifteenShevat, period.EndDay);
+
+			period.BeginDay = SixteenShevat;
+			period.EndDay = SixteenShevat;
+
+			Assert.Equal(SixteenShevat, period.BeginHebrewDay);
+			Assert.True(period.BeginIsAfterDusk);
+			Assert.Equal(SixteenShevat, period.EndHebrewDay);
+			Assert.False(period.EndIsAfterDusk);
 		}
 
 		[Fact]

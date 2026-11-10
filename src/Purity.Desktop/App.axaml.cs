@@ -13,7 +13,6 @@ namespace Purity.Desktop
 	{
 		public override void Initialize()
 		{
-			Loc.Instance.TakeOverCulture();
 			AvaloniaXamlLoader.Load(this);
 			Resources[AppFont.ResourceKey] = AppFont.Family;
 		}

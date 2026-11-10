@@ -1,22 +1,119 @@
+using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop.Views
 {
 	/// <summary>
-	/// The date field of a period. Avalonia's date picker moves its date by a day for every notch of
-	/// the mouse wheel while the pointer is over it, even unfocused, so scrolling the list could
-	/// quietly change a period's dates. WPF's date field ignores the wheel, and so does this one:
-	/// the wheel goes on to scroll the list. Use this in place of CalendarDatePicker everywhere.
+	/// A period's date, in the calendar on show. A date is only ever picked from the month grid:
+	/// typed dates would invite mistakes. It picks a whole date; night or day is the switch's to
+	/// say. Nothing here listens to the mouse wheel, so scrolling past a field can't change it.
 	/// </summary>
-	public sealed class DateField : CalendarDatePicker
+	[TemplatePart("PART_Button", typeof(Button))]
+	[TemplatePart("PART_Popup", typeof(Popup))]
+	[TemplatePart("PART_Month", typeof(MonthView))]
+	public sealed class DateField : TemplatedControl
 	{
-		/// <summary>Keeps the date picker's look and styles</summary>
-		protected override Type StyleKeyOverride => typeof(CalendarDatePicker);
+		/// <summary>The Gregorian day picked. For a Hebrew date, the one holding its daytime.</summary>
+		public static readonly StyledProperty<DateTime?> SelectedDayProperty =
+			AvaloniaProperty.Register<DateField, DateTime?>(nameof(SelectedDay), defaultBindingMode: BindingMode.TwoWay);
 
-		/// <summary>Deliberately skips the date picker's handler, the one that changes the date</summary>
-		protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
-		{}
+		public static readonly StyledProperty<string?> TextProperty =
+			AvaloniaProperty.Register<DateField, string?>(nameof(Text));
+
+
+		public DateTime? SelectedDay
+		{
+			get => GetValue(SelectedDayProperty);
+			set => SetValue(SelectedDayProperty, value);
+		}
+
+		/// <summary>The date as shown in the field</summary>
+		public string? Text
+		{
+			get => GetValue(TextProperty);
+			set => SetValue(TextProperty, value);
+		}
+
+
+		protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+		{
+			base.OnApplyTemplate(e);
+
+			if (_button != null)
+				_button.Click -= OnButtonClick;
+			if (_month != null)
+			{
+				_month.DayPicked -= OnDayPicked;
+				_month.KeyDown -= OnMonthKeyDown;
+			}
+			if (_popup != null)
+				_popup.Opened -= OnPopupOpened;
+
+			_button = e.NameScope.Find<Button>("PART_Button");
+			_popup = e.NameScope.Find<Popup>("PART_Popup");
+			_month = e.NameScope.Find<MonthView>("PART_Month");
+
+			_name?.Dispose();
+			if (_button != null)
+			{
+				_button.Click += OnButtonClick;
+				_name = _button.Bind(AutomationProperties.NameProperty, this.GetObservable(AutomationProperties.NameProperty));		// what a screen reader reaches is the button
+			}
+			if (_month != null)
+			{
+				_month.DayPicked += OnDayPicked;
+				_month.KeyDown += OnMonthKeyDown;
+			}
+			if (_popup != null)
+				_popup.Opened += OnPopupOpened;
+		}
+
+
+		private void OnButtonClick(object? sender, RoutedEventArgs e)
+		{
+			if (_popup == null || _month == null)
+				return;
+
+			_month.Show(SelectedDay, DateTime.Today, Loc.Instance.Calendar);
+			_popup.IsOpen = !_popup.IsOpen;
+		}
+
+		private void OnPopupOpened(object? sender, EventArgs e) => _month?.FocusDay();
+
+		private void OnDayPicked(object? sender, DateTime day)
+		{
+			SetCurrentValue(SelectedDayProperty, day);
+			Close();
+		}
+
+		private void OnMonthKeyDown(object? sender, KeyEventArgs e)
+		{
+			if (e.Key != Key.Escape)
+				return;
+
+			e.Handled = true;
+			Close();
+		}
+
+		private void Close()
+		{
+			if (_popup != null)
+				_popup.IsOpen = false;
+			_button?.Focus();
+		}
+
+
+		private IDisposable? _name;
+		private Button? _button;
+		private Popup? _popup;
+		private MonthView? _month;
 	}
 }

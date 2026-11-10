@@ -234,7 +234,7 @@
         </Setter>
     </ControlTheme>
 
-    <!-- The small calendar page showing 15, on both kinds of date field -->
+    <!-- The small calendar page showing 15, on the date field -->
     <ControlTemplate x:Key="CalendarGlyphTemplate">
                                     <Grid Width="17" Height="17" Background="Transparent">
                                         <Border Background="{DynamicResource CalendarGlyphPageBrush}" BorderBrush="{DynamicResource CalendarGlyphBorderBrush}" BorderThickness="1">
@@ -249,47 +249,8 @@
                                 </ControlTemplate>
 
     <!-- WPF's date field: a text box and a small calendar page showing 15 -->
-    <ControlTheme x:Key="{x:Type CalendarDatePicker}" TargetType="CalendarDatePicker">
-        <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="4,0,2,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Template">
-            <ControlTemplate>
-                <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBox Name="PART_TextBox"
-                                 Padding="{TemplateBinding Padding}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 MinHeight="0"
-                                 VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                 PlaceholderText="{TemplateBinding PlaceholderText}"/>
-                        <Button Name="PART_Button" Grid.Column="1" Focusable="False" Margin="2,0" VerticalAlignment="Center" Template="{StaticResource CalendarGlyphTemplate}"/>
-                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
-                            <Calendar Name="PART_Calendar"
-                                      DisplayDate="{TemplateBinding DisplayDate}"
-                                      DisplayDateStart="{TemplateBinding DisplayDateStart}"
-                                      DisplayDateEnd="{TemplateBinding DisplayDateEnd}"
-                                      FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
-                                      IsTodayHighlighted="{TemplateBinding IsTodayHighlighted}"
-                                      SelectedDate="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate, Mode=TwoWay}"/>
-                        </Popup>
-                    </Grid>
-                </Border>
-            </ControlTemplate>
-        </Setter>
-    </ControlTheme>
-
-    <!-- The Hebrew month grid, in the look of the calendar popup, whose own theme only reaches Gregorian months -->
-    <ControlTheme x:Key="HebrewMonthArrowTheme" TargetType="Button">
+    <!-- The month grid of a date field, in either calendar -->
+    <ControlTheme x:Key="MonthArrowTheme" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -309,7 +270,7 @@
         </Style>
     </ControlTheme>
 
-    <ControlTheme x:Key="HebrewDayButtonTheme" TargetType="Button">
+    <ControlTheme x:Key="MonthDayButtonTheme" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush2}"/>
         <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
         <Setter Property="FontSize" Value="11"/>
@@ -345,7 +306,7 @@
         </Style>
     </ControlTheme>
 
-    <ControlTheme x:Key="{x:Type views:HebrewMonthView}" TargetType="views:HebrewMonthView">
+    <ControlTheme x:Key="{x:Type views:MonthView}" TargetType="views:MonthView">
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Margin="0,2" Background="{DynamicResource ThemeBackgroundBrush}" BorderBrush="{DynamicResource ThemeBorderHighBrush}"
@@ -353,17 +314,17 @@
                     <Grid Margin="2" RowDefinitions="Auto,Auto">
                         <Border Height="22" Background="{DynamicResource ThemeAccentBrush2}">
                             <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
-                                <Button Name="PART_PreviousYear" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                <Button Name="PART_PreviousYear" Theme="{StaticResource MonthArrowTheme}">
                                     <Path Fill="{Binding $parent[Button].Foreground}" Data="M7,0 L1,5 L7,10 Z M13,0 L7,5 L13,10 Z"/>
                                 </Button>
-                                <Button Name="PART_Previous" Grid.Column="1" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                <Button Name="PART_Previous" Grid.Column="1" Theme="{StaticResource MonthArrowTheme}">
                                     <Path Fill="{Binding $parent[Button].Foreground}" Data="M6,0 L0,5 L6,10 Z"/>
                                 </Button>
                                 <TextBlock Name="PART_Title" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
-                                <Button Name="PART_Next" Grid.Column="3" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                <Button Name="PART_Next" Grid.Column="3" Theme="{StaticResource MonthArrowTheme}">
                                     <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z"/>
                                 </Button>
-                                <Button Name="PART_NextYear" Grid.Column="4" Theme="{StaticResource HebrewMonthArrowTheme}">
+                                <Button Name="PART_NextYear" Grid.Column="4" Theme="{StaticResource MonthArrowTheme}">
                                     <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z M6,0 L12,5 L6,10 Z"/>
                                 </Button>
                             </Grid>
@@ -391,8 +352,8 @@
         </Setter>
     </ControlTheme>
 
-    <!-- A date in the Hebrew calendar: looks like the date field, and the whole of it opens the month grid -->
-    <ControlTheme x:Key="{x:Type views:HebrewDateField}" TargetType="views:HebrewDateField">
+    <!-- A date: the whole of the field opens the month grid -->
+    <ControlTheme x:Key="{x:Type views:DateField}" TargetType="views:DateField">
         <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -412,7 +373,7 @@
                             </Grid>
                         </Button>
                         <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
-                            <views:HebrewMonthView Name="PART_Month"/>
+                            <views:MonthView Name="PART_Month"/>
                         </Popup>
                     </Panel>
                 </Border>

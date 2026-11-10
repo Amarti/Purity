@@ -554,29 +554,6 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task ADateTypedJustBeforeClosingIsTheOneThatCounts() => Ui.Run(async () =>
-		{
-			var window = await OpenPeriodsAsync();
-			var viewModel = (MainWindowViewModel)window.DataContext!;
-			viewModel.AddPeriodCommand.Execute(null);
-			var open = viewModel.Periods[0];
-			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<DateField>().Count(el => el.DataContext == open) == 2);
-
-			var to = window.GetVisualDescendants().OfType<DateField>().Where(el => el.DataContext == open).ElementAt(1);
-			var text = to.GetVisualDescendants().OfType<TextBox>().Single();
-			text.Focus();
-			text.Text = "Thursday, 18 March 2010";		// already past, so closing asks nothing
-			var wide = window.GetVisualDescendants().OfType<Button>().Single(el => AutomationProperties.GetName(el) == "Close period");
-
-			Press(wide, window);
-			await Ui.WaitUntil(() => open.IsClosed);
-
-			Assert.Equal(new DateTime(2010, 3, 18), open.EndDate);
-			window.Close();
-			await Ui.WaitUntil(() => !window.IsVisible);
-		});
-
-		[Fact]
 		public Task TheButtonsAreAboveTheListAndTheNewestPeriodIsOnTop() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();

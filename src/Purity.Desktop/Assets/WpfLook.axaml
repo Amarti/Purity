@@ -32,10 +32,6 @@
         <Setter Property="VerticalContentAlignment" Value="Top"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
     </Style>
-    <!-- The date field draws its own frame around its text -->
-    <Style Selector="CalendarDatePicker TextBox">
-        <Setter Property="CornerRadius" Value="0"/>
-    </Style>
 
     <!-- Not in WPF, whose buttons never turned off: a button that is off shows its icon faded, approved by the owner -->
     <Style Selector="Button:disabled Image">
@@ -152,12 +148,6 @@
     <Style Selector="views|EventChip.Strip TextBlock.NextIn">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-    </Style>
-
-    <!-- The long date the WPF app shows on the production machine, fixed so every machine shows the same -->
-    <Style Selector="CalendarDatePicker.Wpf">
-        <Setter Property="SelectedDateFormat" Value="Custom"/>
-        <Setter Property="CustomDateFormatString" Value="dddd, d MMMM yyyy"/>
     </Style>
 
     <!-- What the app says: a pill, or for a question a sheet rising from the bottom (P2) -->

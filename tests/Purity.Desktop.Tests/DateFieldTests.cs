@@ -41,23 +41,16 @@ namespace Purity.Desktop.Tests
 		public Task TheWheelScrollsPastADateFieldWithoutChangingIt() => Ui.Run(() =>
 		{
 			var date = new DateTime(2031, 3, 2);
-			var field = new DateField { SelectedDate = date, Width = 150, Height = 25 };
-			var stock = new CalendarDatePicker { SelectedDate = date, Width = 150, Height = 25 };
+			var field = new DateField { SelectedDay = date, Text = "2 March 2031", Width = 150, Height = 25 };
 			var list = new StackPanel { Spacing = 10 };
-			list.Children.Add(stock);
 			list.Children.Add(field);
 			list.Children.Add(new Border { Height = 1000 });
 			var scroller = new ScrollViewer { Content = list };
 			var window = new Window { Content = scroller, Width = 300, Height = 200 };
 			window.Show();
 
-			// Avalonia's own picker does move, so this test would notice the problem coming back
-			window.MouseWheel(Center(stock, window), new Vector(0, -1));
-			Assert.NotEqual(date, stock.SelectedDate);
-			Assert.Equal(0, scroller.Offset.Y);
-
 			window.MouseWheel(Center(field, window), new Vector(0, -1));
-			Assert.Equal(date, field.SelectedDate);
+			Assert.Equal(date, field.SelectedDay);
 			Assert.True(scroller.Offset.Y > 0, "The wheel should go on to scroll the list");
 
 			window.Close();
@@ -74,7 +67,7 @@ namespace Purity.Desktop.Tests
 			window.Show();
 			var viewModel = (ViewModels.MainWindowViewModel)window.DataContext!;
 			var periods = window.FindControl<ListBox>("Periods")!;
-			await Ui.WaitUntil(() => viewModel.Periods.Count > 0 && periods.GetVisualDescendants().OfType<CalendarDatePicker>().Any());
+			await Ui.WaitUntil(() => viewModel.Periods.Count > 0 && periods.GetVisualDescendants().OfType<DateField>().Any());
 			foreach (var period in viewModel.Periods)
 				period.IsFolded = false;
 			await Task.Delay(200);
@@ -82,14 +75,13 @@ namespace Purity.Desktop.Tests
 
 			string Stamps() => string.Join(", ", viewModel.Periods.Select(el => $"{el.Period.Begin:O} {el.Period.End:O}"));
 			var stamps = Stamps();
-			Assert.All(periods.GetVisualDescendants().OfType<CalendarDatePicker>(), el => Assert.IsType<DateField>(el));
 
 			// Scroll down the list one notch at a time, always with the pointer over a date field. The
 			// list builds periods as they come near, so the periods themselves are what's checked.
 			var offsets = new HashSet<double>();
 			for (var notch = 0; notch < 6; notch++)
 			{
-				var field = periods.GetVisualDescendants().OfType<CalendarDatePicker>()
+				var field = periods.GetVisualDescendants().OfType<DateField>()
 					.Where(el => el.IsEffectivelyVisible && el.Bounds.Height > 0)
 					.Select(el => (Field: el, At: Center(el, window)))
 					.Where(el => el.At.Y > periods.TranslatePoint(default, window)!.Value.Y && el.At.Y < window.Bounds.Height - 30)			// on the list, not what's above it

@@ -27,19 +27,20 @@ namespace Purity.Desktop.Tests
 			calendar.SelectedIndex = 1;
 			Dispatcher.UIThread.RunJobs();
 
-			Assert.All(HebrewFieldsOf(window, first), el => Assert.True(el.IsVisible));
-			Assert.Equal(first.BeginText, HebrewFieldsOf(window, first)[0].Text);
+			Assert.Equal(first.BeginHebrewDay, FieldsOf(window, first)[0].SelectedDay);
+			Assert.Equal(first.BeginText, FieldsOf(window, first)[0].Text);
 
 			settings.GetVisualDescendants().OfType<CheckBox>().Single().IsChecked = true;
 			Dispatcher.UIThread.RunJobs();
 
-			Assert.Matches(@"^\d+ [A-Z]", HebrewFieldsOf(window, first)[0].Text);
+			Assert.Matches(@"^\d+ [A-Z]", FieldsOf(window, first)[0].Text);
 
 			settings.Close(false);
 			await closed;
 			Dispatcher.UIThread.RunJobs();
 
-			Assert.All(HebrewFieldsOf(window, first), el => Assert.False(el.IsVisible));
+			Assert.Equal(first.BeginDate, FieldsOf(window, first)[0].SelectedDay);
+			Assert.Equal(first.BeginText, FieldsOf(window, first)[0].Text);
 			Assert.False(Loc.Instance.HebrewInEnglish);
 			window.Close();
 		});

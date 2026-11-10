@@ -50,19 +50,6 @@ namespace Purity.Desktop.Localization
 		/// <summary>The Gregorian text of a calculated date, in the language being shown. In English it is the engine's own.</summary>
 		public string GregorianText(PurityEvent item) => Language == Language.Hebrew ? item.GregorianText(HebrewDates.ShortMonths) : item.StampGrgRepr;
 
-		/// <summary>
-		/// Makes <see cref="DateCulture"/> the culture of the whole app, for the date pickers, which
-		/// take their month and day names from the current culture. Called before anything is queued
-		/// on the UI thread: Avalonia's dispatcher runs each job with the culture it was queued under, so
-		/// changing the current culture later wouldn't reach all of them. Instead there's this one
-		/// culture from the start, and <see cref="Use"/> changes its names in place.
-		/// </summary>
-		public void TakeOverCulture()
-		{
-			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = DateCulture;
-			CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = DateCulture;
-		}
-
 		/// <summary>The calendar dates are picked and shown in</summary>
 		public CalendarKind Calendar { get; private set; }
 

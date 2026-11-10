@@ -30,9 +30,7 @@ Current TODOs:
  - Settle the open calculation questions with a rav, then apply the answers
  - Desktop (Windows, macOS, Linux)
 	- calendar/reminders integration
-	- arrow keys in the Hebrew month grid
 	- check the current look by hand on macOS and Linux
-	- review the Hebrew wording
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
