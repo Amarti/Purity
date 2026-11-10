@@ -10,7 +10,7 @@ One command builds the app for Windows, macOS and Linux into `out/<version>/`. E
 bash tools/build-apps.sh
 ```
 
-To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs the .NET 10 SDK; on Windows, run it in Git Bash, and the Linux packages also need WSL. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there.
+To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs the .NET 10 SDK; on Windows, run it in Git Bash, and the Linux packages also need WSL. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there. Reminders through Google Calendar need the project's Google client ID and secret in `PURITY_GOOGLE_CLIENT_ID` and `PURITY_GOOGLE_CLIENT_SECRET` when building. They must never be committed, and a build without them simply doesn't offer Google.
 
 | File | For | To install and run |
 |---|---|---|
@@ -29,7 +29,9 @@ Current TODOs:
 	- Or Zarua option
  - Settle the open calculation questions with a rav, then apply the answers
  - Desktop (Windows, macOS, Linux)
-	- calendar/reminders integration
+	- reminders through iCloud and other CalDAV, then Outlook (Google is done)
+	- publish the Google project before relying on Google reminders: sign-ins of a project in Testing expire after 7 days
+	- check Google reminders on Linux by hand (Windows and macOS passed)
 	- check the current look by hand on macOS and Linux
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
