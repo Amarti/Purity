@@ -77,7 +77,8 @@
                 Click="OpenReminders" IsEnabled="{Binding CanOpenReminders}"/>
 
         <TextBlock Grid.Column="1" Grid.Row="6" Margin="0,9,0,0" Height="23" Text="{Binding Text.DataFilePathLabel, Source={x:Static loc:Loc.Instance}}"/>
-        <TextBox Grid.Column="2" Grid.Row="6" Margin="0,7,0,0" Height="23" Text="{Binding DataFilePath}"/>
+        <!-- A path reads left to right in every language: in a right-to-left box a Mac path's leading slash would show at its end -->
+        <TextBox Grid.Column="2" Grid.Row="6" Margin="0,7,0,0" Height="23" Text="{Binding DataFilePath}" FlowDirection="LeftToRight"/>
         <Button Grid.Column="3" Grid.Row="6" Margin="6,7,0,0" Height="23" Width="23" Content="..." Click="PickFile"
                 ToolTip.Tip="{Binding Text.PickFileTip, Source={x:Static loc:Loc.Instance}}"/>
 

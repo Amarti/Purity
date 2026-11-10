@@ -41,10 +41,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- 12.1.3 is the version the Monterey Mac passed with. Rerun the platform check kit before changing it. -->
-    <PackageReference Include="Avalonia" Version="12.1.3" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
-    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.3" />
+    <!--
+      12.1.5 is the version the Monterey Mac passed with. Rerun the platform check kit before changing
+      it. It fixes a crash on clicking into a right-to-left text box that holds mixed-direction text
+      (Avalonia #22553), which 12.1.3 had.
+    -->
+    <PackageReference Include="Avalonia" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.5" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.14" />
   </ItemGroup>
