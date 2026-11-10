@@ -67,7 +67,7 @@ namespace Purity.Desktop.Tests
 
 				Assert.Equal("תור הערב", reminders.Preview.Single().Title);
 				Assert.Contains("BEGIN:VEVENT", reminders.BuildFile());
-				Assert.Contains("X-WR-CALNAME:אישי", reminders.BuildFile());
+				Assert.Contains("X-WR-CALNAME:Purity", reminders.BuildFile());
 			}
 			finally
 			{
@@ -116,7 +116,7 @@ namespace Purity.Desktop.Tests
 			var named = reminders.BuildFile();
 
 			Assert.Contains("SUMMARY:Appointment today", usual);
-			Assert.Contains("X-WR-CALNAME:Personal", usual);
+			Assert.Contains("X-WR-CALNAME:Purity", usual);
 			Assert.Contains("X-WR-CALNAME:Family", named);
 		}
 

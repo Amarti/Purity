@@ -21,6 +21,8 @@ namespace Purity.Desktop.Views
 		{
 			AvaloniaXamlLoader.Load(this);
 			DataContext = _viewModel = viewModel;
+			_messages = this.FindControl<MessageLayer>("Messages")!;
+			Closing += (_, _) => _viewModel.CancelConnecting();
 		}
 
 
@@ -36,16 +38,35 @@ namespace Purity.Desktop.Views
 			if (file?.TryGetLocalPath() is not { } path)
 				return;
 
-			var messages = this.FindControl<MessageLayer>("Messages")!;
 			try
 			{
 				await File.WriteAllTextAsync(path, _viewModel.BuildFile(), new UTF8Encoding(false));
-				messages.Tell(Loc.T.RemindersSaved, MessageKind.Done);
+				_messages.Tell(Loc.T.RemindersSaved, MessageKind.Done);
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 			{
-				messages.Tell(Loc.T.RemindersFileFailed + "\n\n" + ex.Message, MessageKind.Problem);
+				_messages.Tell(Loc.T.RemindersFileFailed + "\n\n" + ex.Message, MessageKind.Problem);
 			}
+		}
+
+		private async void Connect(object? sender, RoutedEventArgs e) => Say(await _viewModel.ConnectAsync());
+
+		private void CancelConnecting(object? sender, RoutedEventArgs e) => _viewModel.CancelConnecting();
+
+		private async void SendTest(object? sender, RoutedEventArgs e) => Say(await _viewModel.SendTestAsync());
+
+		/// <summary>Deletes a calendar at Google, so it asks first</summary>
+		private async void Disconnect(object? sender, RoutedEventArgs e)
+		{
+			var answer = await _messages.AskAsync(new Question(Loc.T.RemindersDisconnectQuestion, Loc.T.RemindersDisconnectBody), new[] { Loc.T.RemindersDisconnectConfirm, Loc.T.Cancel });
+			if (answer == 0)
+				Say(await _viewModel.DisconnectAsync());
+		}
+
+		private void Say(ReminderNotice? notice)
+		{
+			if (notice != null)
+				_messages.Tell(notice.Text, notice.Kind);
 		}
 
 		private void Ok(object? sender, RoutedEventArgs e)
@@ -58,5 +79,6 @@ namespace Purity.Desktop.Views
 
 
 		private readonly RemindersWindowViewModel _viewModel;
+		private readonly MessageLayer _messages;
 	}
 }

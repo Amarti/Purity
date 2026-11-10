@@ -139,6 +139,10 @@ namespace Purity.Reminders.Tests
 		}
 
 		[Fact]
+		public void AMomentIsOnTheLocalClockNotInUtc() =>
+			Assert.Equal(DateTimeKind.Unspecified, Only(Event(PurityEventType.Mikveh, Sun, true)).Moment.Kind);
+
+		[Fact]
 		public void ADateCrossesIntoTheMonthAndYearBefore()
 		{
 			Assert.Equal(DateTime.Parse("2030-12-31 17:00"), Only(Event(PurityEventType.OnaBeinonit, "2031-01-01", false)).Moment);

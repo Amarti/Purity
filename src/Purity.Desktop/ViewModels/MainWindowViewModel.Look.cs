@@ -104,6 +104,7 @@ namespace Purity.Desktop.ViewModels
 			{
 				_dialogs.Tell(T.LanguageNotSaved + e.Message, MessageKind.Problem);
 			}
+			ShareLanguageChange();
 		}
 
 

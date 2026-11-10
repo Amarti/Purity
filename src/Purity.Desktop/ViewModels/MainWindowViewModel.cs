@@ -23,7 +23,8 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="clock">Sets "today" for a new period</param>
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
 		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null)
+		/// <param name="reminderConnection">Makes this device's connection to a calendar service</param>
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, Func<DesktopSettings, IReminderConnection>? reminderConnection = null)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
@@ -32,6 +33,7 @@ namespace Purity.Desktop.ViewModels
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
 			_settings = DesktopSettings.Load();
+			_reminderConnection = reminderConnection?.Invoke(_settings);
 			Loc.Instance.Use(_settings.Language);
 			Loc.Instance.UseCalendar(_settings.Calendar, _settings.HebrewDatesInEnglish);
 		}
@@ -76,7 +78,11 @@ namespace Purity.Desktop.ViewModels
 			return await _dialogs.AskAsync(new Question(T.CloseAnyway, T.UnsavedOnClose), T.Close, T.KeepOpen) == 0;
 		}
 
-		public void Dispose() => CloseDataFile();
+		public void Dispose()
+		{
+			_reminderCancel.Cancel();
+			CloseDataFile();
+		}
 
 
 		[RelayCommand]
@@ -348,7 +354,10 @@ namespace Purity.Desktop.ViewModels
 			}
 
 			if (_session?.State == SessionState.Ready)
+			{
 				_toldUnreadable = false;
+				RequestReminderSync();
+			}
 			UpdateWarning();
 		}
 
@@ -461,6 +470,7 @@ namespace Purity.Desktop.ViewModels
 			foreach (var period in Enumerable.Reverse(Ledger.Data))
 				Periods.Add(new PeriodViewModel(period, this) { IsFolded = period.Closed && period != first });
 			UpdateCommands();
+			RequestReminderSync();
 		}
 
 		/// <summary>Touches the list only when it's different, so adding an open period doesn't disturb it</summary>
@@ -487,6 +497,7 @@ namespace Purity.Desktop.ViewModels
 			foreach (var item in Periods)
 				item.Refresh();
 			UpdateNext();
+			RequestReminderSync();
 		}
 
 		/// <param name="conflict">The periods the two sides disagree on</param>
@@ -566,6 +577,7 @@ namespace Purity.Desktop.ViewModels
 		private readonly Action<Func<Task>> _runOnUiThread;
 		private readonly Func<SelfTestResult> _selfTest;
 		private readonly DesktopSettings _settings;
+		private readonly IReminderConnection? _reminderConnection;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;
 		private LocalVault? _vault;

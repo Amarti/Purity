@@ -13,18 +13,21 @@ namespace Purity.Desktop.ViewModels
 	public sealed record ReminderPreview(string Title, string When);
 
 
-	/// <summary>The choices in the Reminders window. Nothing is kept until OK.</summary>
+	/// <summary>The choices in the Reminders window. Nothing is kept until OK, except a connection, which is made or ended on the spot.</summary>
 	public sealed partial class RemindersWindowViewModel : ObservableObject
 	{
 		/// <param name="setup">The choices as saved</param>
 		/// <param name="periods">The whole history</param>
 		/// <param name="clock">What time it is</param>
 		/// <param name="save">Keeps the choices, on OK</param>
-		public RemindersWindowViewModel(ReminderSetup setup, IReadOnlyList<PurityPeriod> periods, TimeProvider clock, Action<ReminderSetup>? save = null)
+		/// <param name="connection">The connection to a calendar service, where there can be one</param>
+		public RemindersWindowViewModel(ReminderSetup setup, IReadOnlyList<PurityPeriod> periods, TimeProvider clock, Action<ReminderSetup>? save = null, IReminderConnection? connection = null)
 		{
 			_periods = periods;
 			_clock = clock;
 			_save = save;
+			_connection = connection;
+			_where = setup.Where == ReminderPlace.Google && connection?.IsAvailable == true ? ReminderPlace.Google : ReminderPlace.File;
 			_scope = setup.Scope;
 			_wording = setup.Wording;
 			RemindMikveh = setup.Mikveh;
@@ -35,6 +38,7 @@ namespace Purity.Desktop.ViewModels
 			OtherTime = TimeChoices.Contains(setup.OtherTime) ? setup.OtherTime : ReminderSetup.DefaultOtherTime;
 			MoveOffShabbat = setup.MoveOffShabbat;
 			CalendarName = setup.CalendarName;
+			IsConnected = connection?.IsConnected == true;
 			_ready = true;
 			Refresh();
 		}
@@ -42,8 +46,42 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>The times an alert can be set to, every half hour</summary>
 		public IReadOnlyList<string> TimeChoices { get; } = Enumerable.Range(0, 48)
-			.Select(el => new TimeOnly(el / 2, el % 2 * 30).ToString(TimeFormat, CultureInfo.InvariantCulture))
+			.Select(el => new TimeOnly(el / 2, el % 2 * 30).ToString("HH:mm", CultureInfo.InvariantCulture))
 			.ToArray();
+
+		public bool CanUseGoogle => _connection?.IsAvailable == true;
+
+		public string GoogleTip => CanUseGoogle ? Loc.T.RemindersGoogleTip : Loc.T.RemindersGoogleNotInBuild;
+
+		public bool IsFile
+		{
+			get => _where == ReminderPlace.File;
+			set
+			{
+				if (value)
+					Choose(ReminderPlace.File);
+			}
+		}
+
+		public bool IsGoogle
+		{
+			get => _where == ReminderPlace.Google;
+			set
+			{
+				if (value)
+					Choose(ReminderPlace.Google);
+			}
+		}
+
+		[ObservableProperty]
+		[NotifyPropertyChangedFor(nameof(CanConnect))]
+		public partial bool IsConnected { get; private set; }
+
+		[ObservableProperty]
+		[NotifyPropertyChangedFor(nameof(CanConnect))]
+		public partial bool IsConnecting { get; private set; }
+
+		public bool CanConnect => !IsConnected && !IsConnecting;
 
 		public bool IsMikvehOnly
 		{
@@ -137,24 +175,77 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>The reminders as a calendar file</summary>
 		public string BuildFile()
 		{
-			var name = string.IsNullOrWhiteSpace(CalendarName) ? Loc.T.RemindersDefaultCalendar : CalendarName.Trim();
+			var name = string.IsNullOrWhiteSpace(CalendarName) ? ReminderSetup.DefaultCalendarName : CalendarName.Trim();
 			return IcsFile.Write(Planned(), name, _clock.GetUtcNow().UtcDateTime);
 		}
 
 		/// <summary>Keeps the choices, on OK</summary>
-		public void Accept() => _save?.Invoke(new ReminderSetup
+		public void Accept() => _save?.Invoke(CurrentSetup());
+
+		/// <summary>Signs in, in the person's browser</summary>
+		/// <returns>What to tell the person, or null when there's nothing to say</returns>
+		public async Task<ReminderNotice?> ConnectAsync()
 		{
-			Scope = _scope,
-			Mikveh = RemindMikveh,
-			VesetHachodesh = RemindVesetHachodesh,
-			VesetAflaga = RemindVesetAflaga,
-			OnaBenonis = RemindOnaBenonis,
-			Wording = _wording,
-			MikvehTime = MikvehTime,
-			OtherTime = OtherTime,
-			MoveOffShabbat = MoveOffShabbat,
-			CalendarName = CalendarName.Trim(),
-		});
+			if (_connection == null || IsConnecting)
+				return null;
+
+			using var waiting = _connecting = new CancellationTokenSource();
+			IsConnecting = true;
+			try
+			{
+				await _connection.ConnectAsync(waiting.Token);
+				IsConnected = _connection.IsConnected;
+				if (await _connection.Choices.ReadChoicesAsync(waiting.Token) is { } shared)
+					Show(shared);							// another computer has already set them
+				return _connection.RemembersSignIn ? null : new ReminderNotice(Loc.T.RemindersNotRemembered, MessageKind.Problem);
+			}
+			catch (OperationCanceledException)
+			{
+				return null;								// the person gave up waiting, and knows it
+			}
+			catch (CalendarServiceException e)
+			{
+				return new ReminderNotice(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+			}
+			finally
+			{
+				_connecting = null;
+				IsConnecting = false;
+			}
+		}
+
+		public void CancelConnecting() => _connecting?.Cancel();
+
+		/// <summary>Adds a reminder that fires a couple of minutes from now, to prove the alerts arrive</summary>
+		public async Task<ReminderNotice> SendTestAsync()
+		{
+			try
+			{
+				await _connection!.Calendar.AddAsync(ReminderPlanner.TestReminder(Loc.Instance.ReminderLanguage, _clock.GetLocalNow().DateTime), CancellationToken.None);
+				return new ReminderNotice(Loc.T.RemindersTestSent, MessageKind.Done);
+			}
+			catch (CalendarServiceException e)
+			{
+				IsConnected = _connection!.IsConnected;
+				return new ReminderNotice(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+			}
+		}
+
+		/// <summary>Removes the calendar and ends the sign-in</summary>
+		/// <returns>What to tell the person, or null when it all went well</returns>
+		public async Task<ReminderNotice?> DisconnectAsync()
+		{
+			try
+			{
+				await _connection!.DisconnectAsync(CancellationToken.None);
+				IsConnected = _connection.IsConnected;
+				return null;
+			}
+			catch (CalendarServiceException e)
+			{
+				return new ReminderNotice(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+			}
+		}
 
 
 		partial void OnRemindMikvehChanged(bool value) => Refresh();
@@ -167,6 +258,34 @@ namespace Purity.Desktop.ViewModels
 
 		[RelayCommand]
 		private void ToggleMore() => ShowsMore = !ShowsMore;
+
+		private void Show(SharedChoices shared)
+		{
+			var setup = new ReminderSetup();
+			setup.Adopt(shared);
+			_scope = setup.Scope;
+			_wording = setup.Wording;
+			RemindMikveh = setup.Mikveh;
+			RemindVesetHachodesh = setup.VesetHachodesh;
+			RemindVesetAflaga = setup.VesetAflaga;
+			RemindOnaBenonis = setup.OnaBenonis;
+			MikvehTime = TimeChoices.Contains(setup.MikvehTime) ? setup.MikvehTime : ReminderSetup.DefaultMikvehTime;
+			OtherTime = TimeChoices.Contains(setup.OtherTime) ? setup.OtherTime : ReminderSetup.DefaultOtherTime;
+			MoveOffShabbat = setup.MoveOffShabbat;
+			OnPropertyChanged(nameof(IsMikvehOnly));
+			OnPropertyChanged(nameof(IsAllDates));
+			OnPropertyChanged(nameof(IsChosen));
+			OnPropertyChanged(nameof(IsDiscreet));
+			OnPropertyChanged(nameof(IsDetailed));
+			Refresh();
+		}
+
+		private void Choose(ReminderPlace where)
+		{
+			_where = where;
+			OnPropertyChanged(nameof(IsFile));
+			OnPropertyChanged(nameof(IsGoogle));
+		}
 
 		private void Choose(ReminderScope scope)
 		{
@@ -198,44 +317,35 @@ namespace Purity.Desktop.ViewModels
 			CanSaveFile = planned.Count > 0;
 		}
 
-		private IReadOnlyList<Reminder> Planned() => ReminderPlanner.Plan(_periods, new ReminderOptions
+		private IReadOnlyList<Reminder> Planned() =>
+			ReminderPlanner.Plan(_periods, CurrentSetup().ToOptions(Loc.Instance.ReminderLanguage), _clock.GetLocalNow().DateTime);
+
+		private ReminderSetup CurrentSetup() => new()
 		{
-			Kinds = Kinds(),
-			Language = Loc.Instance.Language == Language.Hebrew ? ReminderLanguage.Hebrew : ReminderLanguage.English,
+			Where = _where,
+			Scope = _scope,
+			Mikveh = RemindMikveh,
+			VesetHachodesh = RemindVesetHachodesh,
+			VesetAflaga = RemindVesetAflaga,
+			OnaBenonis = RemindOnaBenonis,
 			Wording = _wording,
-			MikvehTime = TimeOnly.ParseExact(MikvehTime, TimeFormat, CultureInfo.InvariantCulture),
-			OtherTime = TimeOnly.ParseExact(OtherTime, TimeFormat, CultureInfo.InvariantCulture),
+			MikvehTime = MikvehTime,
+			OtherTime = OtherTime,
 			MoveOffShabbat = MoveOffShabbat,
-		}, _clock.GetLocalNow().DateTime);
-
-		private HashSet<PurityEventType> Kinds()
-		{
-			if (_scope == ReminderScope.MikvehOnly)
-				return new HashSet<PurityEventType> { PurityEventType.Mikveh };
-			if (_scope == ReminderScope.AllDates)
-				return Enum.GetValues<PurityEventType>().ToHashSet();
-
-			var kinds = new HashSet<PurityEventType>();
-			if (RemindMikveh)
-				kinds.Add(PurityEventType.Mikveh);
-			if (RemindVesetHachodesh)
-				kinds.Add(PurityEventType.VesetHodesh);
-			if (RemindVesetAflaga)
-				kinds.Add(PurityEventType.VesetAflaga);
-			if (RemindOnaBenonis)
-				kinds.Add(PurityEventType.OnaBeinonit);
-			return kinds;
-		}
+			CalendarName = CalendarName.Trim(),
+		};
 
 
-		private const string TimeFormat = "HH:mm";
 		private const int PreviewCount = 3;
 
 		private readonly IReadOnlyList<PurityPeriod> _periods;
 		private readonly TimeProvider _clock;
 		private readonly Action<ReminderSetup>? _save;
+		private readonly IReminderConnection? _connection;
 		private readonly bool _ready;
+		private ReminderPlace _where;
 		private ReminderScope _scope;
 		private ReminderWording _wording;
+		private CancellationTokenSource? _connecting;
 	}
 }

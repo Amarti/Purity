@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Purity.Desktop\Purity.Desktop.csproj" />
+    <ProjectReference Include="..\Purity.GoogleStandIn\Purity.GoogleStandIn.csproj" />
   </ItemGroup>
 
 </Project>

@@ -34,19 +34,47 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task OnlyTheFileCanBeChosenSoFar() => Ui.Run(() =>
+		public Task WithoutGoogleInTheBuildOnlyTheFileCanBeChosen() => Ui.Run(() =>
 		{
 			var (window, _) = ShowReminders();
 			var places = PlacesOf(window);
 
 			Assert.Equal(new object?[] { "Google", "iCloud", "Outlook", UiText.English.RemindersOther, UiText.English.RemindersFile }, places.Select(el => el.Content));
-			Assert.All(places.Take(4), el =>
-			{
-				Assert.False(el.IsEnabled);
-				Assert.Equal(UiText.English.RemindersLater, ToolTip.GetTip(el));
-			});
+			Assert.All(places.Take(4), el => Assert.False(el.IsEnabled));
+			Assert.Equal(UiText.English.RemindersGoogleNotInBuild, ToolTip.GetTip(places[0]));
+			Assert.All(places.Skip(1).Take(3), el => Assert.Equal(UiText.English.RemindersLater, ToolTip.GetTip(el)));
 			Assert.True(places[4].IsEnabled);
 			Assert.True(places[4].IsChecked);
+			window.Close();
+		});
+
+		[Fact]
+		public Task ChoosingGoogleSwapsTheFilePartForTheConnectionPart() => Ui.Run(() =>
+		{
+			var (window, reminders) = ShowReminders(new MemoryConnection { IsConnected = false });
+			var google = window.FindControl<StackPanel>("GooglePanel")!;
+			Assert.False(google.IsVisible);
+			Assert.True(PlacesOf(window)[0].IsEnabled);
+
+			reminders.IsGoogle = true;
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.True(google.IsVisible);
+			Assert.True(window.FindControl<Button>("ConnectButton")!.IsVisible);
+			Assert.DoesNotContain(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersSave && el.IsEffectivelyVisible);
+			window.Close();
+		});
+
+		[Fact]
+		public Task WhenConnectedTheTestAndStopButtonsShow() => Ui.Run(() =>
+		{
+			var (window, reminders) = ShowReminders(new MemoryConnection());
+			reminders.IsGoogle = true;
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.False(window.FindControl<Button>("ConnectButton")!.IsVisible);
+			Assert.Contains(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersSendTest && el.IsEffectivelyVisible);
+			Assert.Contains(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersDisconnect && el.IsEffectivelyVisible);
 			window.Close();
 		});
 
@@ -122,11 +150,11 @@ namespace Purity.Desktop.Tests
 		});
 
 
-		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders()
+		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null)
 		{
 			var period = new PurityPeriod(new DateTimeOffset(2031, 2, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2031, 2, 6, 0, 0, 0, TimeSpan.Zero)) { Closed = true };
 			period.SubEvents.Add(new PurityEvent(PurityEventType.Mikveh, new DateTimeOffset(2031, 3, 2, 12, 0, 0, TimeSpan.Zero)));
-			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { period }, new EarlierClock());
+			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { period }, new EarlierClock(), null, connection);
 			var window = new RemindersWindow(reminders);
 			window.Show();
 			Dispatcher.UIThread.RunJobs();

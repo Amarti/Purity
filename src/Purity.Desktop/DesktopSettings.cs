@@ -65,6 +65,9 @@ namespace Purity.Desktop
 			set => _reminders = value ?? new ReminderSetup();
 		}
 
+		/// <summary>The ID of Purity's calendar in the connected Google account, or null when there's none yet</summary>
+		public string? GoogleCalendarId { get; set; }
+
 		/// <summary>Where the main window was when it last closed, or null before it ever closed with a data file chosen</summary>
 		public WindowPlacement? Window { get; set; }
 

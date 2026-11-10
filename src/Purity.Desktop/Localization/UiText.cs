@@ -105,7 +105,6 @@ namespace Purity.Desktop.Localization
 		public required string RemindersOtherTime { get; init; }
 		public required string RemindersMoveOffShabbat { get; init; }
 		public required string RemindersCalendarName { get; init; }
-		public required string RemindersDefaultCalendar { get; init; }
 		public required string RemindersNotice { get; init; }
 		public required string RemindersSave { get; init; }
 		public required string RemindersFileTitle { get; init; }
@@ -113,6 +112,24 @@ namespace Purity.Desktop.Localization
 		public required string RemindersSaved { get; init; }
 		public required string RemindersFileFailed { get; init; }
 		public required string RemindersNotSaved { get; init; }
+		public required string RemindersGoogleTip { get; init; }
+		public required string RemindersGoogleNotInBuild { get; init; }
+		public required string RemindersGoogleIntro { get; init; }
+		public required string RemindersConnect { get; init; }
+		public required string RemindersConnecting { get; init; }
+		public required string RemindersConnected { get; init; }
+		public required string RemindersSendTest { get; init; }
+		public required string RemindersTestSent { get; init; }
+		public required string RemindersDisconnect { get; init; }
+		public required string RemindersDisconnectQuestion { get; init; }
+		public required string RemindersDisconnectBody { get; init; }
+		public required string RemindersDisconnectConfirm { get; init; }
+		public required string RemindersSignInDone { get; init; }
+		public required string RemindersNoConnection { get; init; }
+		public required string RemindersSignInNeeded { get; init; }
+		public required string RemindersSignInNotFinished { get; init; }
+		public required string RemindersCalendarFailed { get; init; }
+		public required string RemindersNotRemembered { get; init; }
 		public required string Ok { get; init; }
 		public required string Cancel { get; init; }
 		public required string ReportTitle { get; init; }

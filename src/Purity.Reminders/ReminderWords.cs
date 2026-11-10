@@ -53,6 +53,7 @@ namespace Purity.Reminders
 				[PurityEventType.VesetAflaga] = "Reminder A",
 				[PurityEventType.OnaBeinonit] = "Reminder O",
 			},
+			TestTitle = "Test reminder",
 			Today = "today",
 			Tonight = "tonight",
 			FridayNight = "Friday night",
@@ -79,6 +80,7 @@ namespace Purity.Reminders
 				[PurityEventType.VesetAflaga] = "תזכורת פ׳",
 				[PurityEventType.OnaBeinonit] = "תזכורת ע׳",
 			},
+			TestTitle = "תזכורת בדיקה",
 			Today = "הערב",
 			Tonight = "הלילה",
 			FridayNight = "בליל שבת",
@@ -92,6 +94,7 @@ namespace Purity.Reminders
 
 		public required IReadOnlyDictionary<PurityEventType, string> DetailedNames { get; init; }
 		public required IReadOnlyDictionary<PurityEventType, string> DiscreetNames { get; init; }
+		public required string TestTitle { get; init; }
 		public required string Today { get; init; }
 		public required string Tonight { get; init; }
 		public required string FridayNight { get; init; }

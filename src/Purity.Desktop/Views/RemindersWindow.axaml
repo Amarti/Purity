@@ -7,6 +7,7 @@
         xmlns:vm="using:Purity.Desktop.ViewModels"
         xmlns:loc="using:Purity.Desktop.Localization"
         xmlns:views="using:Purity.Desktop.Views"
+        xmlns:desktop="using:Purity.Desktop"
         x:Class="Purity.Desktop.Views.RemindersWindow"
         x:DataType="vm:RemindersWindowViewModel"
         Title="{Binding Text.RemindersTitle, Source={x:Static loc:Loc.Instance}}" Width="480" SizeToContent="Height"
@@ -21,15 +22,15 @@
             <Border Grid.Column="1" Height="23" BorderThickness="1" CornerRadius="5" BorderBrush="{DynamicResource SwitchBorderBrush}"
                     AutomationProperties.Name="{Binding Text.RemindersWhereName, Source={x:Static loc:Loc.Instance}}">
                 <Grid ColumnDefinitions="*,*,*,*,*">
-                    <RadioButton Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4" GroupName="Where" IsEnabled="False" Content="Google"
-                                 ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
+                    <RadioButton Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4" GroupName="Where" IsEnabled="{Binding CanUseGoogle}" IsChecked="{Binding IsGoogle}" Content="Google"
+                                 ToolTip.Tip="{Binding GoogleTip}" ToolTip.ShowOnDisabled="True"/>
                     <RadioButton Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="iCloud"
                                  ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
                     <RadioButton Grid.Column="2" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="Outlook"
                                  ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
                     <RadioButton Grid.Column="3" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="{Binding Text.RemindersOther, Source={x:Static loc:Loc.Instance}}"
                                  ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
-                    <RadioButton Grid.Column="4" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0" GroupName="Where" IsChecked="True" Content="{Binding Text.RemindersFile, Source={x:Static loc:Loc.Instance}}"/>
+                    <RadioButton Grid.Column="4" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0" GroupName="Where" IsChecked="{Binding IsFile}" Content="{Binding Text.RemindersFile, Source={x:Static loc:Loc.Instance}}"/>
                 </Grid>
             </Border>
         </Grid>
@@ -104,13 +105,28 @@
             <CheckBox IsChecked="{Binding MoveOffShabbat}" Content="{Binding Text.RemindersMoveOffShabbat, Source={x:Static loc:Loc.Instance}}"/>
             <Grid ColumnDefinitions="120,*">
                 <TextBlock VerticalAlignment="Center" Text="{Binding Text.RemindersCalendarName, Source={x:Static loc:Loc.Instance}}"/>
-                <TextBox Grid.Column="1" Height="23" Text="{Binding CalendarName}" PlaceholderText="{Binding Text.RemindersDefaultCalendar, Source={x:Static loc:Loc.Instance}}"/>
+                <TextBox Grid.Column="1" Height="23" Text="{Binding CalendarName}" PlaceholderText="{x:Static desktop:ReminderSetup.DefaultCalendarName}"/>
             </Grid>
         </StackPanel>
 
-        <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource MessageSecondaryBrush}" Text="{Binding Text.RemindersNotice, Source={x:Static loc:Loc.Instance}}"/>
+        <StackPanel x:Name="GooglePanel" Spacing="8" IsVisible="{Binding IsGoogle}">
+            <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource MessageSecondaryBrush}" Text="{Binding Text.RemindersGoogleIntro, Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding !IsConnected}"/>
+            <Button x:Name="ConnectButton" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.RemindersConnect, Source={x:Static loc:Loc.Instance}}" Click="Connect" IsVisible="{Binding CanConnect}"/>
+            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsConnecting}">
+                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding Text.RemindersConnecting, Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="1" Height="30" Padding="14,0" Content="{Binding Text.Cancel, Source={x:Static loc:Loc.Instance}}" Click="CancelConnecting"/>
+            </Grid>
+            <TextBlock TextWrapping="Wrap" Text="{Binding Text.RemindersConnected, Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding IsConnected}"/>
+            <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding IsConnected}">
+                <Button Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.RemindersSendTest, Source={x:Static loc:Loc.Instance}}" Click="SendTest"/>
+                <Button Grid.Column="2" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.RemindersDisconnect, Source={x:Static loc:Loc.Instance}}" Click="Disconnect"/>
+            </Grid>
+        </StackPanel>
 
-        <Button Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.RemindersSave, Source={x:Static loc:Loc.Instance}}" Click="SaveFile" IsEnabled="{Binding CanSaveFile}"/>
+        <StackPanel Spacing="12" IsVisible="{Binding IsFile}">
+            <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource MessageSecondaryBrush}" Text="{Binding Text.RemindersNotice, Source={x:Static loc:Loc.Instance}}"/>
+            <Button Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.RemindersSave, Source={x:Static loc:Loc.Instance}}" Click="SaveFile" IsEnabled="{Binding CanSaveFile}"/>
+        </StackPanel>
 
         <Grid ColumnDefinitions="150,*,150">
             <Button Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.Ok, Source={x:Static loc:Loc.Instance}}" Click="Ok" IsDefault="True" Classes="Confirm"/>
