@@ -14,6 +14,23 @@ namespace Purity.Desktop.Tests
 	/// <summary>The look of the settings window</summary>
 	public sealed partial class LookTests
 	{
+		[Fact]
+		public Task TheAppearanceSwitchIsPicturesThatSayWhatTheyAreInTooltips() => BackToEnglishAfter(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var (settings, closed) = await OpenSettingsAsync(window);
+			var parts = AppearancePartsOf(settings);
+
+			Assert.Equal(3, parts.Length);
+			Assert.All(parts, el => Assert.IsType<Image>(el.Content));
+			Assert.All(parts, el => Assert.Empty(el.GetVisualDescendants().OfType<TextBlock>()));
+			Assert.Equal(new object?[] { UiText.English.SameAsSystem, UiText.English.Light, UiText.English.Dark }, parts.Select(el => ToolTip.GetTip(el)));
+
+			settings.Close(false);
+			await closed;
+			window.Close();
+		});
+
 		/// <summary>A report that couldn't be written is said over this window, not over the one behind it</summary>
 		[Fact]
 		public Task TheSettingsWindowSpeaksThroughItsOwnLayer() => BackToEnglishAfter(async () =>
@@ -50,5 +67,8 @@ namespace Purity.Desktop.Tests
 			await closed;
 			window.Close();
 		});
+
+		private static RadioButton[] AppearancePartsOf(Window settings) =>
+			settings.GetVisualDescendants().OfType<RadioButton>().Where(el => el.GroupName == "Appearance").ToArray();
 	}
 }

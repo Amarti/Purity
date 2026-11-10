@@ -22,7 +22,7 @@ namespace Purity.Desktop.ViewModels
 			_report = report;
 			CanRestore = canRestore;
 			CanMove = canMove;
-			AppearanceIndex = (int)appearance;
+			Appearance = appearance;
 			Language = language;
 			_showLanguage = showLanguage;
 			CalendarIndex = (int)calendar;
@@ -31,14 +31,37 @@ namespace Purity.Desktop.ViewModels
 		}
 
 
-		/// <summary>The choices for <see cref="Appearance"/>, in the order of its values</summary>
-		public IReadOnlyList<string> AppearanceChoices => new[] { Loc.T.SameAsSystem, Loc.T.Light, Loc.T.Dark };
+		public Appearance Appearance { get; private set; }
 
-		/// <summary>Which of <see cref="AppearanceChoices"/> is picked</summary>
-		[ObservableProperty]
-		public partial int AppearanceIndex { get; set; }
+		public bool IsSameAsSystem
+		{
+			get => Appearance == Appearance.System;
+			set
+			{
+				if (value)
+					Choose(Appearance.System);
+			}
+		}
 
-		public Appearance Appearance => Enum.IsDefined((Appearance)AppearanceIndex) ? (Appearance)AppearanceIndex : Appearance.System;
+		public bool IsLight
+		{
+			get => Appearance == Appearance.Light;
+			set
+			{
+				if (value)
+					Choose(Appearance.Light);
+			}
+		}
+
+		public bool IsDark
+		{
+			get => Appearance == Appearance.Dark;
+			set
+			{
+				if (value)
+					Choose(Appearance.Dark);
+			}
+		}
 
 		/// <summary>The choices for <see cref="Calendar"/>, in the order of its values</summary>
 		public IReadOnlyList<string> CalendarChoices => new[] { Loc.T.GregorianAndHebrew, Loc.T.HebrewOnly };
@@ -112,7 +135,15 @@ namespace Purity.Desktop.ViewModels
 		public string? BuildReport() => _report?.Invoke();
 
 
-		/// <summary>The app changes language at once, this window included. The two lists have to be filled again with the new words.</summary>
+		private void Choose(Appearance appearance)
+		{
+			Appearance = appearance;
+			OnPropertyChanged(nameof(IsSameAsSystem));
+			OnPropertyChanged(nameof(IsLight));
+			OnPropertyChanged(nameof(IsDark));
+		}
+
+		/// <summary>The app changes language at once, this window included. The calendar list has to be filled again with the new words.</summary>
 		private void Choose(Language language)
 		{
 			if (language == Language)
@@ -122,11 +153,6 @@ namespace Purity.Desktop.ViewModels
 			OnPropertyChanged(nameof(IsEnglish));
 			OnPropertyChanged(nameof(IsHebrew));
 			_showLanguage?.Invoke(language);
-
-			var appearance = AppearanceIndex;
-			AppearanceIndex = -1;
-			OnPropertyChanged(nameof(AppearanceChoices));
-			AppearanceIndex = appearance;
 
 			var calendar = CalendarIndex;
 			CalendarIndex = -1;

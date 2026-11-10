@@ -131,7 +131,7 @@ namespace Purity.Desktop.Tests
 
 			Assert.True(window.CanResize);
 			Assert.Equal(620, window.Width);
-			Assert.Equal(861, window.Height);
+			Assert.Equal(600, window.Height);
 			Assert.Equal(620, window.MinWidth);
 			Assert.Equal(WindowFit.MinimumHeight, window.MinHeight);
 		});
@@ -185,7 +185,7 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(WindowState.Normal, window.WindowState);
 			window = new MainWindow(new StartOptions(Path.Combine(_root, "pureData.json"), Path.Combine(_root, "picture.png")));
 			Assert.Equal(620, window.Width);
-			Assert.Equal(861, window.Height);
+			Assert.Equal(600, window.Height);
 		});
 
 		[Fact]
@@ -214,11 +214,13 @@ namespace Purity.Desktop.Tests
 			var settings = new SettingsWindowViewModel("pureData.json", null, appearance: Appearance.Dark);
 			var window = new SettingsWindow(settings);
 			window.Show();
-			var choice = window.GetVisualDescendants().OfType<ComboBox>().Single(el => el.ItemCount == 3);
+			var parts = AppearancePartsOf(window);
 
-			Assert.Equal(new[] { "Same as the system", "Light", "Dark" }, settings.AppearanceChoices);
-			Assert.Equal((int)Appearance.Dark, choice.SelectedIndex);
-			choice.SelectedIndex = 0;
+			Assert.Equal(new[] { "Same as the system", "Light", "Dark" }, parts.Select(el => AutomationProperties.GetName(el)));
+			Assert.Equal(new bool?[] { false, false, true }, parts.Select(el => el.IsChecked));
+			parts[0].IsChecked = true;
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(new bool?[] { true, false, false }, parts.Select(el => el.IsChecked));
 			Assert.Equal(Appearance.System, settings.Appearance);
 
 			window.Close();

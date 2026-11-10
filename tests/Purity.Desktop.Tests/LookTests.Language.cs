@@ -31,8 +31,8 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(FlowDirection.RightToLeft, settings.FlowDirection);
 			Assert.Equal(FlowDirection.RightToLeft, window.FlowDirection);
 			Assert.Contains(settings.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.Hebrew.Ok);
-			Assert.Equal(UiText.Hebrew.Light, settings.GetVisualDescendants().OfType<ComboBox>().Single(el => el.ItemCount == 3).Items[1]);
-			Assert.Equal(0, settings.GetVisualDescendants().OfType<ComboBox>().Single(el => el.ItemCount == 3).SelectedIndex);
+			Assert.Equal(UiText.Hebrew.Light, ToolTip.GetTip(AppearancePartsOf(settings)[1]));
+			Assert.True(AppearancePartsOf(settings)[0].IsChecked);
 
 			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<DateField>().Any(el => el.Bounds.Width > 0));
 			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<DateField>().FirstOrDefault(el => el.Bounds.Width > 0)?.Text is { } text && text != englishDate);

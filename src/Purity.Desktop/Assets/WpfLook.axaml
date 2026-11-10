@@ -171,7 +171,7 @@
         <Setter Property="Background" Value="{DynamicResource MessageBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource MessageBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="17"/>
+        <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="Padding" Value="14,7"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="Transitions">

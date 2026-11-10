@@ -25,8 +25,7 @@ namespace Purity.Desktop.Tests
 				Assert.Equal(Language.Hebrew, Loc.Instance.Language);
 				Assert.Equal(FlowDirection.RightToLeft, Loc.Instance.FlowDirection);
 				Assert.Equal(UiText.Hebrew.NewPeriod, window.AddOrCloseLabel);
-				Assert.Equal(UiText.Hebrew.Light, settings.AppearanceChoices[1]);
-				Assert.Equal(Appearance.System, settings.Appearance);		// the list was filled again without losing its choice
+				Assert.Equal(Appearance.System, settings.Appearance);
 				Assert.Equal(Language.English, DesktopSettings.Load().Language);	// nothing is saved before OK
 				return true;
 			};

@@ -27,11 +27,16 @@ Current TODOs:
 
  - Add options to the settings window:
 	- Or Zarua option
+ - Settle the open calculation questions with a rav, then apply the answers
  - Desktop (Windows, macOS, Linux)
 	- calendar/reminders integration
+	- arrow keys in the Hebrew month grid
+	- check the current look by hand on macOS and Linux
+	- review the Hebrew wording
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
+	- Apple Watch viewer
  - Port to android
 	- external storage file path (dropbox/google drive integration)
 	- calendar/reminders integration

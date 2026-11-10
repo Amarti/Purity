@@ -243,14 +243,30 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task EveryButtonIsRounded() => Ui.Run(() =>
+		public Task APillHasTheCornersOfAPeriodCard() => Ui.Run(() =>
+		{
+			var (window, layer) = ShowLayer();
+			var card = new Border { Classes = { "Period" } };
+			layer.Children.Add(card);
+
+			layer.Tell("It couldn't be saved", MessageKind.Problem);
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.Equal(card.CornerRadius, PillsOf(layer).Single().CornerRadius);
+			window.Close();
+		});
+
+		/// <summary>The same corners as the period cards around them</summary>
+		[Fact]
+		public Task EveryButtonHasTheCornersOfAPeriodCard() => Ui.Run(() =>
 		{
 			var button = new Button { Content = "Press" };
-			var window = new Window { Content = button };
+			var card = new Border { Classes = { "Period" } };
+			var window = new Window { Content = new StackPanel { Children = { button, card } } };
 			window.Show();
 			Dispatcher.UIThread.RunJobs();
 
-			Assert.Equal(new CornerRadius(17), button.CornerRadius);
+			Assert.Equal(card.CornerRadius, button.CornerRadius);
 			window.Close();
 		});
 

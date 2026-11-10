@@ -14,7 +14,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundBrush}"/>
         <Setter Property="Padding" Value="1"/>
-        <Setter Property="CornerRadius" Value="17"/>
+        <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">

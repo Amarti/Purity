@@ -150,6 +150,19 @@
         </DrawingGroup.Children>
     </DrawingGroup>
 
+    <!-- A screen on its stand: whatever the system uses -->
+    <DrawingImage x:Key="SameAsSystemIconDrawingImage" Drawing="{DynamicResource SameAsSystemIconDrawingGroup}"/>
+    <DrawingGroup x:Key="SameAsSystemIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M4.5,4 H19.5 A1.5,1.5 0 0 1 21,5.5 V15.5 A1.5,1.5 0 0 1 19.5,17 H4.5 A1.5,1.5 0 0 1 3,15.5 V5.5 A1.5,1.5 0 0 1 4.5,4 Z M12,17 V20.5 M8,20.5 H16">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource IconBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
     <DrawingImage x:Key="FullDayIconDrawingImage" Drawing="{DynamicResource FullDayIconDrawingGroup}"/>
     <DrawingGroup x:Key="FullDayIconDrawingGroup">
         <DrawingGroup.Children>
