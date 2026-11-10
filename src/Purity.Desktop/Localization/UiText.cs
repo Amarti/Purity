@@ -81,6 +81,38 @@ namespace Purity.Desktop.Localization
 		public required string MoveFile { get; init; }
 		public required string MoveFileTip { get; init; }
 		public required string CreateReport { get; init; }
+		public required string RemindersOpen { get; init; }
+		public required string RemindersTitle { get; init; }
+		public required string RemindersWhere { get; init; }
+		public required string RemindersWhereName { get; init; }
+		public required string RemindersFile { get; init; }
+		public required string RemindersOther { get; init; }
+		public required string RemindersLater { get; init; }
+		public required string RemindersAbout { get; init; }
+		public required string RemindersAboutName { get; init; }
+		public required string RemindersMikvehOnly { get; init; }
+		public required string RemindersAllDates { get; init; }
+		public required string RemindersChosen { get; init; }
+		public required string RemindersWording { get; init; }
+		public required string RemindersWordingName { get; init; }
+		public required string RemindersDiscreet { get; init; }
+		public required string RemindersDetailed { get; init; }
+		public required string RemindersNext { get; init; }
+		public required string RemindersNone { get; init; }
+		public required string RemindersOpenPeriod { get; init; }
+		public required string RemindersMore { get; init; }
+		public required string RemindersMikvehTime { get; init; }
+		public required string RemindersOtherTime { get; init; }
+		public required string RemindersMoveOffShabbat { get; init; }
+		public required string RemindersCalendarName { get; init; }
+		public required string RemindersDefaultCalendar { get; init; }
+		public required string RemindersNotice { get; init; }
+		public required string RemindersSave { get; init; }
+		public required string RemindersFileTitle { get; init; }
+		public required string RemindersFileType { get; init; }
+		public required string RemindersSaved { get; init; }
+		public required string RemindersFileFailed { get; init; }
+		public required string RemindersNotSaved { get; init; }
 		public required string Ok { get; init; }
 		public required string Cancel { get; init; }
 		public required string ReportTitle { get; init; }

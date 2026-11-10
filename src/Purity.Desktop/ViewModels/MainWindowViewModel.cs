@@ -82,7 +82,7 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage, Loc.Instance.Calendar, Loc.Instance.HebrewInEnglish, ShowCalendar);
+			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage, Loc.Instance.Calendar, Loc.Instance.HebrewInEnglish, ShowCalendar, reminders: NewReminders);
 			var ok = await _dialogs.ShowSettingsAsync(settings);
 			if (!ok)
 				{

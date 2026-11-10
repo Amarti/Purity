@@ -201,6 +201,9 @@
             <Setter Property="Background" Value="{DynamicResource SwitchOnBackgroundBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource SwitchOnForegroundBrush}"/>
         </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type views:DayNightSwitch}" TargetType="views:DayNightSwitch">

@@ -9,14 +9,14 @@
         xmlns:views="using:Purity.Desktop.Views"
         x:Class="Purity.Desktop.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
-        Title="{Binding Text.Settings, Source={x:Static loc:Loc.Instance}}" Width="384" Height="385"
+        Title="{Binding Text.Settings, Source={x:Static loc:Loc.Instance}}" Width="384" Height="422"
         FlowDirection="{Binding FlowDirection, Source={x:Static loc:Loc.Instance}}"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/Purity.ico">
     <Panel>
 
-    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,37,30,37,30,37,*,30,10,30,20">
+    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,37,30,37,37,30,37,*,30,10,30,20">
         <!-- Not in the WPF app: the language, which changes the moment it's chosen. Each half names its own
              language in that language, and the two stay in place, so a flag doesn't jump from under the pointer. -->
         <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,2,0,0" Height="23" Text="{Binding Text.LanguageLabel, Source={x:Static loc:Loc.Instance}}"/>
@@ -72,29 +72,33 @@
         <CheckBox Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="4" Margin="0,4,0,0" VerticalAlignment="Center" IsChecked="{Binding HebrewInEnglish}"
                   Content="{Binding Text.HebrewInEnglishLabel, Source={x:Static loc:Loc.Instance}}"/>
 
-        <TextBlock Grid.Column="1" Grid.Row="5" Margin="0,9,0,0" Height="23" Text="{Binding Text.DataFilePathLabel, Source={x:Static loc:Loc.Instance}}"/>
-        <TextBox Grid.Column="2" Grid.Row="5" Margin="0,7,0,0" Height="23" Text="{Binding DataFilePath}"/>
-        <Button Grid.Column="3" Grid.Row="5" Margin="6,7,0,0" Height="23" Width="23" Content="..." Click="PickFile"
+        <!-- Not in the WPF app either: what to be reminded of, and how -->
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="5" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.RemindersOpen, Source={x:Static loc:Loc.Instance}}"
+                Click="OpenReminders" IsEnabled="{Binding CanOpenReminders}"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="6" Margin="0,9,0,0" Height="23" Text="{Binding Text.DataFilePathLabel, Source={x:Static loc:Loc.Instance}}"/>
+        <TextBox Grid.Column="2" Grid.Row="6" Margin="0,7,0,0" Height="23" Text="{Binding DataFilePath}"/>
+        <Button Grid.Column="3" Grid.Row="6" Margin="6,7,0,0" Height="23" Width="23" Content="..." Click="PickFile"
                 ToolTip.Tip="{Binding Text.PickFileTip, Source={x:Static loc:Loc.Instance}}"/>
 
         <!-- Not in the WPF app, whose backups never ran. In the row of its debug-only "Save data" button -->
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="6" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.RestoreEarlier, Source={x:Static loc:Loc.Instance}}"
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="7" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.RestoreEarlier, Source={x:Static loc:Loc.Instance}}"
                 Click="Restore" IsEnabled="{Binding CanRestore}"
                 ToolTip.Tip="{Binding Text.RestoreEarlierTip, Source={x:Static loc:Loc.Instance}}"
                 ToolTip.ShowOnDisabled="True"/>
 
         <!-- Not in the WPF app either -->
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="7" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.MoveFile, Source={x:Static loc:Loc.Instance}}"
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="8" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Content="{Binding Text.MoveFile, Source={x:Static loc:Loc.Instance}}"
                 Click="Move" IsEnabled="{Binding CanMove}"
                 ToolTip.Tip="{Binding Text.MoveFileTip, Source={x:Static loc:Loc.Instance}}"
                 ToolTip.ShowOnDisabled="True"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="9" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.CreateReport, Source={x:Static loc:Loc.Instance}}" Click="CreateReport"
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="10" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.CreateReport, Source={x:Static loc:Loc.Instance}}" Click="CreateReport"
                 IsEnabled="{Binding CanReport}"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="11" Height="30" Width="150" Content="{Binding Text.Ok, Source={x:Static loc:Loc.Instance}}" Click="Ok" HorizontalAlignment="Left" IsDefault="True" Classes="Confirm"
+        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="12" Height="30" Width="150" Content="{Binding Text.Ok, Source={x:Static loc:Loc.Instance}}" Click="Ok" HorizontalAlignment="Left" IsDefault="True" Classes="Confirm"
                 IsEnabled="{Binding CanAccept}"/>
-        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="11" Height="30" Width="150" Content="{Binding Text.Cancel, Source={x:Static loc:Loc.Instance}}" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
+        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="12" Height="30" Width="150" Content="{Binding Text.Cancel, Source={x:Static loc:Loc.Instance}}" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
     </Grid>
     <views:MessageLayer x:Name="Messages"/>
     </Panel>

@@ -46,6 +46,9 @@ jobs:
       - name: Build storage tests
         run: dotnet build tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj -c Release
 
+      - name: Build reminder tests
+        run: dotnet build tests/Purity.Reminders.Tests/Purity.Reminders.Tests.csproj -c Release
+
       - name: Build desktop app tests
         run: dotnet build tests/Purity.Desktop.Tests/Purity.Desktop.Tests.csproj -c Release
 
@@ -81,6 +84,11 @@ jobs:
         env:
           PURITY_REQUIRE_REAL_DATA: ${{ steps.fixture.outputs.available == 'true' && '1' || '0' }}
         run: dotnet run --no-build -c Release --project tests/Purity.Storage.Tests/Purity.Storage.Tests.csproj
+
+      - name: Test the reminders
+        shell: bash
+        timeout-minutes: 5
+        run: dotnet run --no-build -c Release --project tests/Purity.Reminders.Tests/Purity.Reminders.Tests.csproj
 
       - name: Test the desktop app
         shell: bash
