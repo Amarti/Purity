@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Media;
 
 
 namespace Purity.Desktop
@@ -29,6 +30,7 @@ namespace Purity.Desktop
 		public static AppBuilder BuildAvaloniaApp() =>
 			AppBuilder.Configure<App>()
 				.UsePlatformDetect()
+				.With(new FontManagerOptions { DefaultFamilyName = AppFont.Source })		// for what sits outside the windows: tooltips and drop-downs
 				.LogToTrace();
 
 		/// <summary>Set when a check run fails, as closing the window gives no other way to say so</summary>

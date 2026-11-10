@@ -1,4 +1,5 @@
 using Avalonia.Platform.Storage;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop.Views
@@ -11,8 +12,8 @@ namespace Purity.Desktop.Views
 		{
 			var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
 			{
-				Title = "Data file",
-				FileTypeFilter = new[] { DataFiles, FilePickerFileTypes.All },
+				Title = Loc.T.DataFileTitle,
+				FileTypeFilter = new[] { DataFiles(), FilePickerFileTypes.All },
 			});
 			return files.Count > 0 ? files[0].TryGetLocalPath() : null;
 		}
@@ -23,15 +24,15 @@ namespace Purity.Desktop.Views
 		{
 			var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
 			{
-				Title = "Move the data file to",
+				Title = Loc.T.MoveToTitle,
 				SuggestedFileName = name,
 				DefaultExtension = "json",
-				FileTypeChoices = new[] { DataFiles },
+				FileTypeChoices = new[] { DataFiles() },
 			});
 			return file?.TryGetLocalPath();
 		}
 
 
-		private static readonly FilePickerFileType DataFiles = new("Purity data") { Patterns = new[] { "*.json" } };
+		private static FilePickerFileType DataFiles() => new(Loc.T.DataFileType) { Patterns = new[] { "*.json" } };
 	}
 }

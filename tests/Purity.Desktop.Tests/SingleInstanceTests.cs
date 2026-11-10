@@ -94,9 +94,8 @@ namespace Purity.Desktop.Tests
 				await holder.WaitForExitAsync();
 			}
 
-			using var next = SingleInstance.TryAcquire(_folder);
-			Assert.NotNull(next);
-			next!.Listen();
+			using var next = await AcquireOnceReleased();
+			next.Listen();
 			var shown = NewSignal();
 			next.Show = () => shown.TrySetResult();
 			Assert.True(SingleInstance.AskRunningToShow(_folder));
@@ -143,6 +142,20 @@ namespace Purity.Desktop.Tests
 			_ = process.StandardOutput.ReadToEndAsync();
 			_ = process.StandardError.ReadToEndAsync();
 			return process;
+		}
+
+		/// <summary>The system lets go of a killed process's files a moment after the process is gone, and later still on a busy machine</summary>
+		private async Task<SingleInstance> AcquireOnceReleased()
+		{
+			var deadline = DateTime.UtcNow.AddSeconds(10);
+			while (true)
+			{
+				if (SingleInstance.TryAcquire(_folder) is { } hold)
+					return hold;
+				if (DateTime.UtcNow > deadline)
+					throw new TimeoutException("The killed process's hold was never released");
+				await Task.Delay(50);
+			}
 		}
 
 		private async Task WaitForFile(string name, Process holder)

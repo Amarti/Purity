@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Purity.Desktop.Localization;
 using Purity.Desktop.ViewModels;
 
 
@@ -47,7 +48,7 @@ namespace Purity.Desktop.Views
 
 			var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
 			{
-				Title = "Periods lengths report",
+				Title = Loc.T.ReportTitle,
 				SuggestedFileName = "periodsLengths.csv",
 				DefaultExtension = "csv",
 			});
@@ -60,7 +61,7 @@ namespace Purity.Desktop.Views
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 			{
-				await MessageWindow.ShowAsync(this, "The report couldn't be written.\n\n" + ex.Message, "OK");
+				this.FindControl<MessageLayer>("Messages")!.Tell(Loc.T.ReportFailed + "\n\n" + ex.Message, MessageKind.Problem);
 			}
 		}
 

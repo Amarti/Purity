@@ -1,5 +1,6 @@
 using System.Text;
 using Purity.Core;
+using Purity.Desktop.Localization;
 using Purity.Desktop.ViewModels;
 using Xunit;
 
@@ -22,6 +23,8 @@ namespace Purity.Desktop.Tests
 		public void Dispose()
 		{
 			_viewModel?.Dispose();
+			Loc.Instance.Use(Language.English);						// opening the app takes on the saved language and calendar, which every test shares
+			Loc.Instance.UseCalendar(CalendarKind.Gregorian, false);
 			Environment.SetEnvironmentVariable("PURITY_APP_DATA", null);
 			try
 			{
@@ -282,8 +285,16 @@ namespace Purity.Desktop.Tests
 
 		private sealed class FakeDialogs : IAppDialogs
 		{
-			public async Task<int?> AskAsync(string text, params string[] buttons)
+			public void Tell(string text, MessageKind kind)
 			{
+				Shown.Add(text);
+				Kinds.Add(kind);
+				Answers.TryDequeue(out _);
+			}
+
+			public async Task<int?> AskAsync(Question question, params string[] buttons)
+			{
+				var text = question.Body == null ? question.Title : question.Body + "\n\n" + question.Title;
 				Shown.Add(text);
 				if (WhileAsking != null)
 					await WhileAsking(text);
@@ -316,6 +327,7 @@ namespace Purity.Desktop.Tests
 			public int FilesPicked { get; private set; }
 
 			public List<string> Shown { get; } = new();
+			public List<MessageKind> Kinds { get; } = new();
 			public Queue<int> Answers { get; } = new();
 			public int SettingsShown { get; private set; }
 

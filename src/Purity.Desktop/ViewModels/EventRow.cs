@@ -1,11 +1,25 @@
 using Purity.Core;
+using Purity.Desktop.Localization;
 
 
 namespace Purity.Desktop.ViewModels
 {
 	/// <summary>One date in a period's list, and how it stands against today (T5)</summary>
 	/// <param name="TodayText">The line marking today, on the first date still to come after some that have passed; otherwise null</param>
-	public sealed record EventRow(PurityEvent Event, bool IsPast, string? TodayText);
+	public sealed record EventRow(PurityEvent Event, bool IsPast, string? TodayText)
+	{
+		/// <summary>The kind of date, in the language being shown</summary>
+		public string TypeText { get; } = Loc.T.EventType(Event.Type);
+
+		/// <summary>The Hebrew date, in the letters chosen</summary>
+		public string HebrewText { get; } = Loc.Instance.HebrewDate(Event.Stamp);
+
+		/// <summary>The width of the Hebrew date's column: English letters need more room</summary>
+		public double HebrewWidth { get; } = Loc.Instance.HebrewInEnglish ? 85 : 60;
+
+		/// <summary>The Gregorian date, in the language being shown. With Hebrew dates alone, only what follows it: the interval of a Veset Aflaga.</summary>
+		public string DetailText { get; } = Loc.Instance.IsHebrewOnly ? Event.Note ?? string.Empty : Loc.Instance.GregorianText(Event);
+	}
 
 
 	/// <summary>
@@ -26,9 +40,9 @@ namespace Purity.Desktop.ViewModels
 			var days = (Begins(item).UtcDateTime.Date - today).Days;
 			return days switch
 			{
-				<= 0 => "Today",
-				1 => "Tomorrow",
-				_ => $"in {days} days",
+				<= 0 => Loc.T.Today,
+				1 => Loc.T.Tomorrow,
+				_ => Loc.T.InDays(days),
 			};
 		}
 	}

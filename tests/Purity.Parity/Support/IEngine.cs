@@ -29,6 +29,9 @@ namespace Purity.Parity
 		/// <summary>Hebrew date text for a day stamp, as the Windows app shows it, and as the old Avalonia app needed it.</summary>
 		(string Text, string TextAvalonia) HebrewDate(DateTimeOffset dayStamp);
 
+		/// <summary>Hebrew date text for a day stamp in English letters.</summary>
+		string HebrewDateInEnglish(DateTimeOffset dayStamp);
+
 		/// <summary>The periods lengths CSV report.</summary>
 		string PeriodLengthsReport(IReadOnlyList<PeriodInput> inputs);
 	}

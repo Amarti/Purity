@@ -16,7 +16,7 @@ namespace Purity.Desktop.Tests
 			_dialogs.InSettings = settings =>
 			{
 				Assert.Equal(Appearance.System, settings.Appearance);
-				settings.AppearanceIndex = (int)Appearance.Dark;
+				settings.IsDark = true;
 				return true;
 			};
 
@@ -32,7 +32,7 @@ namespace Purity.Desktop.Tests
 			_dialogs.InSettings = settings =>
 			{
 				Assert.Equal(Appearance.Dark, settings.Appearance);
-				settings.AppearanceIndex = (int)Appearance.Light;
+				settings.IsLight = true;
 				return false;
 			};
 			await window.OpenSettingsCommand.ExecuteAsync(null);

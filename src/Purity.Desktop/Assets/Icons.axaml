@@ -86,6 +86,47 @@
         </GeometryDrawing>
     </DrawingGroup>
 
+    <!-- The flags of the language switch, drawn here because Windows has no flag emoji -->
+    <DrawingImage x:Key="FlagEnglishDrawingImage" Drawing="{DynamicResource FlagEnglishDrawingGroup}"/>
+    <DrawingGroup x:Key="FlagEnglishDrawingGroup" ClipGeometry="M0,0 H60 V40 H0 Z">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="#012169" Geometry="M0,0 H60 V40 H0 Z"/>
+            <GeometryDrawing Geometry="M0,0 L60,40 M60,0 L0,40">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="8" Brush="White"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M0,0 L60,40 M60,0 L0,40">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="3" Brush="#C8102E"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M30,0 V40 M0,20 H60">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="13" Brush="White"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+            <GeometryDrawing Geometry="M30,0 V40 M0,20 H60">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="8" Brush="#C8102E"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="FlagHebrewDrawingImage" Drawing="{DynamicResource FlagHebrewDrawingGroup}"/>
+    <DrawingGroup x:Key="FlagHebrewDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="White" Geometry="M0,0 H240 V160 H0 Z"/>
+            <GeometryDrawing Brush="#0038B8" Geometry="M0,15 H240 V40 H0 Z M0,120 H240 V145 H0 Z"/>
+            <GeometryDrawing Geometry="M120,47 L149,97 L91,97 Z M120,113 L91,63 L149,63 Z">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="7" Brush="#0038B8"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
     <!-- The day and night icons: a sun, a crescent, and for a full day a small sun with the same crescent, all filled. The invisible square keeps every one the same size. -->
     <StreamGeometry x:Key="IconSquare">M0,0 H24 V24 H0 Z</StreamGeometry>
 
@@ -109,6 +150,19 @@
         </DrawingGroup.Children>
     </DrawingGroup>
 
+    <!-- A screen on its stand: whatever the system uses -->
+    <DrawingImage x:Key="SameAsSystemIconDrawingImage" Drawing="{DynamicResource SameAsSystemIconDrawingGroup}"/>
+    <DrawingGroup x:Key="SameAsSystemIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M4.5,4 H19.5 A1.5,1.5 0 0 1 21,5.5 V15.5 A1.5,1.5 0 0 1 19.5,17 H4.5 A1.5,1.5 0 0 1 3,15.5 V5.5 A1.5,1.5 0 0 1 4.5,4 Z M12,17 V20.5 M8,20.5 H16">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource IconBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
     <DrawingImage x:Key="FullDayIconDrawingImage" Drawing="{DynamicResource FullDayIconDrawingGroup}"/>
     <DrawingGroup x:Key="FullDayIconDrawingGroup">
         <DrawingGroup.Children>
@@ -121,5 +175,55 @@
             <GeometryDrawing Brush="{DynamicResource MoonBrush}" Geometry="M17.38,11.29 a5.6,5.6 0 1,0 5.13,7.7 a4.66,4.66 0 0,1 -5.13,-7.7 Z"/>
         </DrawingGroup.Children>
     </DrawingGroup>
+
+    <!-- The marks on messages: drawn with a line, in the colors of good news and of trouble -->
+    <DrawingImage x:Key="MessageDoneIconDrawingImage" Drawing="{DynamicResource MessageDoneIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageDoneIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M3,12 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 M8.5,12 l2.5,2.5 l4.5,-4.5">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource MessageDoneBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="MessageProblemIconDrawingImage" Drawing="{DynamicResource MessageProblemIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageProblemIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M12,3.5 L2.5,20 H21.5 Z M12,10 V14 M12,17 V17.05">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource MessageProblemBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="MessageCriticalIconDrawingImage" Drawing="{DynamicResource MessageCriticalIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageCriticalIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M8.3,3 H15.7 L21,8.3 V15.7 L15.7,21 H8.3 L3,15.7 V8.3 Z M12,8 V12.5 M12,16 V16.05">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" LineJoin="Round" Brush="{DynamicResource MessageProblemBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
+    <DrawingImage x:Key="MessageCloseIconDrawingImage" Drawing="{DynamicResource MessageCloseIconDrawingGroup}"/>
+    <DrawingGroup x:Key="MessageCloseIconDrawingGroup">
+        <DrawingGroup.Children>
+            <GeometryDrawing Brush="Transparent" Geometry="{StaticResource IconSquare}"/>
+            <GeometryDrawing Geometry="M6,6 L18,18 M18,6 L6,18">
+                <GeometryDrawing.Pen>
+                    <Pen Thickness="2" LineCap="Round" Brush="{DynamicResource MessageSecondaryBrush}"/>
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingGroup.Children>
+    </DrawingGroup>
+
 
 </ResourceDictionary>

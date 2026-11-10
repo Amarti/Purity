@@ -25,6 +25,16 @@
             <SolidColorBrush x:Key="ButtonDisabledBorderBrush" Color="#ADB2B5"/>
             <SolidColorBrush x:Key="ButtonDisabledForegroundBrush" Color="#838383"/>
 
+            <SolidColorBrush x:Key="ConfirmBackgroundBrush" Color="#44719A"/>
+            <SolidColorBrush x:Key="ConfirmHoverBackgroundBrush" Color="#3A6388"/>
+            <SolidColorBrush x:Key="ConfirmPressedBackgroundBrush" Color="#2F5373"/>
+
+            <SolidColorBrush x:Key="MessageBackgroundBrush" Color="White"/>
+            <SolidColorBrush x:Key="MessageBorderBrush" Color="#C5CCD3"/>
+            <SolidColorBrush x:Key="MessageSecondaryBrush" Color="#5A6470"/>
+            <SolidColorBrush x:Key="MessageDoneBrush" Color="#2E8B57"/>
+            <SolidColorBrush x:Key="MessageProblemBrush" Color="#C0392B"/>
+
             <SolidColorBrush x:Key="CheckBoxBackgroundBrush" Color="White"/>
             <SolidColorBrush x:Key="CheckBoxBorderBrush" Color="#707070"/>
             <SolidColorBrush x:Key="CheckBoxMarkBrush" Color="#212121"/>
@@ -78,6 +88,16 @@
             <SolidColorBrush x:Key="ButtonDisabledBackgroundBrush" Color="#2A2C30"/>
             <SolidColorBrush x:Key="ButtonDisabledBorderBrush" Color="#3D4046"/>
             <SolidColorBrush x:Key="ButtonDisabledForegroundBrush" Color="#6B6F76"/>
+
+            <SolidColorBrush x:Key="ConfirmBackgroundBrush" Color="#44719A"/>
+            <SolidColorBrush x:Key="ConfirmHoverBackgroundBrush" Color="#5383AE"/>
+            <SolidColorBrush x:Key="ConfirmPressedBackgroundBrush" Color="#3A6388"/>
+
+            <SolidColorBrush x:Key="MessageBackgroundBrush" Color="#2A2C30"/>
+            <SolidColorBrush x:Key="MessageBorderBrush" Color="#4A4E55"/>
+            <SolidColorBrush x:Key="MessageSecondaryBrush" Color="#A4A8B0"/>
+            <SolidColorBrush x:Key="MessageDoneBrush" Color="#5DCAA5"/>
+            <SolidColorBrush x:Key="MessageProblemBrush" Color="#F09595"/>
 
             <SolidColorBrush x:Key="CheckBoxBackgroundBrush" Color="#2A2C30"/>
             <SolidColorBrush x:Key="CheckBoxBorderBrush" Color="#9A9EA6"/>

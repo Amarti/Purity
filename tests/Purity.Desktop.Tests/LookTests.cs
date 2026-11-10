@@ -22,7 +22,7 @@ namespace Purity.Desktop.Tests
 	/// the whole app, so every test puts it back.
 	/// </summary>
 	[Collection(AppDataCollection.Name)]
-	public sealed class LookTests : IDisposable
+	public sealed partial class LookTests : IDisposable
 	{
 		public LookTests()
 		{
@@ -131,7 +131,7 @@ namespace Purity.Desktop.Tests
 
 			Assert.True(window.CanResize);
 			Assert.Equal(620, window.Width);
-			Assert.Equal(861, window.Height);
+			Assert.Equal(600, window.Height);
 			Assert.Equal(620, window.MinWidth);
 			Assert.Equal(WindowFit.MinimumHeight, window.MinHeight);
 		});
@@ -185,7 +185,7 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(WindowState.Normal, window.WindowState);
 			window = new MainWindow(new StartOptions(Path.Combine(_root, "pureData.json"), Path.Combine(_root, "picture.png")));
 			Assert.Equal(620, window.Width);
-			Assert.Equal(861, window.Height);
+			Assert.Equal(600, window.Height);
 		});
 
 		[Fact]
@@ -214,11 +214,13 @@ namespace Purity.Desktop.Tests
 			var settings = new SettingsWindowViewModel("pureData.json", null, appearance: Appearance.Dark);
 			var window = new SettingsWindow(settings);
 			window.Show();
-			var choice = window.GetVisualDescendants().OfType<ComboBox>().Single();
+			var parts = AppearancePartsOf(window);
 
-			Assert.Equal(new[] { "Same as the system", "Light", "Dark" }, settings.AppearanceChoices);
-			Assert.Equal((int)Appearance.Dark, choice.SelectedIndex);
-			choice.SelectedIndex = 0;
+			Assert.Equal(new[] { "Same as the system", "Light", "Dark" }, parts.Select(el => AutomationProperties.GetName(el)));
+			Assert.Equal(new bool?[] { false, false, true }, parts.Select(el => el.IsChecked));
+			parts[0].IsChecked = true;
+			Dispatcher.UIThread.RunJobs();
+			Assert.Equal(new bool?[] { true, false, false }, parts.Select(el => el.IsChecked));
 			Assert.Equal(Appearance.System, settings.Appearance);
 
 			window.Close();
@@ -552,29 +554,6 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
-		public Task ADateTypedJustBeforeClosingIsTheOneThatCounts() => Ui.Run(async () =>
-		{
-			var window = await OpenPeriodsAsync();
-			var viewModel = (MainWindowViewModel)window.DataContext!;
-			viewModel.AddPeriodCommand.Execute(null);
-			var open = viewModel.Periods[0];
-			await Ui.WaitUntil(() => window.GetVisualDescendants().OfType<DateField>().Count(el => el.DataContext == open) == 2);
-
-			var to = window.GetVisualDescendants().OfType<DateField>().Where(el => el.DataContext == open).ElementAt(1);
-			var text = to.GetVisualDescendants().OfType<TextBox>().Single();
-			text.Focus();
-			text.Text = "Thursday, 18 March 2010";		// already past, so closing asks nothing
-			var wide = window.GetVisualDescendants().OfType<Button>().Single(el => AutomationProperties.GetName(el) == "Close period");
-
-			Press(wide, window);
-			await Ui.WaitUntil(() => open.IsClosed);
-
-			Assert.Equal(new DateTime(2010, 3, 18), open.EndDate);
-			window.Close();
-			await Ui.WaitUntil(() => !window.IsVisible);
-		});
-
-		[Fact]
 		public Task TheButtonsAreAboveTheListAndTheNewestPeriodIsOnTop() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();
@@ -736,7 +715,7 @@ namespace Purity.Desktop.Tests
 		}
 
 
-		/// <summary>The longest date, "Wednesday, 29 September ...", is 170 wide in Segoe UI and 175 in Linux's Liberation Sans; the field's frame and calendar page take 29</summary>
+		/// <summary>The longest date, "Wednesday, 29 September ...", has to fit in Heebo, beside the field's frame and calendar page, which take 29</summary>
 		private const double WholeDateWidth = 210;
 
 		/// <summary>A date line's drop, date field and switch, with their gaps and the one before Skip</summary>

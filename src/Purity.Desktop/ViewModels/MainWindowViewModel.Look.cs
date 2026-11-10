@@ -1,6 +1,11 @@
+using System.Collections.ObjectModel;
+using Purity.Desktop.Localization;
+using static Purity.Desktop.Localization.Loc;
+
+
 namespace Purity.Desktop.ViewModels
 {
-	/// <summary>How the app looks on this computer: light or dark (T7), and where the window was (T8)</summary>
+	/// <summary>How the app looks on this computer: light or dark (T7), where the window was (T8), and its language</summary>
 	public sealed partial class MainWindowViewModel
 	{
 		/// <summary>Light, dark, or the system's choice, as set in Settings</summary>
@@ -31,7 +36,78 @@ namespace Purity.Desktop.ViewModels
 		}
 
 
-		private async Task SetAppearanceAsync(Appearance appearance)
+		/// <summary>
+		/// Shows the whole app in this language at once. Saves nothing: that waits for OK. The date
+		/// fields and the calendars behind them write their month names when they're built, so the
+		/// periods are built again.
+		/// </summary>
+		private void ShowLanguage(Language language)
+		{
+			if (language == Loc.Instance.Language)
+				return;
+
+			Loc.Instance.Use(language);
+			OnPropertyChanged(nameof(AddOrCloseLabel));
+			UpdateWarning();
+			RefreshAll();
+			BuildAgain(OpenPeriods);
+			BuildAgain(ClosedPeriods);
+		}
+
+		private static void BuildAgain(ObservableCollection<PeriodViewModel> shown)
+		{
+			var periods = shown.ToList();
+			shown.Clear();
+			foreach (var item in periods)
+				shown.Add(item);
+		}
+
+		/// <summary>Shows the whole app with this calendar and these letters at once. Saves nothing: that waits for OK.</summary>
+		private void ShowCalendar(CalendarKind calendar, bool hebrewInEnglish)
+		{
+			if (calendar == Loc.Instance.Calendar && hebrewInEnglish == Loc.Instance.HebrewInEnglish)
+				return;
+
+			Loc.Instance.UseCalendar(calendar, hebrewInEnglish);
+			OnPropertyChanged(nameof(UsesHebrewCalendar));
+			RefreshAll();
+		}
+
+		private void SetCalendar(CalendarKind calendar, bool hebrewInEnglish)
+		{
+			if (calendar == _settings.Calendar && hebrewInEnglish == _settings.HebrewDatesInEnglish)
+				return;
+
+			_settings.Calendar = calendar;
+			_settings.HebrewDatesInEnglish = hebrewInEnglish;
+			try
+			{
+				_settings.Save();
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				_dialogs.Tell(T.CalendarNotSaved + e.Message, MessageKind.Problem);
+			}
+		}
+
+		private void SetLanguage(Language language)
+		{
+			if (language == _settings.Language)
+				return;
+
+			_settings.Language = language;
+			try
+			{
+				_settings.Save();
+			}
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				_dialogs.Tell(T.LanguageNotSaved + e.Message, MessageKind.Problem);
+			}
+		}
+
+
+		private void SetAppearance(Appearance appearance)
 		{
 			if (appearance == _settings.Appearance)
 				return;
@@ -44,7 +120,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				await _dialogs.AskAsync("The appearance couldn't be saved, so Purity will start with the earlier one next time.\n\n" + e.Message, "OK");
+				_dialogs.Tell(T.AppearanceNotSaved + e.Message, MessageKind.Problem);
 			}
 		}
 	}

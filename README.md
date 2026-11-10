@@ -26,14 +26,15 @@ The app keeps its settings and local copies per user: in `%LOCALAPPDATA%\Purity`
 Current TODOs:
 
  - Add options to the settings window:
-	- Language option (en, heb)
-	- Calendar culture (gregorian + hebrew or hebrew only)
 	- Or Zarua option
+ - Settle the open calculation questions with a rav, then apply the answers
  - Desktop (Windows, macOS, Linux)
 	- calendar/reminders integration
+	- check the current look by hand on macOS and Linux
  - Port to iOS
 	- external storage file path (dropbox/google drive/iCloud storage integration)
 	- calendar/reminders integration
+	- Apple Watch viewer
  - Port to android
 	- external storage file path (dropbox/google drive integration)
 	- calendar/reminders integration

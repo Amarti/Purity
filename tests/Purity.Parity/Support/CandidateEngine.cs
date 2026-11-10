@@ -62,6 +62,8 @@ namespace Purity.Parity
 		public (int Length, float FullLength) Lengths(PeriodInput first, PeriodInput second) =>
 			(Core.PurityPeriod.GetPeriodLength(ToPeriod(first), ToPeriod(second)), Core.PurityPeriod.GetFullPeriodLength(ToPeriod(first), ToPeriod(second)));
 
+		public string HebrewDateInEnglish(DateTimeOffset dayStamp) => Core.DateText.HebrewInEnglish(dayStamp);
+
 		public (string Text, string TextAvalonia) HebrewDate(DateTimeOffset dayStamp)
 		{
 			var e = new Core.PurityEvent(Core.PurityEventType.Mikveh, dayStamp);

@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Purity.Desktop.Localization;
 using Purity.Desktop.Views;
 
 
@@ -13,7 +14,7 @@ namespace Purity.Desktop
 		public override void Initialize()
 		{
 			AvaloniaXamlLoader.Load(this);
-			Resources[AppFont.ResourceKey] = AppFont.Choose();
+			Resources[AppFont.ResourceKey] = AppFont.Family;
 		}
 
 		public override void OnFrameworkInitializationCompleted()

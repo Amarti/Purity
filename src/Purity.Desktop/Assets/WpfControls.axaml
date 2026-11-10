@@ -6,7 +6,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:views="using:Purity.Desktop.Views">
+                    xmlns:views="using:Purity.Desktop.Views" xmlns:loc="using:Purity.Desktop.Localization">
 
     <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
@@ -14,7 +14,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundBrush}"/>
         <Setter Property="Padding" Value="1"/>
-        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
@@ -41,6 +41,29 @@
             <Setter Property="BorderBrush" Value="{DynamicResource ButtonPressedBorderBrush}"/>
         </Style>
         <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
+
+        <!-- The button that confirms a window: filled, so it stands out from the ones beside it -->
+        <Style Selector="^.Confirm">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.Confirm /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="^.Confirm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Confirm:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmPressedBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Confirm:disabled /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
@@ -151,8 +174,8 @@
         </Setter>
     </ControlTheme>
 
-    <!-- One half of the Day | Night switch (T3b) -->
-    <ControlTheme x:Key="DayNightHalfTheme" TargetType="RadioButton">
+    <!-- One half of a switch: Day | Night (T3b), or the language in Settings -->
+    <ControlTheme x:Key="SwitchHalfTheme" TargetType="RadioButton">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource SwitchOffForegroundBrush}"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -191,18 +214,18 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="{TemplateBinding CornerRadius}">
                     <Grid ColumnDefinitions="*,*">
-                        <RadioButton Name="PART_Day" Theme="{StaticResource DayNightHalfTheme}" CornerRadius="4,0,0,4"
-                                     ToolTip.Tip="After dawn" AutomationProperties.Name="Day">
+                        <RadioButton Name="PART_Day" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4"
+                                     ToolTip.Tip="{Binding Text.AfterDawn, Source={x:Static loc:Loc.Instance}}" AutomationProperties.Name="{Binding Text.Day, Source={x:Static loc:Loc.Instance}}">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDawnIconDrawingImage}"/>
-                                <TextBlock Text="Day" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Text.Day, Source={x:Static loc:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </RadioButton>
-                        <RadioButton Name="PART_Night" Grid.Column="1" Theme="{StaticResource DayNightHalfTheme}" CornerRadius="0,4,4,0"
-                                     ToolTip.Tip="After dusk" AutomationProperties.Name="Night">
+                        <RadioButton Name="PART_Night" Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0"
+                                     ToolTip.Tip="{Binding Text.AfterDusk, Source={x:Static loc:Loc.Instance}}" AutomationProperties.Name="{Binding Text.Night, Source={x:Static loc:Loc.Instance}}">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDuskIconDrawingImage}"/>
-                                <TextBlock Text="Night" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Text.Night, Source={x:Static loc:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </RadioButton>
                     </Grid>
@@ -211,33 +234,8 @@
         </Setter>
     </ControlTheme>
 
-    <!-- WPF's date field: a text box and a small calendar page showing 15 -->
-    <ControlTheme x:Key="{x:Type CalendarDatePicker}" TargetType="CalendarDatePicker">
-        <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="4,0,2,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Template">
-            <ControlTemplate>
-                <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBox Name="PART_TextBox"
-                                 Padding="{TemplateBinding Padding}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 MinHeight="0"
-                                 VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                 PlaceholderText="{TemplateBinding PlaceholderText}"/>
-                        <Button Name="PART_Button" Grid.Column="1" Focusable="False" Margin="2,0" VerticalAlignment="Center">
-                            <Button.Template>
-                                <ControlTemplate>
+    <!-- The small calendar page showing 15, on the date field -->
+    <ControlTemplate x:Key="CalendarGlyphTemplate">
                                     <Grid Width="17" Height="17" Background="Transparent">
                                         <Border Background="{DynamicResource CalendarGlyphPageBrush}" BorderBrush="{DynamicResource CalendarGlyphBorderBrush}" BorderThickness="1">
                                             <Grid RowDefinitions="4,*">
@@ -249,21 +247,139 @@
                                         </Border>
                                     </Grid>
                                 </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
-                            <Calendar Name="PART_Calendar"
-                                      DisplayDate="{TemplateBinding DisplayDate}"
-                                      DisplayDateStart="{TemplateBinding DisplayDateStart}"
-                                      DisplayDateEnd="{TemplateBinding DisplayDateEnd}"
-                                      FirstDayOfWeek="{TemplateBinding FirstDayOfWeek}"
-                                      IsTodayHighlighted="{TemplateBinding IsTodayHighlighted}"
-                                      SelectedDate="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate, Mode=TwoWay}"/>
-                        </Popup>
+
+    <!-- WPF's date field: a text box and a small calendar page showing 15 -->
+    <!-- The month grid of a date field, in either calendar -->
+    <ControlTheme x:Key="MonthArrowTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Background="{TemplateBinding Background}" Content="{TemplateBinding Content}"
+                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource HighlightBrush}"/>
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="MonthDayButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <Rectangle Name="TodayBackground" Fill="{DynamicResource HighlightBrush}" IsVisible="False"/>
+                    <Rectangle Name="SelectedBackground" Fill="{TemplateBinding Background}" Opacity="0.75" IsVisible="False"/>
+                    <Rectangle Name="Background" Fill="{TemplateBinding Background}" Opacity="0.5" IsVisible="False"/>
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                                      FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Rectangle Name="FocusVisual" Stroke="{DynamicResource HighlightBrush}" StrokeThickness="1" IsHitTestVisible="False" IsVisible="False"/>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ Rectangle#Background">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^:focus-visible /template/ Rectangle#FocusVisual">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Selected /template/ Rectangle#SelectedBackground">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Today /template/ Rectangle#TodayBackground">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Today /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeControlLowBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type views:MonthView}" TargetType="views:MonthView">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Margin="0,2" Background="{DynamicResource ThemeBackgroundBrush}" BorderBrush="{DynamicResource ThemeBorderHighBrush}"
+                        BorderThickness="{DynamicResource ThemeBorderThickness}">
+                    <Grid Margin="2" RowDefinitions="Auto,Auto">
+                        <Border Height="22" Background="{DynamicResource ThemeAccentBrush2}">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                <Button Name="PART_PreviousYear" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M7,0 L1,5 L7,10 Z M13,0 L7,5 L13,10 Z"/>
+                                </Button>
+                                <Button Name="PART_Previous" Grid.Column="1" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M6,0 L0,5 L6,10 Z"/>
+                                </Button>
+                                <TextBlock Name="PART_Title" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
+                                <Button Name="PART_Next" Grid.Column="3" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z"/>
+                                </Button>
+                                <Button Name="PART_NextYear" Grid.Column="4" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z M6,0 L12,5 L6,10 Z"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <Grid Name="PART_Days" Grid.Row="1" Margin="6,0,6,6" ColumnDefinitions="28,28,28,28,28,28,28" RowDefinitions="Auto,20,20,20,20,20,20">
+                            <Grid.Styles>
+                                <Style Selector="TextBlock">
+                                    <Setter Property="Margin" Value="0,4"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="FontSize" Value="9.5"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                            </Grid.Styles>
+                            <TextBlock Grid.Column="0"/>
+                            <TextBlock Grid.Column="1"/>
+                            <TextBlock Grid.Column="2"/>
+                            <TextBlock Grid.Column="3"/>
+                            <TextBlock Grid.Column="4"/>
+                            <TextBlock Grid.Column="5"/>
+                            <TextBlock Grid.Column="6"/>
+                        </Grid>
                     </Grid>
                 </Border>
             </ControlTemplate>
         </Setter>
     </ControlTheme>
+
+    <!-- A date: the whole of the field opens the month grid -->
+    <ControlTheme x:Key="{x:Type views:DateField}" TargetType="views:DateField">
+        <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="4,0,2,0"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Panel>
+                        <Button Name="PART_Button" Theme="{StaticResource PlainButtonTheme}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Margin="{TemplateBinding Padding}" VerticalAlignment="Center" Text="{TemplateBinding Text}"/>
+                                <ContentControl Grid.Column="1" Margin="2,0" VerticalAlignment="Center" Template="{StaticResource CalendarGlyphTemplate}"/>
+                            </Grid>
+                        </Button>
+                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
+                            <views:MonthView Name="PART_Month"/>
+                        </Popup>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
 
 </ResourceDictionary>

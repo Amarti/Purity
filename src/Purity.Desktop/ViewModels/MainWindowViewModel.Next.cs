@@ -18,6 +18,10 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>The strip gives way while a period is open, and returns when it's closed or removed</summary>
 		public bool ShowsNextStrip => NextEvent != null && !HasOpenPeriod;
 
+		/// <summary>The next date's text for the strip, in the language being shown</summary>
+		[ObservableProperty]
+		public partial EventRow? NextRow { get; private set; }
+
 		/// <summary>The date on this computer's calendar, as of the last time it was looked at</summary>
 		internal DateTime Today { get; private set; }
 
@@ -39,6 +43,7 @@ namespace Purity.Desktop.ViewModels
 				.Where(el => !EventTiming.IsOver(el, Today))
 				.OrderBy(EventTiming.Begins)
 				.FirstOrDefault();
+			NextRow = NextEvent == null ? null : new EventRow(NextEvent, false, null);
 			NextIn = NextEvent == null ? string.Empty : EventTiming.DaysAway(NextEvent, Today);
 			OnPropertyChanged(nameof(ShowsNextStrip));
 		}

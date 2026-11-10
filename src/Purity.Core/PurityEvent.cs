@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 
@@ -47,22 +48,22 @@ namespace Purity.Core
 		[JsonIgnore]
 		public bool IsFullDay => Type == PurityEventType.OnaBeinonit;
 		[JsonIgnore]
-		public string StampHebRepr => DateText.Hebrew(IsDateAfterDusk(Stamp) ? Stamp.AddDays(1) : Stamp);
+		public string StampHebRepr => DateText.HebrewOfOnah(Stamp);
 		[JsonIgnore]
 		public string StampHebReprAvalonia => DateText.ReversedForOldAvalonia(StampHebRepr);
 		[JsonIgnore]
-		public string StampGrgRepr
-		{
-			get
-			{
-				var res = $"{DateText.Gregorian(Stamp)} {Note}";
-				if (Type == PurityEventType.OnaBeinonit)
-					res = (Stamp.Day > 1)
-							? DateText.Invariant($"{Stamp.Day - 1}-{res}")
-							: $"{DateText.Gregorian(Stamp.AddDays(-1))} - {res}";
+		public string StampGrgRepr => GregorianText(DateText.GregorianMonths);
 
-				return res;
-			}
+		/// <summary>The Gregorian text with another language's month names, for the screen only</summary>
+		public string GregorianText(IReadOnlyList<string> months)
+		{
+			var res = $"{DateText.Gregorian(Stamp, months)} {Note}";
+			if (Type == PurityEventType.OnaBeinonit)
+				res = (Stamp.Day > 1)
+						? DateText.Invariant($"{Stamp.Day - 1}-{res}")
+						: $"{DateText.Gregorian(Stamp.AddDays(-1), months)} - {res}";
+
+			return res;
 		}
 	}
 }

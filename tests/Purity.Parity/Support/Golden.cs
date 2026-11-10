@@ -51,6 +51,35 @@ namespace Purity.Parity
 		});
 	}
 
+	/// <summary>Every Hebrew date in English letters, one per day of each kind of year</summary>
+	public static class HebrewEnglishTable
+	{
+		public const string FileName = "hebrew-dates-english.txt";
+
+
+		public static string Build(IEngine engine)
+		{
+			var calendar = new HebrewCalendar();
+			var table = new SortedDictionary<string, string>(StringComparer.Ordinal);
+			for (var day = calendar.MinSupportedDateTime.Date; day < calendar.MaxSupportedDateTime.Date; day = day.AddDays(1))
+			{
+				var year = calendar.GetYear(day);
+				var key = $"{(calendar.IsLeapYear(year) ? 'L' : 'C')}|{calendar.GetMonth(day):00}|{calendar.GetDayOfMonth(day):00}";
+				var value = engine.HebrewDateInEnglish(new DateTimeOffset(day, TimeSpan.Zero));
+
+				if (table.TryGetValue(key, out var existing))
+					Assert.True(existing == value, $"{engine.Name}: {key} has two spellings on {day:yyyy-MM-dd}");
+				else
+					table.Add(key, value);
+			}
+
+			var sb = new StringBuilder();
+			foreach (var (key, value) in table)
+				sb.Append(key).Append('|').Append(value).Append('\n');
+			return sb.ToString();
+		}
+	}
+
 	/// <summary>
 	/// Every Hebrew date text that can appear. It depends only on the day, the month and whether the
 	/// year is a leap year, so a small reviewable table covers the whole calendar.
