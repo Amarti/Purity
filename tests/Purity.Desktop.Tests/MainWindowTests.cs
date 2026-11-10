@@ -1,5 +1,6 @@
 using System.Text;
 using Purity.Core;
+using Purity.Desktop.Localization;
 using Purity.Desktop.ViewModels;
 using Xunit;
 
@@ -22,6 +23,8 @@ namespace Purity.Desktop.Tests
 		public void Dispose()
 		{
 			_viewModel?.Dispose();
+			Loc.Instance.Use(Language.English);						// opening the app takes on the saved language and calendar, which every test shares
+			Loc.Instance.UseCalendar(CalendarKind.Gregorian, false);
 			Environment.SetEnvironmentVariable("PURITY_APP_DATA", null);
 			try
 			{
