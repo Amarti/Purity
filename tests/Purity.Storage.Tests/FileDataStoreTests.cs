@@ -374,6 +374,26 @@ namespace Purity.Storage.Tests
 			Assert.Equal(0, raised);
 		}
 
+		/// <summary>
+		/// A busy machine can stall a save between putting the file in place and returning, longer
+		/// than the watcher waits. CI did once, on Linux with tests running side by side.
+		/// </summary>
+		[Fact]
+		public async Task OurOwnSaveDoesNotRaiseChangedEvenWhenItIsSlowToFinish()
+		{
+			var files = new InjectedFiles { AfterMove = () => Thread.Sleep(400) };
+			using var store = new FileDataStore(_folder.DataFile, files, TimeSpan.FromMilliseconds(50));
+			var raised = 0;
+			store.Changed += (_, _) => Interlocked.Increment(ref raised);
+
+			var first = await store.SaveAsync(First, null);
+			await store.SaveAsync(Second, first.Version);
+			await Task.Delay(TimeSpan.FromSeconds(1));
+
+			Assert.Equal(2, files.Moves);
+			Assert.Equal(0, raised);
+		}
+
 		[Fact]
 		public void WatchingAMissingFolderDoesNothing()
 		{

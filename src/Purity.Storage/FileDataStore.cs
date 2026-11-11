@@ -77,14 +77,25 @@ namespace Purity.Storage
 			if (CurrentVersion() != expectedVersion)
 				return SaveResult.Conflict;
 
-			if (!AtomicFile.Replace(_files, _path, content, () => !cancellation.IsCancellationRequested && VersionNow() == expectedVersion))
+			// Known before the file is in place: its file event may be checked before Replace returns,
+			// which on a busy machine can take longer than the watcher waits
+			var version = VersionOf(content.Span);
+			_saving = version;
+			try
 			{
-				cancellation.ThrowIfCancellationRequested();
-				return SaveResult.Conflict;
-			}
+				if (!AtomicFile.Replace(_files, _path, content, () => !cancellation.IsCancellationRequested && VersionNow() == expectedVersion))
+				{
+					cancellation.ThrowIfCancellationRequested();
+					return SaveResult.Conflict;
+				}
 
-			_lastSeen = VersionOf(content.Span);
-			return new SaveResult(_lastSeen);
+				_lastSeen = version;			// before the save stops counting as in progress, so no check falls between
+				return new SaveResult(version);
+			}
+			finally
+			{
+				_saving = null;
+			}
 		}
 
 		private string? CurrentVersion() => AtomicFile.Retrying(_files, VersionNow);
@@ -136,7 +147,11 @@ namespace Purity.Storage
 		{
 			try
 			{
-				if (CurrentVersion() == _lastSeen)
+				// The save in progress first: it records what it wrote as seen before it stops
+				// counting as in progress, so this order never misses a save that just finished
+				var now = CurrentVersion();
+				var saving = _saving;
+				if ((saving != null && now == saving) || now == _lastSeen)
 					return;
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
@@ -171,5 +186,7 @@ namespace Purity.Storage
 		private FileSystemWatcher? _watcher;
 		private Timer? _settle;
 		private volatile string? _lastSeen;
+		/// <summary>The version a save is putting in place, until it's recorded as seen</summary>
+		private volatile string? _saving;
 	}
 }

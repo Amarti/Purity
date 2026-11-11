@@ -119,6 +119,7 @@ namespace Purity.Storage.Tests
 			}
 
 			base.Move(source, target);
+			AfterMove?.Invoke();
 		}
 
 		public override void Delete(string path)
@@ -187,6 +188,8 @@ namespace Purity.Storage.Tests
 		}
 		public Action? AfterWrite { get; set; }
 		public Action? AfterLockedMove { get; set; }
+		/// <summary>Runs once a move has gone through</summary>
+		public Action? AfterMove { get; set; }
 		public int Writes { get; private set; }
 		public int Moves { get; private set; }
 		public int Pauses { get; private set; }

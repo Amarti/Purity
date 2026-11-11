@@ -5,7 +5,7 @@ every change that finishes, starts, drops or blocks a stage.
 
 ✅ done · 🔨 built, not released yet · ⬜ to do · ⏳ waiting on you · ✖️ dropped
 
-**Now:** version 2.4.2, on the `calendar-reminders` branch, waiting to be merged into `master`.
+**Now:** version 2.4.2, merged into `master`.
 
 ## Done
 
@@ -25,9 +25,10 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | New period | Starts on the computer's own date, not the UTC one, which in an American evening was already tomorrow and just after midnight in Israel still yesterday. Only the suggestion changed: a picked date was always stored as picked | 2.4.2 |
 | ✅ | Odd input | When a period is closed, its dates are checked for what a typo makes: an end before its start, more than 30 days, an overlap with the period before or after, or a new period going in among earlier ones. Once closed, a period isn't checked again, so nothing needs remembering. Changing any date of a closed period, or its day or night, asks first. Neither blocks: every date is still worked out as entered | 2.4.2 |
 
+| 🔨 | Fixes | On a busy computer, Purity's own save could be taken for a change made elsewhere, as CI caught once on Linux. Harmless, since reloading found the same history, but now it can't happen | next |
+
 ## Next, on the desktop
 
-- ⬜ Merge `calendar-reminders` into `master`.
 - ⬜ Reminders through iCloud and other CalDAV calendars.
 - ⬜ Check the app on the latest macOS on Apple Silicon (the MacBook Neo). Monterey is checked on Intel only.
 
