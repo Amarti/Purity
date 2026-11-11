@@ -96,7 +96,7 @@ namespace Purity.Desktop.Views
 
 		private void ShowSheet(Question question, IReadOnlyList<string> buttons, TaskCompletionSource<int?> answer)
 		{
-			var content = new Grid { RowDefinitions = new RowDefinitions("Auto,*,Auto") };
+			var content = new Grid { RowDefinitions = new RowDefinitions("Auto,*,Auto,Auto") };
 			content.Children.Add(new TextBlock { Classes = { "SheetTitle" }, Text = question.Title });
 			if (question.Body != null)
 			{
@@ -104,6 +104,13 @@ namespace Purity.Desktop.Views
 				var body = new ScrollViewer { Content = new TextBlock { Classes = { "SheetBody" }, Text = question.Body } };
 				Grid.SetRow(body, 1);
 				content.Children.Add(body);
+			}
+			if (question.Warning != null)
+			{
+				// Outside the scrolling part, so it's in sight beside the answers however long the explanation
+				var warning = new TextBlock { Classes = { "SheetWarning" }, Text = question.Warning };
+				Grid.SetRow(warning, 2);
+				content.Children.Add(warning);
 			}
 
 			var row = new StackPanel { Classes = { "SheetButtons" }, Orientation = Orientation.Horizontal };
@@ -115,12 +122,12 @@ namespace Purity.Desktop.Views
 				{
 					firstButton = button;
 					if (!question.NoPreference)
-						button.Classes.Add("Confirm");
+						button.Classes.Add(question.RemovesForGood ? "Danger" : "Confirm");
 				}
 				button.Click += (_, _) => Answer(index);
 				row.Children.Add(button);
 			}
-			Grid.SetRow(row, 2);
+			Grid.SetRow(row, 3);
 			content.Children.Add(row);
 
 			var sheet = new Border { Classes = { "Sheet" }, Child = content };

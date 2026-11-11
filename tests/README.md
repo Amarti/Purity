@@ -36,7 +36,7 @@ bash tools/platform-check/build-kit.sh linux-x64 linux-arm64
 
 The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the tests run with globalization off and most calculation tests skip, so install `libicu` first for a full run. The app itself never needs ICU.
 
-The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon on Monterey hasn't been tried. Rerun the kit on a Monterey Mac after upgrading Avalonia or .NET.
+The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon isn't a Monterey target: it is checked on the latest macOS only, and CI runs every suite on an Apple Silicon Mac. Rerun the kit on the Monterey Mac after upgrading Avalonia or .NET; it passed again in November 2026 with Avalonia 12.1.5.
 
 Between runs, CI publishes the Mac build every night and on each push, and fails if any program or library in it needs a newer macOS than 12.0:
 
@@ -45,6 +45,14 @@ dotnet run tools/check-macos-minimum.cs -- <publish folder> 12.0
 ```
 
 That catches the usual way an update drops a macOS version. It can't catch a library calling something newer only at run time, which is why the kit is still the real test.
+
+Google Calendar can't be reached from CI either, so the tests use a local stand-in for it. `tools/google-check` builds a kit that tries reminders against the real Google Calendar: the app with the project's Google client ID and secret built in, a made-up history whose reminders fall in the coming weeks, and a checklist covering sign-in, the calendar, an alert on the phone, a language change, a new period, a second computer and removing everything. It asks for the ID and secret, so they never reach the repo, and builds outside the repo's own build folders:
+
+```bash
+dotnet run tools/google-check/build-kit.cs
+```
+
+The kits land in `out/google-check`, and each kit's README explains how to use it. In November 2026 every check passed on Windows and on the Intel Mac. Linux hasn't been tried.
 
 For Linux, `bash tools/package-linux.sh` builds `out/linux/purity_<version>_<arch>.deb` for amd64 and arm64 (on Windows its last step runs in WSL). The Linux package workflow installs each package in clean Debian 12 and 13 and Ubuntu 22.04 and 24.04 containers, then opens the app on a made-up history on a virtual screen, which proves the package's dependencies are enough. `tools/test-linux-package.sh` does the same locally in a Docker container.
 

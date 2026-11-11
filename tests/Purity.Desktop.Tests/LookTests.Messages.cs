@@ -99,6 +99,43 @@ namespace Purity.Desktop.Tests
 		});
 
 		[Fact]
+		public Task GoingAheadWithARemovalForGoodIsRed() => Ui.Run(() =>
+		{
+			var (window, layer) = ShowLayer();
+
+			_ = layer.AskAsync(new Question("Remove everything?", RemovesForGood: true), new[] { "Remove", "Cancel" });
+			Dispatcher.UIThread.RunJobs();
+
+			var buttons = SheetButtonsOf(layer);
+			Assert.Equal(new object?[] { "Cancel", "Remove" }, buttons.Select(el => el.Content));
+			Assert.DoesNotContain(buttons[0].Classes, el => el is "Confirm" or "Danger");
+			Assert.Contains("Danger", buttons[1].Classes);
+			Assert.DoesNotContain("Confirm", buttons[1].Classes);
+			layer.CancelQuestion();
+			window.Close();
+		});
+
+		[Fact]
+		public Task AWarningStandsApartBetweenTheExplanationAndTheAnswers() => Ui.Run(() =>
+		{
+			var (window, layer) = ShowLayer();
+
+			_ = layer.AskAsync(new Question("Remove everything?", "What goes, and what to know first.", RemovesForGood: true, Warning: "This can't be undone."), new[] { "Remove", "Cancel" });
+			Dispatcher.UIThread.RunJobs();
+
+			var texts = layer.GetVisualDescendants().OfType<TextBlock>().ToList();
+			var body = texts.Single(el => el.Classes.Contains("SheetBody"));
+			var warning = texts.Single(el => el.Classes.Contains("SheetWarning"));
+			Assert.Equal("This can't be undone.", warning.Text);
+			Assert.Equal(FontWeight.SemiBold, warning.FontWeight);
+			Assert.Null(warning.FindAncestorOfType<ScrollViewer>());			// in sight however long the explanation
+			Assert.True(Grid.GetRow(warning) > Grid.GetRow(body.FindAncestorOfType<ScrollViewer>()!));
+			Assert.True(Grid.GetRow(warning) < Grid.GetRow(SheetButtonsOf(layer)[0].FindAncestorOfType<StackPanel>()!));
+			layer.CancelQuestion();
+			window.Close();
+		});
+
+		[Fact]
 		public Task WithNoPreferenceNoButtonStandsOut() => Ui.Run(() =>
 		{
 			var (window, layer) = ShowLayer();

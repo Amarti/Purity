@@ -40,6 +40,13 @@ namespace Purity.Desktop.Views
 			Close(false);
 		}
 
+		/// <summary>Not in the WPF app. Opens over the settings and keeps its own choices, whichever way the settings then close</summary>
+		private async void OpenReminders(object? sender, RoutedEventArgs e)
+		{
+			if (_viewModel.NewReminders() is { } reminders)
+				await new RemindersWindow(reminders).ShowDialog(this);
+		}
+
 		/// <summary>The WPF app wrote the report beside itself without asking. Here the person chooses where.</summary>
 		private async void CreateReport(object? sender, RoutedEventArgs e)
 		{
@@ -69,6 +76,13 @@ namespace Purity.Desktop.Views
 		private void Restore(object? sender, RoutedEventArgs e)
 		{
 			_viewModel.RequestRestore();
+			Close(false);
+		}
+
+		/// <summary>Closes the settings unchanged; the main window then asks, twice, before removing anything</summary>
+		private void WipeOut(object? sender, RoutedEventArgs e)
+		{
+			_viewModel.RequestWipe();
 			Close(false);
 		}
 

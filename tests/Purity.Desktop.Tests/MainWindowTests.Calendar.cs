@@ -13,6 +13,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenFromSettingsWithOneChangeAsync();
 			var period = window.Periods[0];
+			_dialogs.ConfirmsChanges = true;
 			var cases = new (DateTime Date, bool Night, string English, string Hebrew)[]
 			{
 				(new DateTime(2034, 2, 3), false, "י\"ד שבט, day", "י\"ד שבט, יום"),		// W1
@@ -47,6 +48,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenFromSettingsWithOneChangeAsync();
 			var period = window.Periods[0];
+			_dialogs.ConfirmsChanges = true;
 			var changes = new List<string?>();
 			period.PropertyChanged += (_, e) => changes.Add(e.PropertyName);
 

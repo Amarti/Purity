@@ -16,8 +16,11 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="calendar">The calendar dates are picked and shown in</param>
 		/// <param name="hebrewInEnglish">Whether Hebrew dates are written in English letters</param>
 		/// <param name="showCalendar">Shows the whole app with a calendar and letters, the moment they're chosen</param>
-		public SettingsWindowViewModel(string dataFilePath, Func<string?>? report, bool canRestore = false, bool canMove = false, Appearance appearance = Appearance.System, Language language = Language.English, Action<Language>? showLanguage = null, CalendarKind calendar = CalendarKind.Gregorian, bool hebrewInEnglish = false, Action<CalendarKind, bool>? showCalendar = null)
+		/// <param name="reminders">Sets up the Reminders window, or null where there are none to set up</param>
+		/// <param name="canWipe">Whether there is a history to remove</param>
+		public SettingsWindowViewModel(string dataFilePath, Func<string?>? report, bool canRestore = false, bool canMove = false, Appearance appearance = Appearance.System, Language language = Language.English, Action<Language>? showLanguage = null, CalendarKind calendar = CalendarKind.Gregorian, bool hebrewInEnglish = false, Action<CalendarKind, bool>? showCalendar = null, Func<RemindersWindowViewModel>? reminders = null, bool canWipe = false)
 		{
+			CanWipe = canWipe;
 			DataFilePath = dataFilePath;
 			_report = report;
 			CanRestore = canRestore;
@@ -28,6 +31,7 @@ namespace Purity.Desktop.ViewModels
 			CalendarIndex = (int)calendar;
 			HebrewInEnglish = hebrewInEnglish;
 			_showCalendar = showCalendar;
+			_reminders = reminders;
 		}
 
 
@@ -129,7 +133,19 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>Where the person asked to move the history, which closes the settings without changing them</summary>
 		public string? MoveTo { get; private set; }
 
+		public bool CanOpenReminders => _reminders != null;
+
+		/// <summary>What the Reminders window works on, or null where there are none to set up</summary>
+		public RemindersWindowViewModel? NewReminders() => _reminders?.Invoke();
+
 		public void RequestMove(string path) => MoveTo = path;
+
+		public bool CanWipe { get; }
+
+		/// <summary>The person asked to remove the history, which closes the settings without changing them</summary>
+		public bool WipeRequested { get; private set; }
+
+		public void RequestWipe() => WipeRequested = true;
 
 		/// <inheritdoc cref="SettingsWindowViewModel(string, Func{string?}?, bool, bool, Appearance, Language, Action{Language}?, CalendarKind, bool, Action{CalendarKind, bool}?)"/>
 		public string? BuildReport() => _report?.Invoke();
@@ -164,5 +180,6 @@ namespace Purity.Desktop.ViewModels
 		private readonly Func<string?>? _report;
 		private readonly Action<Language>? _showLanguage;
 		private readonly Action<CalendarKind, bool>? _showCalendar;
+		private readonly Func<RemindersWindowViewModel>? _reminders;
 	}
 }

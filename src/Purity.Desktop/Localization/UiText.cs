@@ -81,6 +81,55 @@ namespace Purity.Desktop.Localization
 		public required string MoveFile { get; init; }
 		public required string MoveFileTip { get; init; }
 		public required string CreateReport { get; init; }
+		public required string RemindersOpen { get; init; }
+		public required string RemindersTitle { get; init; }
+		public required string RemindersWhere { get; init; }
+		public required string RemindersWhereName { get; init; }
+		public required string RemindersFile { get; init; }
+		public required string RemindersOther { get; init; }
+		public required string RemindersLater { get; init; }
+		public required string RemindersAbout { get; init; }
+		public required string RemindersAboutName { get; init; }
+		public required string RemindersMikvehOnly { get; init; }
+		public required string RemindersAllDates { get; init; }
+		public required string RemindersChosen { get; init; }
+		public required string RemindersWording { get; init; }
+		public required string RemindersWordingName { get; init; }
+		public required string RemindersDiscreet { get; init; }
+		public required string RemindersDetailed { get; init; }
+		public required string RemindersNext { get; init; }
+		public required string RemindersNone { get; init; }
+		public required string RemindersOpenPeriod { get; init; }
+		public required string RemindersMore { get; init; }
+		public required string RemindersMikvehTime { get; init; }
+		public required string RemindersOtherTime { get; init; }
+		public required string RemindersMoveOffShabbat { get; init; }
+		public required string RemindersCalendarName { get; init; }
+		public required string RemindersNotice { get; init; }
+		public required string RemindersSave { get; init; }
+		public required string RemindersFileTitle { get; init; }
+		public required string RemindersFileType { get; init; }
+		public required string RemindersSaved { get; init; }
+		public required string RemindersFileFailed { get; init; }
+		public required string RemindersNotSaved { get; init; }
+		public required string RemindersGoogleTip { get; init; }
+		public required string RemindersGoogleNotInBuild { get; init; }
+		public required string RemindersGoogleIntro { get; init; }
+		public required string RemindersConnect { get; init; }
+		public required string RemindersConnecting { get; init; }
+		public required string RemindersConnected { get; init; }
+		public required string RemindersSendTest { get; init; }
+		public required string RemindersTestSent { get; init; }
+		public required string RemindersDisconnect { get; init; }
+		public required string RemindersDisconnectQuestion { get; init; }
+		public required string RemindersDisconnectBody { get; init; }
+		public required string RemindersDisconnectConfirm { get; init; }
+		public required string RemindersSignInDone { get; init; }
+		public required string RemindersNoConnection { get; init; }
+		public required string RemindersSignInNeeded { get; init; }
+		public required string RemindersSignInNotFinished { get; init; }
+		public required string RemindersCalendarFailed { get; init; }
+		public required string RemindersNotRemembered { get; init; }
 		public required string Ok { get; init; }
 		public required string Cancel { get; init; }
 		public required string ReportTitle { get; init; }
@@ -103,6 +152,21 @@ namespace Purity.Desktop.Localization
 		public required string DuplicateToday { get; init; }
 		public required Func<string, string> EndNotYet { get; init; }
 		public required string ClosePeriodAnyway { get; init; }
+		public required string OddDates { get; init; }
+		public required string OddKeepOpen { get; init; }
+		public required Func<string, string> OddEndsFirst { get; init; }
+		public required Func<int, string> OddLong { get; init; }
+		public required Func<string, string> OddInPrevious { get; init; }
+		public required Func<string, string> OddInNext { get; init; }
+		public required Func<string, string> OddBeforeNewest { get; init; }
+		public required string ChangeClosedTitle { get; init; }
+		public required string ChangeClosedStart { get; init; }
+		public required string ChangeClosedEnd { get; init; }
+		public required Func<string, string> ChangeNow { get; init; }
+		public required Func<string, string> ChangeNew { get; init; }
+		public required string ChangeClosedRefresh { get; init; }
+		public required Func<string, bool, string> DateWithOnah { get; init; }
+		public required string Change { get; init; }
 		public required string CloseAnyway { get; init; }
 		public required string RemoveQuestion { get; init; }
 
@@ -159,6 +223,21 @@ namespace Purity.Desktop.Localization
 		public required string StartNew { get; init; }
 		public required string OpenMine { get; init; }
 		public required string SettingsNotSaved { get; init; }
+
+		// Removing everything
+		public required string WipeOut { get; init; }
+		public required string WipeOutTip { get; init; }
+		public required string WipeTitle { get; init; }
+		public required string WipeBody { get; init; }
+		public required string WipeSure { get; init; }
+		public required string WipeForGood { get; init; }
+		public required string WipedTitle { get; init; }
+		public required string Wiped { get; init; }
+		public required string WipeLeftTitle { get; init; }
+		public required Func<string, string> WipeLeft { get; init; }
+		public required string WipeCalendarLeft { get; init; }
+		public required string ClosePurity { get; init; }
+
 		public required string MoveOntoFile { get; init; }
 		public required string CantMoveYet { get; init; }
 		public required string CopyFailed { get; init; }

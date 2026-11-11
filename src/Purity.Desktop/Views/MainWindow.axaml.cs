@@ -29,7 +29,7 @@ namespace Purity.Desktop.Views
 			_messages = this.FindControl<MessageLayer>("Messages")!;
 			_periods.AddHandler(KeyDownEvent, OnPeriodsKeyDown, RoutingStrategies.Tunnel);
 
-			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()));
+			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()), reminderConnection: settings => GoogleConnection.ForThisBuild(options, settings, OpenInBrowserAsync));
 			DataContext = _viewModel;
 			_options = options;
 
@@ -92,6 +92,11 @@ namespace Purity.Desktop.Views
 		public Task<Storage.Backup?> ChooseBackupAsync(IReadOnlyList<BackupChoice> choices) => BackupsWindow.ShowAsync(this, choices);
 
 		public Task<string?> PickDataFileAsync() => DataFilePicker.OpenAsync(StorageProvider);
+
+		/// <summary>After the question that leads to it is answered, so the close isn't caught up in it</summary>
+		public void CloseApp() => Dispatcher.UIThread.Post(Close);
+
+		private async Task OpenInBrowserAsync(Uri page) => await Launcher.LaunchUriAsync(page);
 
 
 		/// <summary>Draws the eye to the wide button when what it does changes (E4), along with the fade between its faces in the styles</summary>

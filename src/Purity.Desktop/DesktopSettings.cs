@@ -58,8 +58,21 @@ namespace Purity.Desktop
 		/// <summary>Whether Hebrew dates are written in English letters everywhere</summary>
 		public bool HebrewDatesInEnglish { get; set; }
 
+		/// <summary>How reminders are set up on this device</summary>
+		public ReminderSetup Reminders
+		{
+			get => _reminders;
+			set => _reminders = value ?? new ReminderSetup();
+		}
+
+		/// <summary>The ID of Purity's calendar in the connected Google account, or null when there's none yet</summary>
+		public string? GoogleCalendarId { get; set; }
+
 		/// <summary>Where the main window was when it last closed, or null before it ever closed with a data file chosen</summary>
 		public WindowPlacement? Window { get; set; }
+
+
+		private ReminderSetup _reminders = new();
 
 
 		/// <summary>The saved settings, or defaults when there are none or they can't be read</summary>

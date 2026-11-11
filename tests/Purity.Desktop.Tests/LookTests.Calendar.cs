@@ -26,6 +26,7 @@ namespace Purity.Desktop.Tests
 			Assert.EndsWith(", day", before);
 
 			Press(Halves(SwitchesOf(window, first).Begin).Night, window);
+			ConfirmChange(window);
 
 			var after = (string)ToolTip.GetTip(fields[0])!;
 			Assert.EndsWith(", night", after);

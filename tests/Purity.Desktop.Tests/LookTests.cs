@@ -284,16 +284,19 @@ namespace Purity.Desktop.Tests
 			Assert.False(beginSwitch.IsNight);
 
 			Press(Halves(beginSwitch).Night, window);
+			ConfirmChange(window);
 			Assert.Equal(begin.AddHours(12), period.Period.Begin);
 			Assert.Equal(end, period.Period.End);
 			Assert.True(beginSwitch.IsNight);
 			Assert.False(endSwitch.IsNight);
 
 			Press(Halves(endSwitch).Night, window);
+			ConfirmChange(window);
 			Assert.Equal(end.AddHours(12), period.Period.End);
 			Assert.True(endSwitch.IsNight);
 
 			Press(Halves(beginSwitch).Day, window);
+			ConfirmChange(window);
 			Assert.Equal(begin, period.Period.Begin);
 			Assert.False(beginSwitch.IsNight);
 

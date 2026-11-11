@@ -39,6 +39,9 @@ namespace Purity.Desktop.Localization
 
 		public Language Language { get; private set; }
 
+		/// <summary>The language reminders are worded in, which is the one being shown</summary>
+		public Purity.Reminders.ReminderLanguage ReminderLanguage => Language == Language.Hebrew ? Purity.Reminders.ReminderLanguage.Hebrew : Purity.Reminders.ReminderLanguage.English;
+
 		/// <summary>The words of the language being shown, for bindings</summary>
 		public UiText Text { get; private set; } = UiText.English;
 

@@ -51,21 +51,27 @@ namespace Purity.Desktop
 	/// For checks on machines CI can't reach: save a picture of the window here, with a report
 	/// beside it, then quit. Only allowed together with <paramref name="DataFile"/>.
 	/// </param>
-	public sealed record StartOptions(string? DataFile, string? PictureFile = null)
+	/// <param name="GoogleStandIn">Debug builds only: use the test stand-in for Google at this address</param>
+	public sealed record StartOptions(string? DataFile, string? PictureFile = null, Uri? GoogleStandIn = null)
 	{
 		/// <summary>Reads <c>--data &lt;file&gt;</c> and <c>--picture &lt;file&gt;</c>, and ignores anything else, such as the arguments older macOS adds</summary>
 		public static StartOptions Parse(IReadOnlyList<string> args)
 		{
 			string? dataFile = null, pictureFile = null;
+			Uri? googleStandIn = null;
 			for (var i = 0; i < args.Count - 1; i++)
 			{
 				if (args[i] == "--data")
 					dataFile = args[i + 1];
 				else if (args[i] == "--picture")
 					pictureFile = args[i + 1];
+#if DEBUG
+				else if (args[i] == "--google-stand-in")
+					googleStandIn = new Uri(args[i + 1]);
+#endif
 			}
 
-			return new StartOptions(dataFile, pictureFile);
+			return new StartOptions(dataFile, pictureFile, googleStandIn);
 		}
 	}
 }

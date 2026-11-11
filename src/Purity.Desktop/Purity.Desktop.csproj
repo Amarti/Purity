@@ -16,7 +16,7 @@
     <AssemblyName>Purity</AssemblyName>
     <Product>Purity</Product>
     <!-- The one place the version is set: the window title, the Mac bundle and the Linux package all take it from here -->
-    <Version>2.3.3</Version>
+    <Version>2.4.2</Version>
     <ApplicationIcon>Assets\Purity.ico</ApplicationIcon>
     <InvariantGlobalization>true</InvariantGlobalization>
     <!-- dotnet run starts where Visual Studio's launch profile does, so the profile's relative paths work for both -->
@@ -41,17 +41,30 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- 12.1.3 is the version the Monterey Mac passed with. Rerun the platform check kit before changing it. -->
-    <PackageReference Include="Avalonia" Version="12.1.3" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
-    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.3" />
+    <!--
+      12.1.5 is the version the Monterey Mac passed with. Rerun the platform check kit before changing
+      it. It fixes a crash on clicking into a right-to-left text box that holds mixed-direction text
+      (Avalonia #22553), which 12.1.3 had.
+    -->
+    <PackageReference Include="Avalonia" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.5" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Purity.Core\Purity.Core.csproj" />
     <ProjectReference Include="..\Purity.Storage\Purity.Storage.csproj" />
+    <ProjectReference Include="..\Purity.Reminders\Purity.Reminders.csproj" />
     <InternalsVisibleTo Include="Purity.Desktop.Tests" />
   </ItemGroup>
+
+  <!-- The app's ID at Google comes from the environment of whoever builds it. A build without one simply doesn't offer Google. -->
+  <ItemGroup Condition="'$(PURITY_GOOGLE_CLIENT_ID)' != ''">
+    <AssemblyMetadata Include="GoogleClientId" Value="$(PURITY_GOOGLE_CLIENT_ID)" />
+    <AssemblyMetadata Include="GoogleClientSecret" Value="$(PURITY_GOOGLE_CLIENT_SECRET)" Condition="'$(PURITY_GOOGLE_CLIENT_SECRET)' != ''" />
+  </ItemGroup>
+
 
 </Project>

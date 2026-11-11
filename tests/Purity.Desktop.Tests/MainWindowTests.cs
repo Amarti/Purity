@@ -103,6 +103,25 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(content, File.ReadAllBytes(_dataFile));
 		}
 
+		[Theory]
+		[InlineData(-5, 21, 0)]			// an evening in New York, when the UTC date is already tomorrow
+		[InlineData(2, 1, 30)]			// just after midnight in Israel, when the UTC date is still yesterday
+		public async Task ANewPeriodStartsOnTheComputersOwnDate(int offset, int hour, int minute)
+		{
+			WriteHistory();
+			var zone = TimeZoneInfo.CreateCustomTimeZone($"Made-up {offset:+0;-0}", TimeSpan.FromHours(offset), "Made-up", "Made-up");
+			var now = new DateTimeOffset(Today.AddHours(hour).AddMinutes(minute), TimeSpan.FromHours(offset));
+			Assert.NotEqual(Today, now.UtcDateTime.Date);
+			var window = await OpenAsync(new FixedClock { Now = now, Zone = zone });
+
+			window.AddPeriodCommand.Execute(null);
+
+			var added = window.Periods[0];
+			Assert.Equal(Stamps.FromDate(Today, false), added.Period.Begin);
+			Assert.Equal(Stamps.FromDate(Today.AddDays(7), false), added.Period.End);
+			Assert.Equal(Today, added.BeginDate);
+		}
+
 		[Fact]
 		public async Task OnlyOnePeriodCanBeOpenAtATime()
 		{
@@ -278,9 +297,15 @@ namespace Purity.Desktop.Tests
 			/// <summary>For what happens a moment later; the date stays the same</summary>
 			public TimeSpan Elapsed { get; set; }
 
-			public override DateTimeOffset GetUtcNow() => new DateTimeOffset(Today.AddHours(9), TimeSpan.Zero) + Elapsed;
+			/// <summary>The moment the test starts at, 09:00 UTC on <see cref="Today"/> unless set</summary>
+			public DateTimeOffset Now { get; init; } = new(Today.AddHours(9), TimeSpan.Zero);
 
-			public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
+			/// <summary>The computer's time zone</summary>
+			public TimeZoneInfo Zone { get; init; } = TimeZoneInfo.Utc;
+
+			public override DateTimeOffset GetUtcNow() => Now.ToUniversalTime() + Elapsed;
+
+			public override TimeZoneInfo LocalTimeZone => Zone;
 		}
 
 		private sealed class FakeDialogs : IAppDialogs
@@ -295,11 +320,18 @@ namespace Purity.Desktop.Tests
 			public async Task<int?> AskAsync(Question question, params string[] buttons)
 			{
 				var text = question.Body == null ? question.Title : question.Body + "\n\n" + question.Title;
+				if (question.Warning != null)
+					text += "\n\n" + question.Warning;
 				Shown.Add(text);
+				if (ConfirmsChanges && question.Title == Loc.T.ChangeClosedTitle)
+					return 0;
 				if (WhileAsking != null)
 					await WhileAsking(text);
 				return Answers.TryDequeue(out var answer) ? answer : null;
 			}
+
+			/// <summary>Answers Change whenever a closed period's date changes, for tests about something else</summary>
+			public bool ConfirmsChanges { get; set; }
 
 			/// <summary>Runs while a question is on screen, before it's answered</summary>
 			public Func<string, Task>? WhileAsking { get; set; }
@@ -321,6 +353,11 @@ namespace Purity.Desktop.Tests
 				FilesPicked++;
 				return Task.FromResult(PickDataFile?.Invoke());
 			}
+
+			public void CloseApp() => Closed++;
+
+			/// <summary>How many times the app was asked to close</summary>
+			public int Closed { get; private set; }
 
 			/// <summary>The data file the person picks, if any</summary>
 			public Func<string?>? PickDataFile { get; set; }

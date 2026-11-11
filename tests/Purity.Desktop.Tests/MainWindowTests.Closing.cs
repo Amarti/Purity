@@ -125,9 +125,11 @@ namespace Purity.Desktop.Tests
 			var open = window.Periods[1];
 			Assert.False(open.IsClosed);
 			Assert.False(open.IsFolded);					// one waiting to be closed always shows
+			_dialogs.Answers.Enqueue(0);					// Close period, though it goes in among the earlier ones
 
 			await window.AddOrClosePeriodCommand.ExecuteAsync(null);
 
+			Assert.Contains(Localization.UiText.English.OddBeforeNewest(window.Periods[0].BeginText), Assert.Single(_dialogs.Shown));
 			Assert.True(open.IsClosed);
 			Assert.False(window.HasOpenPeriod);
 		}

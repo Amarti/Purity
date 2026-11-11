@@ -10,7 +10,7 @@ One command builds the app for Windows, macOS and Linux into `out/<version>/`. E
 bash tools/build-apps.sh
 ```
 
-To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs the .NET 10 SDK; on Windows, run it in Git Bash, and the Linux packages also need WSL. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there.
+To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs the .NET 10 SDK; on Windows, run it in Git Bash, and the Linux packages also need WSL. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there. Reminders through Google Calendar need the project's Google client ID and secret in `PURITY_GOOGLE_CLIENT_ID` and `PURITY_GOOGLE_CLIENT_SECRET` when building. They must never be committed, and a build without them simply doesn't offer Google.
 
 | File | For | To install and run |
 |---|---|---|
@@ -23,18 +23,4 @@ To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs 
 
 The app keeps its settings and local copies per user: in `%LOCALAPPDATA%\Purity` on Windows, `~/Library/Application Support/Purity` on macOS and `~/.local/share/Purity` on Linux.
 
-Current TODOs:
-
- - Add options to the settings window:
-	- Or Zarua option
- - Settle the open calculation questions with a rav, then apply the answers
- - Desktop (Windows, macOS, Linux)
-	- calendar/reminders integration
-	- check the current look by hand on macOS and Linux
- - Port to iOS
-	- external storage file path (dropbox/google drive/iCloud storage integration)
-	- calendar/reminders integration
-	- Apple Watch viewer
- - Port to android
-	- external storage file path (dropbox/google drive integration)
-	- calendar/reminders integration
+What's done, what's next and what's waiting: see [PROGRESS.md](PROGRESS.md).

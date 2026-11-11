@@ -23,7 +23,8 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="clock">Sets "today" for a new period</param>
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
 		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null)
+		/// <param name="reminderConnection">Makes this device's connection to a calendar service</param>
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, Func<DesktopSettings, IReminderConnection>? reminderConnection = null)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
@@ -32,6 +33,7 @@ namespace Purity.Desktop.ViewModels
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
 			_settings = DesktopSettings.Load();
+			_reminderConnection = reminderConnection?.Invoke(_settings);
 			Loc.Instance.Use(_settings.Language);
 			Loc.Instance.UseCalendar(_settings.Calendar, _settings.HebrewDatesInEnglish);
 		}
@@ -76,13 +78,17 @@ namespace Purity.Desktop.ViewModels
 			return await _dialogs.AskAsync(new Question(T.CloseAnyway, T.UnsavedOnClose), T.Close, T.KeepOpen) == 0;
 		}
 
-		public void Dispose() => CloseDataFile();
+		public void Dispose()
+		{
+			_reminderCancel.Cancel();
+			CloseDataFile();
+		}
 
 
 		[RelayCommand]
 		private async Task OpenSettings()
 		{
-			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage, Loc.Instance.Calendar, Loc.Instance.HebrewInEnglish, ShowCalendar);
+			var settings = new SettingsWindowViewModel(DataFilePath, Ledger.Data.Count > 0 ? BuildReport : null, HasBackups(), CanMove, Appearance, Loc.Instance.Language, ShowLanguage, Loc.Instance.Calendar, Loc.Instance.HebrewInEnglish, ShowCalendar, reminders: NewReminders, canWipe: CanWipe);
 			var ok = await _dialogs.ShowSettingsAsync(settings);
 			if (!ok)
 				{
@@ -97,6 +103,11 @@ namespace Purity.Desktop.ViewModels
 			if (settings.MoveTo is { } target)
 			{
 				await MoveDataFileAsync(target);
+				return;
+			}
+			if (settings.WipeRequested)
+			{
+				await WipeOutAsync();
 				return;
 			}
 			if (!ok)
@@ -122,7 +133,8 @@ namespace Purity.Desktop.ViewModels
 		private string? BuildReport() => Ledger.Data.Count < 1 ? null : PurityFile.PeriodLengthsReport(Ledger.Data);
 
 		/// <summary>
-		/// Adds an open period starting today, as the WPF app does. "Today" is the UTC date there too.
+		/// Adds an open period starting today by the computer's own clock. WPF took the UTC date, which in
+		/// an American evening is already tomorrow and just after midnight in Israel is still yesterday.
 		/// Unlike WPF, only while no other period is open: that one must be accepted or removed first.
 		/// </summary>
 		[RelayCommand(CanExecute = nameof(CanAddPeriod))]
@@ -134,7 +146,7 @@ namespace Purity.Desktop.ViewModels
 			if (!CanAddPeriod)
 				return false;
 
-			var today = new DateTimeOffset(_clock.GetUtcNow().UtcDateTime.Date, TimeSpan.Zero);
+			var today = Stamps.FromDate(_clock.GetLocalNow().Date, false);
 			var period = Ledger.AddPeriod(today, today.AddDays(7));
 			if (period == null)
 				return false;
@@ -175,14 +187,20 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>
 		/// Asks first when the end date hasn't come yet, as it is when it's still the week-ahead date a
-		/// new period starts with, since the wide button is easy to press by accident.
+		/// new period starts with, since the wide button is easy to press by accident. Asks too when the
+		/// dates look odd, as a typo makes them.
 		/// </summary>
 		private async Task<bool> MayCloseAsync(PeriodViewModel open)
 		{
-			if (open.EndDate <= _clock.GetLocalNow().Date)
+			var reasons = new List<string>();
+			if (!(open.EndDate <= _clock.GetLocalNow().Date))
+				reasons.Add(T.EndNotYet(open.EndText));
+			if (OddText(open.Period) is { } odd)
+				reasons.Add(odd);
+			if (reasons.Count == 0)
 				return true;
 
-			return await _dialogs.AskAsync(new Question(T.ClosePeriodAnyway, T.EndNotYet(open.EndText)), T.ClosePeriod, T.KeepOpen) == 0;
+			return await _dialogs.AskAsync(new Question(T.ClosePeriodAnyway, string.Join("\n\n", reasons)), T.ClosePeriod, T.KeepOpen) == 0;
 		}
 
 		/// <summary>
@@ -348,7 +366,10 @@ namespace Purity.Desktop.ViewModels
 			}
 
 			if (_session?.State == SessionState.Ready)
+			{
 				_toldUnreadable = false;
+				RequestReminderSync();
+			}
 			UpdateWarning();
 		}
 
@@ -461,6 +482,7 @@ namespace Purity.Desktop.ViewModels
 			foreach (var period in Enumerable.Reverse(Ledger.Data))
 				Periods.Add(new PeriodViewModel(period, this) { IsFolded = period.Closed && period != first });
 			UpdateCommands();
+			RequestReminderSync();
 		}
 
 		/// <summary>Touches the list only when it's different, so adding an open period doesn't disturb it</summary>
@@ -487,6 +509,7 @@ namespace Purity.Desktop.ViewModels
 			foreach (var item in Periods)
 				item.Refresh();
 			UpdateNext();
+			RequestReminderSync();
 		}
 
 		/// <param name="conflict">The periods the two sides disagree on</param>
@@ -566,6 +589,7 @@ namespace Purity.Desktop.ViewModels
 		private readonly Action<Func<Task>> _runOnUiThread;
 		private readonly Func<SelfTestResult> _selfTest;
 		private readonly DesktopSettings _settings;
+		private readonly IReminderConnection? _reminderConnection;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;
 		private LocalVault? _vault;

@@ -68,6 +68,29 @@
             <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
         </Style>
+
+        <!-- A button that removes something for good: filled red, so it's never pressed by mistake for an ordinary one -->
+        <Style Selector="^.Danger">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.Danger /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="^.Danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerPressedBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Danger:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
@@ -201,6 +224,9 @@
             <Setter Property="Background" Value="{DynamicResource SwitchOnBackgroundBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource SwitchOnForegroundBrush}"/>
         </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type views:DayNightSwitch}" TargetType="views:DayNightSwitch">
@@ -331,20 +357,23 @@
                         </Border>
                         <Grid Name="PART_Days" Grid.Row="1" Margin="6,0,6,6" ColumnDefinitions="28,28,28,28,28,28,28" RowDefinitions="Auto,20,20,20,20,20,20">
                             <Grid.Styles>
-                                <Style Selector="TextBlock">
+                                <!-- Only the weekday row: a looser selector would reach the dates inside the day buttons too -->
+                                <Style Selector="TextBlock.Weekday">
                                     <Setter Property="Margin" Value="0,4"/>
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="FontSize" Value="9.5"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                 </Style>
                             </Grid.Styles>
-                            <TextBlock Grid.Column="0"/>
-                            <TextBlock Grid.Column="1"/>
-                            <TextBlock Grid.Column="2"/>
-                            <TextBlock Grid.Column="3"/>
-                            <TextBlock Grid.Column="4"/>
-                            <TextBlock Grid.Column="5"/>
-                            <TextBlock Grid.Column="6"/>
+                            <!-- The weekday row sits on a band, so its letters can't be taken for the first week's dates -->
+                            <Border Grid.ColumnSpan="7" Margin="-6,0" Background="{DynamicResource SwitchOnBackgroundBrush}"/>
+                            <TextBlock Classes="Weekday" Grid.Column="0"/>
+                            <TextBlock Classes="Weekday" Grid.Column="1"/>
+                            <TextBlock Classes="Weekday" Grid.Column="2"/>
+                            <TextBlock Classes="Weekday" Grid.Column="3"/>
+                            <TextBlock Classes="Weekday" Grid.Column="4"/>
+                            <TextBlock Classes="Weekday" Grid.Column="5"/>
+                            <TextBlock Classes="Weekday" Grid.Column="6"/>
                         </Grid>
                     </Grid>
                 </Border>
