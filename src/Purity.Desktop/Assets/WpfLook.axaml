@@ -209,6 +209,16 @@
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
+    <!-- A last word that mustn't be missed, such as that something can't be undone -->
+    <Style Selector="Border.Sheet TextBlock.SheetWarning">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="MaxWidth" Value="580"/>
+        <Setter Property="Margin" Value="0,10,0,0"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Foreground" Value="{DynamicResource MessageProblemBrush}"/>
+    </Style>
     <Style Selector="Border.Sheet TextBlock.SheetBody">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="MaxWidth" Value="580"/>

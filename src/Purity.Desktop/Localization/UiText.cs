@@ -208,6 +208,21 @@ namespace Purity.Desktop.Localization
 		public required string StartNew { get; init; }
 		public required string OpenMine { get; init; }
 		public required string SettingsNotSaved { get; init; }
+
+		// Removing everything
+		public required string WipeOut { get; init; }
+		public required string WipeOutTip { get; init; }
+		public required string WipeTitle { get; init; }
+		public required string WipeBody { get; init; }
+		public required string WipeSure { get; init; }
+		public required string WipeForGood { get; init; }
+		public required string WipedTitle { get; init; }
+		public required string Wiped { get; init; }
+		public required string WipeLeftTitle { get; init; }
+		public required Func<string, string> WipeLeft { get; init; }
+		public required string WipeCalendarLeft { get; init; }
+		public required string ClosePurity { get; init; }
+
 		public required string MoveOntoFile { get; init; }
 		public required string CantMoveYet { get; init; }
 		public required string CopyFailed { get; init; }

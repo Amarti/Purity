@@ -69,6 +69,12 @@ namespace Purity.Desktop
 			await _account.SignOutAsync(cancellation);
 		}
 
+		public async Task ForgetAsync(CancellationToken cancellation)
+		{
+			if (_account != null)
+				await _account.SignOutAsync(cancellation);
+		}
+
 
 		private static GoogleClient? ClientOfThisBuild()
 		{

@@ -40,6 +40,16 @@ namespace Purity.Desktop.Tests
 			return Task.CompletedTask;
 		}
 
+		public Task ForgetAsync(CancellationToken cancellation)
+		{
+			Forgotten++;
+			IsConnected = false;
+			return Task.CompletedTask;
+		}
+
+		/// <summary>How many times the sign-in was forgotten without the calendar being removed</summary>
+		public int Forgotten { get; private set; }
+
 		public Task<SharedChoices?> ReadChoicesAsync(CancellationToken cancellation)
 		{
 			Fail();

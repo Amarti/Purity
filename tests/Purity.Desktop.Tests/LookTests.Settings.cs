@@ -31,6 +31,26 @@ namespace Purity.Desktop.Tests
 			window.Close();
 		});
 
+		[Fact]
+		public Task RemovingAllHistoryIsARedButtonAfterTheFileButtons() => BackToEnglishAfter(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var (settings, closed) = await OpenSettingsAsync(window);
+			var buttons = settings.GetVisualDescendants().OfType<Button>().ToList();
+			Button Labelled(string text) => buttons.Single(el => el.Content as string == text);
+			var wipe = Labelled(UiText.English.WipeOut);
+
+			Assert.Contains("Danger", wipe.Classes);
+			Assert.True(wipe.IsEnabled);
+			Assert.Equal(UiText.English.WipeOutTip, ToolTip.GetTip(wipe));
+			Assert.True(Grid.GetRow(wipe) > Grid.GetRow(Labelled(UiText.English.MoveFile)));
+			Assert.True(Grid.GetRow(wipe) < Grid.GetRow(Labelled(UiText.English.CreateReport)));
+
+			settings.Close(false);
+			await closed;
+			window.Close();
+		});
+
 		/// <summary>A report that couldn't be written is said over this window, not over the one behind it</summary>
 		[Fact]
 		public Task TheSettingsWindowSpeaksThroughItsOwnLayer() => BackToEnglishAfter(async () =>

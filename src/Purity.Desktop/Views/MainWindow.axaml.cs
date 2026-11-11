@@ -93,6 +93,9 @@ namespace Purity.Desktop.Views
 
 		public Task<string?> PickDataFileAsync() => DataFilePicker.OpenAsync(StorageProvider);
 
+		/// <summary>After the question that leads to it is answered, so the close isn't caught up in it</summary>
+		public void CloseApp() => Dispatcher.UIThread.Post(Close);
+
 		private async Task OpenInBrowserAsync(Uri page) => await Launcher.LaunchUriAsync(page);
 
 

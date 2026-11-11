@@ -79,6 +79,13 @@ namespace Purity.Desktop.Views
 			Close(false);
 		}
 
+		/// <summary>Closes the settings unchanged; the main window then asks, twice, before removing anything</summary>
+		private void WipeOut(object? sender, RoutedEventArgs e)
+		{
+			_viewModel.RequestWipe();
+			Close(false);
+		}
+
 		private void Ok(object? sender, RoutedEventArgs e) => Close(true);
 
 		private void Cancel(object? sender, RoutedEventArgs e) => Close(false);

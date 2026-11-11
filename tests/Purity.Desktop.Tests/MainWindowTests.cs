@@ -295,6 +295,8 @@ namespace Purity.Desktop.Tests
 			public async Task<int?> AskAsync(Question question, params string[] buttons)
 			{
 				var text = question.Body == null ? question.Title : question.Body + "\n\n" + question.Title;
+				if (question.Warning != null)
+					text += "\n\n" + question.Warning;
 				Shown.Add(text);
 				if (WhileAsking != null)
 					await WhileAsking(text);
@@ -321,6 +323,11 @@ namespace Purity.Desktop.Tests
 				FilesPicked++;
 				return Task.FromResult(PickDataFile?.Invoke());
 			}
+
+			public void CloseApp() => Closed++;
+
+			/// <summary>How many times the app was asked to close</summary>
+			public int Closed { get; private set; }
 
 			/// <summary>The data file the person picks, if any</summary>
 			public Func<string?>? PickDataFile { get; set; }

@@ -1,5 +1,6 @@
 using System.Text;
 using Purity.Core;
+using Purity.Desktop.Localization;
 using Purity.Desktop.ViewModels;
 using Xunit;
 
@@ -15,7 +16,7 @@ namespace Purity.Desktop.Tests
 			_dialogs.Answers.Enqueue(0);						// Start a new history
 			var window = await StartFreshAsync();
 
-			Assert.Contains("one data file", Assert.Single(_dialogs.Shown));
+			Assert.Contains(UiText.English.FirstStartTitle, Assert.Single(_dialogs.Shown));
 			Assert.Equal(0, _dialogs.SettingsShown);
 			Assert.Equal(DefaultDataFile, window.DataFilePath);
 			Assert.Equal(DefaultDataFile, DesktopSettings.Load().DataFilePath);

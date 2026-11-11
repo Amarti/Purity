@@ -9,14 +9,14 @@
         xmlns:views="using:Purity.Desktop.Views"
         x:Class="Purity.Desktop.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
-        Title="{Binding Text.Settings, Source={x:Static loc:Loc.Instance}}" Width="384" Height="422"
+        Title="{Binding Text.Settings, Source={x:Static loc:Loc.Instance}}" Width="384" Height="459"
         FlowDirection="{Binding FlowDirection, Source={x:Static loc:Loc.Instance}}"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/Purity.ico">
     <Panel>
 
-    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,37,30,37,37,30,37,*,30,10,30,20">
+    <Grid ColumnDefinitions="20,100,*,30,20" RowDefinitions="20,30,37,37,30,37,37,30,37,37,*,30,10,30,20">
         <!-- Not in the WPF app: the language, which changes the moment it's chosen. Each half names its own
              language in that language, and the two stay in place, so a flag doesn't jump from under the pointer. -->
         <TextBlock Grid.Column="1" Grid.Row="1" Margin="0,2,0,0" Height="23" Text="{Binding Text.LanguageLabel, Source={x:Static loc:Loc.Instance}}"/>
@@ -94,12 +94,18 @@
                 ToolTip.Tip="{Binding Text.MoveFileTip, Source={x:Static loc:Loc.Instance}}"
                 ToolTip.ShowOnDisabled="True"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="10" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.CreateReport, Source={x:Static loc:Loc.Instance}}" Click="CreateReport"
+        <!-- Not in the WPF app: removes the history and everything kept about it, after asking twice -->
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="9" Height="30" Margin="0,7,0,0" HorizontalAlignment="Stretch" Classes="Danger" Content="{Binding Text.WipeOut, Source={x:Static loc:Loc.Instance}}"
+                Click="WipeOut" IsEnabled="{Binding CanWipe}"
+                ToolTip.Tip="{Binding Text.WipeOutTip, Source={x:Static loc:Loc.Instance}}"
+                ToolTip.ShowOnDisabled="True"/>
+
+        <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="11" Height="30" HorizontalAlignment="Stretch" Content="{Binding Text.CreateReport, Source={x:Static loc:Loc.Instance}}" Click="CreateReport"
                 IsEnabled="{Binding CanReport}"/>
 
-        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="12" Height="30" Width="150" Content="{Binding Text.Ok, Source={x:Static loc:Loc.Instance}}" Click="Ok" HorizontalAlignment="Left" IsDefault="True" Classes="Confirm"
+        <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="13" Height="30" Width="150" Content="{Binding Text.Ok, Source={x:Static loc:Loc.Instance}}" Click="Ok" HorizontalAlignment="Left" IsDefault="True" Classes="Confirm"
                 IsEnabled="{Binding CanAccept}"/>
-        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="12" Height="30" Width="150" Content="{Binding Text.Cancel, Source={x:Static loc:Loc.Instance}}" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
+        <Button Grid.Column="3" Margin="-120,0,0,0" Grid.Row="13" Height="30" Width="150" Content="{Binding Text.Cancel, Source={x:Static loc:Loc.Instance}}" Click="Cancel" HorizontalAlignment="Right" IsCancel="True"/>
     </Grid>
     <views:MessageLayer x:Name="Messages"/>
     </Panel>

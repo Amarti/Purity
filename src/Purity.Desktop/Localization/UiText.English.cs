@@ -28,7 +28,7 @@ namespace Purity.Desktop.Localization
 			Next = "Next",
 			NoPeriodsYet = "No periods yet",
 			Press = "Press",
-			WhenOneBegins = "when one begins.",
+			WhenOneBegins = "when one begins",
 
 			Mikveh = "Mikveh",
 			VesetHodesh = "Veset Hachodesh",
@@ -200,13 +200,30 @@ namespace Purity.Desktop.Localization
 				return $"Brought in {copies}. {periods}, and {(setAside == 1 ? "it is" : "they are")} now in this computer's backups.";
 			},
 
-			FirstStartTitle = "Purity keeps your history in one data file.",
+			FirstStartTitle = "Welcome to Purity",
 			FirstStart =
-				"Start a new history on this computer, or open the data file you already have, such as the one your other computers use in Dropbox. " +
+				"Purity keeps your history in a single data file. Start a new history on this computer, or open the file you already have, " +
+				"for example in Dropbox, Google Drive or OneDrive, so all your computers share it. " +
 				"A new history can move to a synced folder later, in Settings.",
 			StartNew = "Start a new history",
 			OpenMine = "Open my data file...",
 			SettingsNotSaved = "The settings couldn't be saved, so Purity will ask for the data file again next time.\n\n",
+
+			WipeOut = "Remove all history...",
+			WipeOutTip = "Remove your history and all its backups, for good",
+			WipeTitle = "Remove all your history?",
+			WipeBody =
+				"Purity will remove your history and all its backups.\n\n" +
+				"If the data file is in a folder that Dropbox, Google Drive, OneDrive or iCloud syncs, it goes from every computer that uses it. " +
+				"Other computers keep their own backups until wiped there too, and sync services keep deleted files for a while, in their own trash or history.",
+			WipeSure = "This can't be undone.",
+			WipeForGood = "Remove for good",
+			WipedTitle = "Your history is removed",
+			Wiped = "Purity will close now. When it starts again, it starts afresh.",
+			WipeLeftTitle = "Not everything could be removed",
+			WipeLeft = items => $"Purity couldn't remove these, so please remove them yourself:\n\n{items}\n\nPurity will close now.",
+			WipeCalendarLeft = "Purity's calendar in your Google account: remove it in Google Calendar's settings",
+			ClosePurity = "Close Purity",
 			MoveOntoFile =
 				"There's already a file with that name there, and Purity won't replace it, since it may hold someone's history.\n\n" +
 				"To use that file instead, choose it with the ... button in Settings.",

@@ -14,7 +14,7 @@ namespace Purity.Desktop
 		public static ISecretStore ForThisComputer()
 		{
 			if (OperatingSystem.IsWindows())
-				return new WindowsSecretStore(Path.Combine(AppPaths.Folder, "google.sign-in"));
+				return new WindowsSecretStore(AppPaths.GoogleSignInFile);
 			return OperatingSystem.IsMacOS() ? new MacSecretStore() : new LinuxSecretStore();
 		}
 

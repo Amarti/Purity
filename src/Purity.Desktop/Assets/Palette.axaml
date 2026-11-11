@@ -28,6 +28,9 @@
             <SolidColorBrush x:Key="ConfirmBackgroundBrush" Color="#44719A"/>
             <SolidColorBrush x:Key="ConfirmHoverBackgroundBrush" Color="#3A6388"/>
             <SolidColorBrush x:Key="ConfirmPressedBackgroundBrush" Color="#2F5373"/>
+            <SolidColorBrush x:Key="DangerBackgroundBrush" Color="#B3261E"/>
+            <SolidColorBrush x:Key="DangerHoverBackgroundBrush" Color="#9C2019"/>
+            <SolidColorBrush x:Key="DangerPressedBackgroundBrush" Color="#831A15"/>
 
             <SolidColorBrush x:Key="MessageBackgroundBrush" Color="White"/>
             <SolidColorBrush x:Key="MessageBorderBrush" Color="#C5CCD3"/>
@@ -92,6 +95,9 @@
             <SolidColorBrush x:Key="ConfirmBackgroundBrush" Color="#44719A"/>
             <SolidColorBrush x:Key="ConfirmHoverBackgroundBrush" Color="#5383AE"/>
             <SolidColorBrush x:Key="ConfirmPressedBackgroundBrush" Color="#3A6388"/>
+            <SolidColorBrush x:Key="DangerBackgroundBrush" Color="#B3261E"/>
+            <SolidColorBrush x:Key="DangerHoverBackgroundBrush" Color="#C8392F"/>
+            <SolidColorBrush x:Key="DangerPressedBackgroundBrush" Color="#9C2019"/>
 
             <SolidColorBrush x:Key="MessageBackgroundBrush" Color="#2A2C30"/>
             <SolidColorBrush x:Key="MessageBorderBrush" Color="#4A4E55"/>

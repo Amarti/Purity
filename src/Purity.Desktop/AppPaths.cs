@@ -40,7 +40,13 @@ namespace Purity.Desktop
 				path = path.ToUpperInvariant();			// Windows and macOS ignore case in paths
 
 			var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(path)))[..16];
-			return Path.Combine(Folder, "vaults", hash);
+			return Path.Combine(VaultsFolder, hash);
 		}
+
+		/// <summary>Every data file's vault: its backups and local copies</summary>
+		public static string VaultsFolder => Path.Combine(Folder, "vaults");
+
+		/// <summary>Where Windows keeps the Google sign-in, encrypted for this user. Macs and Linux use the system's own store.</summary>
+		public static string GoogleSignInFile => Path.Combine(Folder, "google.sign-in");
 	}
 }

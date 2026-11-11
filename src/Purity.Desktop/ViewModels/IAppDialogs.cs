@@ -26,6 +26,9 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>Lets the person pick a data file they already have</summary>
 		/// <returns>Its path, or null</returns>
 		Task<string?> PickDataFileAsync();
+
+		/// <summary>Closes the app, as its window's close button does</summary>
+		void CloseApp();
 	}
 
 
@@ -46,7 +49,9 @@ namespace Purity.Desktop.ViewModels
 	/// <param name="Title">The question itself</param>
 	/// <param name="Body">What's needed to answer it, or null</param>
 	/// <param name="NoPreference">Neither answer is the safer one, so no button stands out</param>
-	public sealed record Question(string Title, string? Body = null, bool NoPreference = false);
+	/// <param name="RemovesForGood">Going ahead removes something that can't be brought back, so that button is red</param>
+	/// <param name="Warning">A last word set apart from the explanation, just above the answers, or null</param>
+	public sealed record Question(string Title, string? Body = null, bool NoPreference = false, bool RemovesForGood = false, string? Warning = null);
 
 
 	/// <param name="Backup">The earlier version</param>

@@ -68,6 +68,29 @@
             <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
         </Style>
+
+        <!-- A button that removes something for good: filled red, so it's never pressed by mistake for an ordinary one -->
+        <Style Selector="^.Danger">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.Danger /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="^.Danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerPressedBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Danger:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
     </ControlTheme>
 
     <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">

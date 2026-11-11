@@ -24,6 +24,9 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>Removes the calendar and ends the sign-in</summary>
 		Task DisconnectAsync(CancellationToken cancellation);
+
+		/// <summary>Ends the sign-in and leaves the calendar alone. Forgetting the sign-in here always happens, even offline.</summary>
+		Task ForgetAsync(CancellationToken cancellation);
 	}
 
 
