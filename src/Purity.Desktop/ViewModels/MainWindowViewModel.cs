@@ -133,7 +133,8 @@ namespace Purity.Desktop.ViewModels
 		private string? BuildReport() => Ledger.Data.Count < 1 ? null : PurityFile.PeriodLengthsReport(Ledger.Data);
 
 		/// <summary>
-		/// Adds an open period starting today, as the WPF app does. "Today" is the UTC date there too.
+		/// Adds an open period starting today by the computer's own clock. WPF took the UTC date, which in
+		/// an American evening is already tomorrow and just after midnight in Israel is still yesterday.
 		/// Unlike WPF, only while no other period is open: that one must be accepted or removed first.
 		/// </summary>
 		[RelayCommand(CanExecute = nameof(CanAddPeriod))]
@@ -145,7 +146,7 @@ namespace Purity.Desktop.ViewModels
 			if (!CanAddPeriod)
 				return false;
 
-			var today = new DateTimeOffset(_clock.GetUtcNow().UtcDateTime.Date, TimeSpan.Zero);
+			var today = Stamps.FromDate(_clock.GetLocalNow().Date, false);
 			var period = Ledger.AddPeriod(today, today.AddDays(7));
 			if (period == null)
 				return false;

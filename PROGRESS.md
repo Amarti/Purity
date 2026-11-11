@@ -22,20 +22,20 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | Fixes | A crash on clicking a Hebrew text box holding a Mac path or mixed text, fixed with Avalonia 12.1.5 (rechecked on Monterey) | 2.4.2 |
 | ✅ | Wipe-out | A red "Remove all history..." button in Settings. One question, with what a synced folder means and that it can't be undone. It removes the history and all its backups, removes Purity's Google calendar and signs out, then closes Purity. The settings stay, apart from where the history was | 2.4.2 |
 | ✅ | Welcome | A warmer first-start message that names Dropbox, Google Drive and OneDrive | 2.4.2 |
+| ✅ | New period | Starts on the computer's own date, not the UTC one, which in an American evening was already tomorrow and just after midnight in Israel still yesterday. Only the suggestion changed: a picked date was always stored as picked | 2.4.2 |
 
 ## Next, on the desktop
 
 - ⬜ Merge `calendar-reminders` into `master`.
 - ⬜ Reminders through iCloud and other CalDAV calendars.
 - ⬜ Check the app on the latest macOS on Apple Silicon (the MacBook Neo). Monterey is checked on Intel only.
-- ⬜ "Today" from the computer's own clock: a new period still starts on the UTC date, while everything else already uses the local date.
 - ⬜ Reminders that follow one shared time zone, so computers in different time zones don't keep moving each other's alerts.
 
 ## Calculations: rules version 2
 
 - ⏳ The rav's answers to the open questions on the calculations. Each answer lands as a versioned rules change, with a reviewed list of every date that moves.
 - ⬜ An Or Zarua option.
-- ⬜ A typo in one stored period's end date, to fix in the data. The surviving snapshots already have it, so they can't tell when it appeared.
+- ✅ A typo in one stored period's end date, fixed by you in the data on 2026-11-11.
 - ⬜ Warnings for odd input, such as an end before its start or overlapping periods.
 - ⏳ Which onah applies after crossing time zones, a question for the rav.
 
