@@ -36,7 +36,7 @@ bash tools/platform-check/build-kit.sh linux-x64 linux-arm64
 
 The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the tests run with globalization off and most calculation tests skip, so install `libicu` first for a full run. The app itself never needs ICU.
 
-The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon on Monterey hasn't been tried. Rerun the kit on a Monterey Mac after upgrading Avalonia or .NET.
+The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon isn't a Monterey target: it is checked on the latest macOS only, and CI runs every suite on an Apple Silicon Mac. Rerun the kit on the Monterey Mac after upgrading Avalonia or .NET; it passed again in November 2026 with Avalonia 12.1.5.
 
 Between runs, CI publishes the Mac build every night and on each push, and fails if any program or library in it needs a newer macOS than 12.0:
 

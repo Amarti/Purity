@@ -21,16 +21,14 @@
             <TextBlock VerticalAlignment="Center" Text="{Binding Text.RemindersWhere, Source={x:Static loc:Loc.Instance}}"/>
             <Border Grid.Column="1" Height="23" BorderThickness="1" CornerRadius="5" BorderBrush="{DynamicResource SwitchBorderBrush}"
                     AutomationProperties.Name="{Binding Text.RemindersWhereName, Source={x:Static loc:Loc.Instance}}">
-                <Grid ColumnDefinitions="*,*,*,*,*">
+                <Grid ColumnDefinitions="*,*,*,*">
                     <RadioButton Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4" GroupName="Where" IsEnabled="{Binding CanUseGoogle}" IsChecked="{Binding IsGoogle}" Content="Google"
                                  ToolTip.Tip="{Binding GoogleTip}" ToolTip.ShowOnDisabled="True"/>
                     <RadioButton Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="iCloud"
                                  ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
-                    <RadioButton Grid.Column="2" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="Outlook"
+                    <RadioButton Grid.Column="2" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="{Binding Text.RemindersOther, Source={x:Static loc:Loc.Instance}}"
                                  ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
-                    <RadioButton Grid.Column="3" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0" GroupName="Where" IsEnabled="False" Content="{Binding Text.RemindersOther, Source={x:Static loc:Loc.Instance}}"
-                                 ToolTip.Tip="{Binding Text.RemindersLater, Source={x:Static loc:Loc.Instance}}" ToolTip.ShowOnDisabled="True"/>
-                    <RadioButton Grid.Column="4" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0" GroupName="Where" IsChecked="{Binding IsFile}" Content="{Binding Text.RemindersFile, Source={x:Static loc:Loc.Instance}}"/>
+                    <RadioButton Grid.Column="3" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0" GroupName="Where" IsChecked="{Binding IsFile}" Content="{Binding Text.RemindersFile, Source={x:Static loc:Loc.Instance}}"/>
                 </Grid>
             </Border>
         </Grid>

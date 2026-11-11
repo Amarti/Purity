@@ -23,20 +23,4 @@ To build only some, name them: `bash tools/build-apps.sh windows mac`. It needs 
 
 The app keeps its settings and local copies per user: in `%LOCALAPPDATA%\Purity` on Windows, `~/Library/Application Support/Purity` on macOS and `~/.local/share/Purity` on Linux.
 
-Current TODOs:
-
- - Add options to the settings window:
-	- Or Zarua option
- - Settle the open calculation questions with a rav, then apply the answers
- - Desktop (Windows, macOS, Linux)
-	- reminders through iCloud and other CalDAV, then Outlook (Google is done)
-	- publish the Google project before relying on Google reminders: sign-ins of a project in Testing expire after 7 days
-	- check Google reminders on Linux by hand (Windows and macOS passed)
-	- check the current look by hand on macOS and Linux
- - Port to iOS
-	- external storage file path (dropbox/google drive/iCloud storage integration)
-	- calendar/reminders integration
-	- Apple Watch viewer
- - Port to android
-	- external storage file path (dropbox/google drive integration)
-	- calendar/reminders integration
+What's done, what's next and what's waiting: see [PROGRESS.md](PROGRESS.md).

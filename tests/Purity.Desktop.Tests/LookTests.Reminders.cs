@@ -39,12 +39,12 @@ namespace Purity.Desktop.Tests
 			var (window, _) = ShowReminders();
 			var places = PlacesOf(window);
 
-			Assert.Equal(new object?[] { "Google", "iCloud", "Outlook", UiText.English.RemindersOther, UiText.English.RemindersFile }, places.Select(el => el.Content));
-			Assert.All(places.Take(4), el => Assert.False(el.IsEnabled));
+			Assert.Equal(new object?[] { "Google", "iCloud", UiText.English.RemindersOther, UiText.English.RemindersFile }, places.Select(el => el.Content));
+			Assert.All(places.Take(3), el => Assert.False(el.IsEnabled));
 			Assert.Equal(UiText.English.RemindersGoogleNotInBuild, ToolTip.GetTip(places[0]));
-			Assert.All(places.Skip(1).Take(3), el => Assert.Equal(UiText.English.RemindersLater, ToolTip.GetTip(el)));
-			Assert.True(places[4].IsEnabled);
-			Assert.True(places[4].IsChecked);
+			Assert.All(places.Skip(1).Take(2), el => Assert.Equal(UiText.English.RemindersLater, ToolTip.GetTip(el)));
+			Assert.True(places[3].IsEnabled);
+			Assert.True(places[3].IsChecked);
 			window.Close();
 		});
 
@@ -145,7 +145,7 @@ namespace Purity.Desktop.Tests
 			var (window, _) = ShowReminders();
 
 			Assert.True(PlacesOf(window)[0].Opacity < 1);
-			Assert.Equal(1, PlacesOf(window)[4].Opacity);
+			Assert.Equal(1, PlacesOf(window)[3].Opacity);
 			window.Close();
 		});
 
