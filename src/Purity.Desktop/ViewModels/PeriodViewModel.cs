@@ -44,8 +44,7 @@ namespace Purity.Desktop.ViewModels
 				if (value is not { } date || date == BeginDate)
 					return;
 
-				Period.Begin = Stamps.FromDate(date, BeginIsAfterDusk);
-				BeginChanged();
+				SetBegin(Stamps.FromDate(date, BeginIsAfterDusk));
 			}
 		}
 
@@ -61,15 +60,14 @@ namespace Purity.Desktop.ViewModels
 				if (value is not { } day || day == BeginHebrewDay)
 					return;
 
-				Period.Begin = Stamps.FromHebrewDaytime(day, BeginIsAfterDusk);
-				BeginChanged();
+				SetBegin(Stamps.FromHebrewDaytime(day, BeginIsAfterDusk));
 			}
 		}
 
 		/// <summary>The day the start's date field holds, in the calendar on show</summary>
 		public DateTime? BeginDay
 		{
-			get => UsesHebrewCalendar ? BeginHebrewDay : BeginDate;
+			get => DayOf(_asking is (true, var stamp) ? stamp : Period.Begin);
 			set
 			{
 				if (UsesHebrewCalendar)
@@ -84,8 +82,7 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private void ToggleBeginNight()
 		{
-			Period.Begin = Toggled(Period.Begin);
-			BeginChanged();
+			SetBegin(Toggled(Period.Begin));
 		}
 
 		/// <inheritdoc cref="BeginDate"/>
@@ -97,8 +94,7 @@ namespace Purity.Desktop.ViewModels
 				if (value is not { } date || date == EndDate)
 					return;
 
-				Period.End = Stamps.FromDate(date, EndIsAfterDusk);
-				EndChanged();
+				SetEnd(Stamps.FromDate(date, EndIsAfterDusk));
 			}
 		}
 
@@ -111,15 +107,14 @@ namespace Purity.Desktop.ViewModels
 				if (value is not { } day || day == EndHebrewDay)
 					return;
 
-				Period.End = Stamps.FromHebrewDaytime(day, EndIsAfterDusk);
-				EndChanged();
+				SetEnd(Stamps.FromHebrewDaytime(day, EndIsAfterDusk));
 			}
 		}
 
 		/// <inheritdoc cref="BeginDay"/>
 		public DateTime? EndDay
 		{
-			get => UsesHebrewCalendar ? EndHebrewDay : EndDate;
+			get => DayOf(_asking is (false, var stamp) ? stamp : Period.End);
 			set
 			{
 				if (UsesHebrewCalendar)
@@ -134,8 +129,7 @@ namespace Purity.Desktop.ViewModels
 		[RelayCommand]
 		private void ToggleEndNight()
 		{
-			Period.End = Toggled(Period.End);
-			EndChanged();
+			SetEnd(Toggled(Period.End));
 		}
 
 		public bool SkipStreak
@@ -250,6 +244,68 @@ namespace Purity.Desktop.ViewModels
 
 		private bool UsesHebrewCalendar => _owner.UsesHebrewCalendar;
 
+		private void SetBegin(DateTimeOffset stamp) => Change(stamp, true);
+
+		private void SetEnd(DateTimeOffset stamp) => Change(stamp, false);
+
+		/// <summary>
+		/// A period still open takes a new date at once. A closed one takes it only once the change is
+		/// confirmed: until then the field keeps showing the date it has, and goes back to it if not.
+		/// </summary>
+		private void Change(DateTimeOffset stamp, bool start)
+		{
+			if (IsClosed)
+				_ = ConfirmChangeAsync(stamp, start);
+			else
+				Apply(stamp, start);
+		}
+
+		/// <summary>
+		/// While asked, the field's day is the one picked. A two-way binding passes on only a value
+		/// that differs from the last it saw, so going back to the date kept is a change it then hears
+		/// of, and the field follows.
+		/// </summary>
+		private async Task ConfirmChangeAsync(DateTimeOffset stamp, bool start)
+		{
+			var was = start ? Period.Begin : Period.End;
+			_asking = (start, stamp);
+			Changed(start);
+			bool confirmed;
+			try
+			{
+				confirmed = await _owner.MayChangeClosedAsync(was, stamp, start);
+			}
+			finally
+			{
+				_asking = null;
+			}
+
+			if (confirmed)
+				Apply(stamp, start);
+			else
+				Changed(start);
+		}
+
+		private void Apply(DateTimeOffset stamp, bool start)
+		{
+			if (start)
+				Period.Begin = stamp;
+			else
+				Period.End = stamp;
+			Changed(start);
+		}
+
+		private void Changed(bool start)
+		{
+			if (start)
+				BeginChanged();
+			else
+				EndChanged();
+		}
+
+		/// <summary>The day a date field holds for a stamp, in the calendar on show</summary>
+		private DateTime? DayOf(DateTimeOffset stamp) => UsesHebrewCalendar ? HebrewDay(stamp) : ShownDate(stamp);
+
 		private static DateTime? HebrewDay(DateTimeOffset stamp) => Stamps.IsInHebrewCalendar(stamp) ? Stamps.HebrewDaytime(stamp) : null;
 
 		private void BeginChanged()
@@ -286,5 +342,8 @@ namespace Purity.Desktop.ViewModels
 
 
 		private readonly MainWindowViewModel _owner;
+
+		/// <summary>A closed period's date picked but not confirmed yet, and whether it's the start</summary>
+		private (bool Start, DateTimeOffset Stamp)? _asking;
 	}
 }

@@ -23,20 +23,19 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | Wipe-out | A red "Remove all history..." button in Settings. One question, with what a synced folder means and that it can't be undone. It removes the history and all its backups, removes Purity's Google calendar and signs out, then closes Purity. The settings stay, apart from where the history was | 2.4.2 |
 | ✅ | Welcome | A warmer first-start message that names Dropbox, Google Drive and OneDrive | 2.4.2 |
 | ✅ | New period | Starts on the computer's own date, not the UTC one, which in an American evening was already tomorrow and just after midnight in Israel still yesterday. Only the suggestion changed: a picked date was always stored as picked | 2.4.2 |
+| ✅ | Odd input | When a period is closed, its dates are checked for what a typo makes: an end before its start, more than 30 days, an overlap with the period before or after, or a new period going in among earlier ones. Once closed, a period isn't checked again, so nothing needs remembering. Changing any date of a closed period, or its day or night, asks first. Neither blocks: every date is still worked out as entered | 2.4.2 |
 
 ## Next, on the desktop
 
 - ⬜ Merge `calendar-reminders` into `master`.
 - ⬜ Reminders through iCloud and other CalDAV calendars.
 - ⬜ Check the app on the latest macOS on Apple Silicon (the MacBook Neo). Monterey is checked on Intel only.
-- ⬜ Reminders that follow one shared time zone, so computers in different time zones don't keep moving each other's alerts.
 
 ## Calculations: rules version 2
 
 - ⏳ The rav's answers to the open questions on the calculations. Each answer lands as a versioned rules change, with a reviewed list of every date that moves.
 - ⬜ An Or Zarua option.
 - ✅ A typo in one stored period's end date, fixed by you in the data on 2026-11-11.
-- ⬜ Warnings for odd input, such as an end before its start or overlapping periods.
 - ⏳ Which onah applies after crossing time zones, a question for the rav.
 
 ## Phones
@@ -59,5 +58,6 @@ every change that finishes, starts, drops or blocks a stage.
 
 ## Dropped
 
+- ✖️ Reminders that follow one shared time zone, so computers in different time zones don't keep moving each other's alerts, dropped on 2026-11-11.
 - ✖️ Outlook reminders, dropped on 2026-11-11.
 - ✖️ The old WPF and Avalonia 0.10 apps, replaced by this one on 2026-11-09. Their source is kept in history at the tags `wpf-final` and `engine-v1-reference`.

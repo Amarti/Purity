@@ -77,6 +77,7 @@ namespace Purity.Desktop.Tests
 
 			Day(month, "ט\"ז שבט").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 			Dispatcher.UIThread.RunJobs();
+			ConfirmChange(window);
 
 			Assert.False(popup.IsOpen);
 			Assert.Equal(new DateTimeOffset(2034, 2, 5, 0, 0, 0, TimeSpan.Zero), first.Period.Begin);
@@ -105,6 +106,7 @@ namespace Purity.Desktop.Tests
 
 			Day(month, "5 February").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 			Dispatcher.UIThread.RunJobs();
+			ConfirmChange(window);
 
 			Assert.False(popup.IsOpen);
 			Assert.Equal(new DateTimeOffset(2034, 2, 5, 12, 0, 0, TimeSpan.Zero), first.Period.Begin);

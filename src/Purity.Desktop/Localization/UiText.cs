@@ -152,6 +152,21 @@ namespace Purity.Desktop.Localization
 		public required string DuplicateToday { get; init; }
 		public required Func<string, string> EndNotYet { get; init; }
 		public required string ClosePeriodAnyway { get; init; }
+		public required string OddDates { get; init; }
+		public required string OddKeepOpen { get; init; }
+		public required Func<string, string> OddEndsFirst { get; init; }
+		public required Func<int, string> OddLong { get; init; }
+		public required Func<string, string> OddInPrevious { get; init; }
+		public required Func<string, string> OddInNext { get; init; }
+		public required Func<string, string> OddBeforeNewest { get; init; }
+		public required string ChangeClosedTitle { get; init; }
+		public required string ChangeClosedStart { get; init; }
+		public required string ChangeClosedEnd { get; init; }
+		public required Func<string, string> ChangeNow { get; init; }
+		public required Func<string, string> ChangeNew { get; init; }
+		public required string ChangeClosedRefresh { get; init; }
+		public required Func<string, bool, string> DateWithOnah { get; init; }
+		public required string Change { get; init; }
 		public required string CloseAnyway { get; init; }
 		public required string RemoveQuestion { get; init; }
 

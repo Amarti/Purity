@@ -323,10 +323,15 @@ namespace Purity.Desktop.Tests
 				if (question.Warning != null)
 					text += "\n\n" + question.Warning;
 				Shown.Add(text);
+				if (ConfirmsChanges && question.Title == Loc.T.ChangeClosedTitle)
+					return 0;
 				if (WhileAsking != null)
 					await WhileAsking(text);
 				return Answers.TryDequeue(out var answer) ? answer : null;
 			}
+
+			/// <summary>Answers Change whenever a closed period's date changes, for tests about something else</summary>
+			public bool ConfirmsChanges { get; set; }
 
 			/// <summary>Runs while a question is on screen, before it's answered</summary>
 			public Func<string, Task>? WhileAsking { get; set; }

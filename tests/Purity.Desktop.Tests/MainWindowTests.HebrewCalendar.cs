@@ -28,6 +28,7 @@ namespace Purity.Desktop.Tests
 		public async Task PickingAHebrewStartDateKeepsItsOnah()
 		{
 			var period = (await OpenInHebrewAsync()).Periods[0];
+			_dialogs.ConfirmsChanges = true;
 
 			period.BeginHebrewDay = FifteenShevat;
 			Assert.Equal(Utc(2034, 2, 4, 0), period.Period.Begin);
@@ -51,6 +52,7 @@ namespace Purity.Desktop.Tests
 		public async Task PickingAHebrewEndDateKeepsItsOnah()
 		{
 			var period = (await OpenInHebrewAsync()).Periods[0];
+			_dialogs.ConfirmsChanges = true;
 
 			period.EndHebrewDay = FifteenShevat;
 			Assert.Equal(Utc(2034, 2, 4, 0), period.Period.End);
@@ -91,6 +93,7 @@ namespace Purity.Desktop.Tests
 		public async Task TheFieldHoldsTheDateOfTheCalendarOnShow()
 		{
 			var period = (await OpenInHebrewAsync()).Periods[0];
+			_dialogs.ConfirmsChanges = true;
 			period.BeginHebrewDay = FifteenShevat;
 			period.EndHebrewDay = FifteenShevat;
 			if (!period.BeginIsAfterDusk)
@@ -128,6 +131,7 @@ namespace Purity.Desktop.Tests
 		{
 			WriteHistory();
 			var period = (await OpenAsync()).Periods[0];
+			_dialogs.ConfirmsChanges = true;
 			period.BeginDate = FifteenShevat;
 
 			period.ToggleBeginNightCommand.Execute(null);

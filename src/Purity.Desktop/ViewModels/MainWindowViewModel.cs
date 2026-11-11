@@ -187,14 +187,20 @@ namespace Purity.Desktop.ViewModels
 
 		/// <summary>
 		/// Asks first when the end date hasn't come yet, as it is when it's still the week-ahead date a
-		/// new period starts with, since the wide button is easy to press by accident.
+		/// new period starts with, since the wide button is easy to press by accident. Asks too when the
+		/// dates look odd, as a typo makes them.
 		/// </summary>
 		private async Task<bool> MayCloseAsync(PeriodViewModel open)
 		{
-			if (open.EndDate <= _clock.GetLocalNow().Date)
+			var reasons = new List<string>();
+			if (!(open.EndDate <= _clock.GetLocalNow().Date))
+				reasons.Add(T.EndNotYet(open.EndText));
+			if (OddText(open.Period) is { } odd)
+				reasons.Add(odd);
+			if (reasons.Count == 0)
 				return true;
 
-			return await _dialogs.AskAsync(new Question(T.ClosePeriodAnyway, T.EndNotYet(open.EndText)), T.ClosePeriod, T.KeepOpen) == 0;
+			return await _dialogs.AskAsync(new Question(T.ClosePeriodAnyway, string.Join("\n\n", reasons)), T.ClosePeriod, T.KeepOpen) == 0;
 		}
 
 		/// <summary>
