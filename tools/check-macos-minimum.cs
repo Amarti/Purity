@@ -2,8 +2,12 @@
 //
 // Hosted CI has no Monterey Mac, so this is how an update to Avalonia, SkiaSharp or .NET that drops
 // macOS 12 gets noticed before the app reaches one. It reads the minimum version that each Mach-O
-// file records, which macOS checks before loading it. A file that passes can still call something
-// newer at run time, so the platform check kit stays the real test after an upgrade.
+// file records, which macOS checks before loading it. It runs anywhere and loads nothing, so a file
+// that passes can still call something newer at run time: after an upgrade, open the new build on
+// the Monterey Mac.
+//
+// The verdict comes first, then each file with its minimum. On GitHub the verdict is also a note on
+// the run's page and in its summary, since the job's log view doesn't always show the last lines.
 //
 //   dotnet run tools/check-macos-minimum.cs -- <folder> <version, such as 12.0>
 
@@ -24,6 +28,7 @@ if (!Directory.Exists(folder))
 
 var limit = MachO.Pack(limitVersion);
 var problems = new List<string>();
+var rows = new List<string>();
 var files = 0;
 uint newest = 0;
 foreach (var path in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal))
@@ -46,7 +51,7 @@ foreach (var path in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirec
 	foreach (var slice in slices)
 	{
 		var minimum = slice.Minimum is { } m ? "macOS " + MachO.Format(m) : "no minimum";
-		Console.WriteLine($"{name,-72} {slice.Arch,-7} {minimum}");
+		rows.Add($"{name,-72} {slice.Arch,-7} {minimum}");
 		if (slice.Minimum is not { } version)
 			problems.Add($"{name} ({slice.Arch}) records no minimum macOS version");
 		else if (slice.Platform != MachO.PlatformMacOS)
@@ -60,23 +65,41 @@ foreach (var path in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirec
 	}
 }
 
-Console.WriteLine();
-var annotate = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+var onGitHub = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+var title = $"macOS {MachO.Format(limit)}";
 if (files == 0 && problems.Count == 0)
 {
-	Console.WriteLine((annotate ? "::error::" : "") + $"No Mac programs or libraries were found in {folder}, so nothing was checked");
+	Verdict("error", $"No Mac programs or libraries were found in {folder}, so nothing was checked.");
 	return 1;
 }
 if (problems.Count == 0)
 {
-	Console.WriteLine($"Checked {files} Mac files. The newest minimum is macOS {MachO.Format(newest)}, within the limit of {MachO.Format(limit)}.");
+	Verdict("notice", $"Checked {files} Mac files. The newest minimum is macOS {MachO.Format(newest)}, within the limit of {MachO.Format(limit)}.");
+	Table();
 	return 0;
 }
 
-Console.WriteLine($"Some files won't load on macOS {MachO.Format(limit)}:");
+Verdict("error", $"Some Mac files won't load on macOS {MachO.Format(limit)}.", problems);
 foreach (var problem in problems)
-	Console.WriteLine((annotate ? "::error::" : "  ") + problem);
+	Console.WriteLine((onGitHub ? $"::error title={title}::" : "  ") + problem);
+Table();
 return 1;
+
+
+// On GitHub a notice or error line becomes a note on the run's page, and the summary shows under the run
+void Verdict(string kind, string text, IReadOnlyList<string>? details = null)
+{
+	Console.WriteLine(onGitHub ? $"::{kind} title={title}::{text}" : text);
+	if (onGitHub && Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY") is { Length: > 0 } summary)
+		File.AppendAllText(summary, $"### {title}\n\n{text}\n\n" + string.Concat((details ?? []).Select(el => $"- {el}\n")));
+}
+
+void Table()
+{
+	Console.WriteLine();
+	foreach (var row in rows)
+		Console.WriteLine(row);
+}
 
 
 /// <summary>Just enough of the Mach-O format to find each architecture's minimum macOS version</summary>

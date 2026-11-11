@@ -1,9 +1,10 @@
-name: Runs on macOS 12
+name: macOS 12 minimum
 
 # Monterey gets the same build as every other Mac, and hosted CI has no Monterey machine. An update to
 # Avalonia, SkiaSharp or .NET that drops macOS 12 would pass every test and then refuse to open there,
-# so this publishes the Mac build and checks the minimum macOS version each program and library
-# records. The nightly run catches a new .NET patch, which reaches the build without any commit.
+# so this publishes the Mac build, on Linux, and reads the minimum macOS version each program and
+# library records, which macOS checks before loading it. It doesn't run anything on a Mac. The
+# nightly run catches a new .NET patch, which reaches the build without any commit.
 
 on:
   push:
@@ -17,7 +18,7 @@ permissions:
 
 jobs:
   check:
-    name: Mac files load on macOS 12
+    name: Mac files need macOS 12 or older
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
