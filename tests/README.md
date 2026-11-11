@@ -24,19 +24,9 @@ Tests that need real data skip when `tests/private/` is missing. Set `PURITY_REQ
 
 ## On machines CI can't reach
 
-Hosted CI has no Monterey Mac and no real Debian machine, so `tools/platform-check` builds a kit that needs nothing installed: the three test suites and the desktop app (a `Purity.app` bundle on a Mac), all self-contained on .NET 10. The script runs the suites, has the app save a picture of its window with a made-up history (`--picture`, which refuses to run without `--data`), then lets the person try the app and answer a few questions, and packs up a report to send back. The kit's README explains how. The .NET 8 build of the engine is still tested in CI, but the kit no longer carries it, since Monterey runs .NET 10.
+Hosted CI has no Monterey Mac and no real Debian machine. The app checks its own date calculations at every start (see `Golden/self-test.txt` below) and shows no dates if they differ, so opening a build from `dotnet run tools/build-apps.cs` on such a machine is itself a check.
 
-```bash
-bash tools/platform-check/build-kit.sh                  # Mac, Intel and Apple Silicon
-```
-
-```bash
-bash tools/platform-check/build-kit.sh linux-x64 linux-arm64
-```
-
-The kits land in `out/platform-check`. Without ICU, as on a minimal Linux install, the tests run with globalization off and most calculation tests skip, so install `libicu` first for a full run. The app itself never needs ICU.
-
-The first run, in November 2026 on an Intel MacBook Pro with macOS 12.7.6, passed everything for all three candidates, so Monterey gets the main Avalonia 12 build on .NET 10. Apple Silicon isn't a Monterey target: it is checked on the latest macOS only, and CI runs every suite on an Apple Silicon Mac. Rerun the kit on the Monterey Mac after upgrading Avalonia or .NET; it passed again in November 2026 with Avalonia 12.1.5.
+In November 2026 a kit of the test suites and the app passed everything on an Intel MacBook Pro with macOS 12.7.6, so Monterey gets the main Avalonia 12 build on .NET 10, and it passed again with Avalonia 12.1.5. Apple Silicon isn't a Monterey target: it is checked on the latest macOS only, and CI runs every suite on an Apple Silicon Mac. The kit was retired once Monterey was settled; `git checkout 06f891f -- tools/platform-check` brings it back.
 
 Between runs, CI publishes the Mac build every night and on each push, and fails if any program or library in it needs a newer macOS than 12.0:
 
@@ -44,17 +34,11 @@ Between runs, CI publishes the Mac build every night and on each push, and fails
 dotnet run tools/check-macos-minimum.cs -- <publish folder> 12.0
 ```
 
-That catches the usual way an update drops a macOS version. It can't catch a library calling something newer only at run time, which is why the kit is still the real test.
+That catches the usual way an update drops a macOS version. It can't catch a library calling something newer only at run time, so after upgrading Avalonia or .NET, open the new build on the Monterey Mac.
 
-Google Calendar can't be reached from CI either, so the tests use a local stand-in for it. `tools/google-check` builds a kit that tries reminders against the real Google Calendar: the app with the project's Google client ID and secret built in, a made-up history whose reminders fall in the coming weeks, and a checklist covering sign-in, the calendar, an alert on the phone, a language change, a new period, a second computer and removing everything. It asks for the ID and secret, so they never reach the repo, and builds outside the repo's own build folders:
+Google Calendar can't be reached from CI either, so the tests use a local stand-in for it. In November 2026 a kit tried reminders against the real Google Calendar on Windows, the Intel Mac and Linux, and every check passed: sign-in, the calendar, an alert on the phone, a language change, a new period, a second computer and removing everything. To try the real thing again, build with the project's client ID and secret in `PURITY_GOOGLE_CLIENT_ID` and `PURITY_GOOGLE_CLIENT_SECRET`. The kit, with its made-up history and checklist, was retired too; `git checkout 06f891f -- tools/google-check` brings it back.
 
-```bash
-dotnet run tools/google-check/build-kit.cs
-```
-
-The kits land in `out/google-check`, and each kit's README explains how to use it. In November 2026 every check passed on Windows and on the Intel Mac. Linux hasn't been tried.
-
-For Linux, `bash tools/package-linux.sh` builds `out/linux/purity_<version>_<arch>.deb` for amd64 and arm64 (on Windows its last step runs in WSL). The Linux package workflow installs each package in clean Debian 12 and 13 and Ubuntu 22.04 and 24.04 containers, then opens the app on a made-up history on a virtual screen, which proves the package's dependencies are enough. `tools/test-linux-package.sh` does the same locally in a Docker container.
+For Linux, `dotnet run tools/build-apps.cs -- linux` builds `out/<version>/purity_<version>_<arch>.deb` for amd64 and arm64 (on Linux, `bash tools/package-linux.sh` does too; on Windows the packaging step runs in WSL). The Linux package workflow installs each package in clean Debian 12 and 13 and Ubuntu 22.04 and 24.04 containers, then opens the app on a made-up history on a virtual screen, which proves the package's dependencies are enough. `tools/test-linux-package.sh` does the same locally in a Docker container.
 
 ## Real data
 
