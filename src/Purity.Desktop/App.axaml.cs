@@ -24,8 +24,9 @@ namespace Purity.Desktop
 			{
 				var window = new MainWindow(StartOptions.Parse(desktop.Args ?? Array.Empty<string>()));
 				desktop.MainWindow = window;
+				var ui = Dispatcher.UIThread;			// held here: a second start is heard on another thread
 				if (Program.Instance is { } instance)
-					instance.Show = () => Dispatcher.UIThread.Post(window.BringToFront);
+					instance.Show = () => ui.Post(window.BringToFront);
 			}
 
 			base.OnFrameworkInitializationCompleted();

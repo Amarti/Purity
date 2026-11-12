@@ -29,7 +29,10 @@ namespace Purity.Desktop.Views
 			_messages = this.FindControl<MessageLayer>("Messages")!;
 			_periods.AddHandler(KeyDownEvent, OnPeriodsKeyDown, RoutingStrategies.Tunnel);
 
-			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()), reminderConnections: settings => Connections(options, settings));
+			// Held from here, on the UI thread: notices come from the file watcher's own thread, and asking
+			// for the UI thread from there can make that thread the UI one, as happened between tests
+			var ui = Dispatcher.UIThread;
+			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => ui.Post(() => _ = work()), reminderConnections: settings => Connections(options, settings));
 			DataContext = _viewModel;
 			_options = options;
 
