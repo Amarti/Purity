@@ -44,7 +44,7 @@ namespace Purity.Desktop.Views
 		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
 		{
 			base.OnPropertyChanged(change);
-			if (change.Property == MarkedProperty || change.Property == LinksProperty)
+			if (change.Property == MarkedProperty || change.Property == LinksProperty || change.Property == IsVisibleProperty)
 				Build();
 		}
 
@@ -74,6 +74,11 @@ namespace Purity.Desktop.Views
 		}
 
 
+		/// <summary>
+		/// Hidden, the links are plain words. Avalonia still draws text hidden this way, and a link in it
+		/// is laid out then, in the middle of drawing, which fails: opening the Reminders window on
+		/// iCloud already connected crashed on a Mac. Text in a hidden panel isn't drawn, so is safe.
+		/// </summary>
 		private void Build()
 		{
 			var inlines = new InlineCollection();
@@ -87,7 +92,7 @@ namespace Purity.Desktop.Views
 					inlines.Add(new Run(text[at..link.Index]));
 
 				var words = link.Groups[1].Value;
-				if (Links is { } links && index < links.Count)
+				if (IsVisible && Links is { } links && index < links.Count)
 				{
 					var button = Link(words, links[index]);
 					_links.Add(button);

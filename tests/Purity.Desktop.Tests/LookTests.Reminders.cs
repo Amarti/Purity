@@ -111,6 +111,32 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(new[] { "Go to ", " or ", "two", "." }, text.Inlines!.OfType<Avalonia.Controls.Documents.Run>().Select(el => el.Text));
 		});
 
+		/// <summary>Avalonia draws text hidden by its own IsVisible, and a link laid out then, in the middle of drawing, crashed the app</summary>
+		[Theory]
+		[InlineData(false)]
+		[InlineData(true)]
+		public Task LinksInTextHiddenFromTheStartNeverCrashTheDrawing(bool inHiddenPanel) => Ui.Run(() =>
+		{
+			var text = new LinkText { Marked = "See [this page] and [that one].", Links = new[] { new Uri("https://example.com/"), new Uri("https://example.org/") } };
+			var holder = new Border { Child = text };
+			if (inHiddenPanel)
+				holder.IsVisible = false;
+			else
+				text.IsVisible = false;
+			var window = new Window { Content = new StackPanel { Children = { new TextBlock { Text = "Above" }, holder } } };
+			window.Show();
+			Dispatcher.UIThread.RunJobs();
+
+			text.IsVisible = holder.IsVisible = true;
+			Dispatcher.UIThread.RunJobs();
+
+			var links = text.GetLogicalDescendants().OfType<HyperlinkButton>().ToArray();
+			Assert.Equal(new[] { "https://example.com/", "https://example.org/" }, links.Select(el => el.NavigateUri?.AbsoluteUri));
+			Assert.All(links, el => Assert.True(el.Bounds.Width > 0));
+			Assert.Equal("See this page and that one.", string.Concat(text.Inlines!.Select(el => el is Avalonia.Controls.Documents.Run run ? run.Text : AutomationProperties.GetName(((Avalonia.Controls.Documents.InlineUIContainer)el).Child))));
+			window.Close();
+		});
+
 		[Fact]
 		public Task ChoosingOtherAsksForTheServerToo() => Ui.Run(() =>
 		{
@@ -238,13 +264,42 @@ namespace Purity.Desktop.Tests
 		});
 
 
+		[Theory]
+		[InlineData(ReminderPlace.ICloud, true)]
+		[InlineData(ReminderPlace.ICloud, false)]
+		[InlineData(ReminderPlace.CalDav, true)]
+		[InlineData(ReminderPlace.Google, true)]
+		public Task OpensWithAServiceAlreadyChosen(ReminderPlace place, bool connected) => Ui.Run(async () =>
+		{
+			// As after a restart: the text about the service is hidden from the start while connected,
+			// and for iCloud it holds links. Opening this way once crashed the app on a Mac.
+			var connection = new MemoryConnection { IsConnected = connected, TakesPassword = place != ReminderPlace.Google };
+			var (window, reminders) = ShowReminders(connection, place, chosen: true);
+			Assert.True(reminders.IsService);
+			Assert.Equal(connected, reminders.IsConnected);
+
+			await reminders.DisconnectAsync();
+			Dispatcher.UIThread.RunJobs();
+
+			var intro = window.FindControl<LinkText>("ServiceIntro")!;
+			Assert.True(intro.IsEffectivelyVisible);
+			Assert.True(intro.Bounds.Height > 0);
+			var links = LinksIn(window);
+			Assert.Equal(place == ReminderPlace.ICloud ? 2 : 0, links.Length);
+			Assert.All(links, el => Assert.True(el.Bounds.Width > 0 && el.IsEffectivelyVisible));
+			window.Close();
+		});
+
+
 		/// <param name="connection">The one service's connection, or none</param>
 		/// <param name="place">Which service it is</param>
-		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null, ReminderPlace place = ReminderPlace.Google)
+		/// <param name="chosen">Whether the service is already where reminders go, as after a restart</param>
+		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null, ReminderPlace place = ReminderPlace.Google, bool chosen = false)
 		{
 			var period = new PurityPeriod(new DateTimeOffset(2031, 2, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2031, 2, 6, 0, 0, 0, TimeSpan.Zero)) { Closed = true };
 			period.SubEvents.Add(new PurityEvent(PurityEventType.Mikveh, new DateTimeOffset(2031, 3, 2, 12, 0, 0, TimeSpan.Zero)));
-			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { period }, new EarlierClock(), null, connection == null ? null : ReminderConnections.Of(place, connection));
+			var setup = new ReminderSetup { Where = chosen ? place : ReminderPlace.File };
+			var reminders = new RemindersWindowViewModel(setup, new[] { period }, new EarlierClock(), null, connection == null ? null : ReminderConnections.Of(place, connection));
 			var window = new RemindersWindow(reminders);
 			window.Show();
 			Dispatcher.UIThread.RunJobs();
