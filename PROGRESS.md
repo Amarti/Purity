@@ -5,7 +5,7 @@ every change that finishes, starts, drops or blocks a stage.
 
 ✅ done · 🔨 built, not released yet · ⬜ to do · ⏳ waiting on you · ✖️ dropped
 
-**Now:** version 2.4.2, merged into `master`.
+**Now:** version 2.4.3, on `master`.
 
 ## Done
 
@@ -26,12 +26,12 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | Odd input | When a period is closed, its dates are checked for what a typo makes: an end before its start, more than 30 days, an overlap with the period before or after, or a new period going in among earlier ones. Once closed, a period isn't checked again, so nothing needs remembering. Changing any date of a closed period, or its day or night, asks first. Neither blocks: every date is still worked out as entered | 2.4.2 |
 | ✅ | Fixes | On a busy computer, Purity's own save could be taken for a change made elsewhere, as CI caught once on Linux. Harmless, since reloading found the same history, but now it can't happen | 2.4.2 |
 | ✅ | Building | `dotnet run tools/build-apps.cs` builds every platform from any console, with only the .NET SDK: no git or Git Bash, so a downloaded copy of the code builds too. On Windows the Linux packages still need WSL. It asks for Google's client ID and secret, as the retired Google kit did, and Enter builds without Google. They reach the build only through its environment, and its working files, which hold them in plain text, are deleted afterwards. The Monterey and Google check kits are retired, and can be brought back from history | 2.4.2 |
+| ✅ | First start | Starts in the computer's own language: Hebrew when Windows shows Hebrew, macOS has Hebrew first under Language & Region, or Linux's language is Hebrew, and English otherwise. The dates go with the language on every system, Hebrew with Hebrew and Gregorian with English, whatever calendar the computer itself shows. Only until the settings are saved: after that the saved choice always wins. CI tries asking each system, but no Hebrew computer has been tried by hand yet | 2.4.3 |
 
 ## Next, on the desktop
 
 - ⬜ Reminders through iCloud and other CalDAV calendars.
 - ⬜ Check the app on the latest macOS on Apple Silicon (the MacBook Neo). Monterey is checked on Intel only.
-- ⬜ On the first start, take the language and the calendar from the computer's own language settings, so a Hebrew computer starts in Hebrew. Today every first start is in English with Gregorian dates, and both are changed in Settings.
 
 ## Calculations: rules version 2
 

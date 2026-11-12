@@ -72,6 +72,11 @@ namespace Purity.Desktop
 		public WindowPlacement? Window { get; set; }
 
 
+		/// <summary>True for the defaults that <see cref="Load"/> gives when nothing was saved, or what was saved can't be read</summary>
+		[JsonIgnore]
+		public bool IsNew { get; private init; }
+
+
 		private ReminderSetup _reminders = new();
 
 
@@ -82,13 +87,13 @@ namespace Purity.Desktop
 			{
 				var path = AppPaths.SettingsFile;
 				if (!File.Exists(path))
-					return new DesktopSettings();
+					return new DesktopSettings { IsNew = true };
 
-				return JsonSerializer.Deserialize(File.ReadAllText(path), SettingsJson.Default.DesktopSettings) ?? new DesktopSettings();
+				return JsonSerializer.Deserialize(File.ReadAllText(path), SettingsJson.Default.DesktopSettings) ?? new DesktopSettings { IsNew = true };
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException)
 			{
-				return new DesktopSettings();
+				return new DesktopSettings { IsNew = true };
 			}
 		}
 

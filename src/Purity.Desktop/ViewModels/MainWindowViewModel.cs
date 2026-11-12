@@ -24,7 +24,8 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
 		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
 		/// <param name="reminderConnection">Makes this device's connection to a calendar service</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, Func<DesktopSettings, IReminderConnection>? reminderConnection = null)
+		/// <param name="computerLanguage">The language this computer is set to, which a first start takes on with its dates</param>
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, Func<DesktopSettings, IReminderConnection>? reminderConnection = null, Func<ComputerLanguage>? computerLanguage = null)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
@@ -33,6 +34,13 @@ namespace Purity.Desktop.ViewModels
 			_runOnUiThread = runOnUiThread;
 			_selfTest = selfTest ?? SelfTest.Run;
 			_settings = DesktopSettings.Load();
+			if (_settings.IsNew)
+			{
+				// Not saved by themselves: they're saved along with the first thing that is, such as where the history goes
+				var computer = (computerLanguage ?? ComputerLanguage.OfThisComputer)();
+				_settings.Language = computer.Language;
+				_settings.Calendar = computer.Calendar;
+			}
 			_reminderConnection = reminderConnection?.Invoke(_settings);
 			Loc.Instance.Use(_settings.Language);
 			Loc.Instance.UseCalendar(_settings.Calendar, _settings.HebrewDatesInEnglish);
