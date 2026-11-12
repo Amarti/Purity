@@ -10,7 +10,7 @@ One command builds the app for Windows, macOS and Linux into `out/<version>/`. E
 dotnet run tools/build-apps.cs
 ```
 
-It needs only the .NET 10 SDK and runs from any console: Command Prompt, PowerShell, or a Mac or Linux terminal, with no git or Git Bash, so a downloaded copy of the code builds too. To build only some, name them: `dotnet run tools/build-apps.cs -- windows mac`. The Linux packages are made by `dpkg-deb`, which only Linux has: on Windows that step runs in WSL, and a Mac can't build them. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there. Reminders through Google Calendar need the project's Google client ID and secret in `PURITY_GOOGLE_CLIENT_ID` and `PURITY_GOOGLE_CLIENT_SECRET` when building. They must never be committed, and a build without them simply doesn't offer Google.
+It needs only the .NET 10 SDK and runs from any console: Command Prompt, PowerShell, or a Mac or Linux terminal, with no git or Git Bash, so a downloaded copy of the code builds too. To build only some, name them: `dotnet run tools/build-apps.cs -- windows mac`. The Linux packages are made by `dpkg-deb`, which only Linux has: on Windows that step runs in WSL, and a Mac can't build them. The version is set in one place, `<Version>` in `src/Purity.Desktop/Purity.Desktop.csproj`, and everything takes it from there. Reminders through Google Calendar need the project's Google client ID and secret built in: the script asks for them, or takes them from `PURITY_GOOGLE_CLIENT_ID` and `PURITY_GOOGLE_CLIENT_SECRET`, and pressing Enter at the ID builds without Google. They must never be committed, and a build without them doesn't offer Google.
 
 | File | For | To install and run |
 |---|---|---|

@@ -7,9 +7,15 @@
 //
 // Writes out/<version>/. The version comes from <Version> in src/Purity.Desktop/Purity.Desktop.csproj.
 // The Linux packages are made by dpkg-deb, which only Linux has: on Windows that step runs in WSL,
-// and a Mac can't build them. Reminders through Google need the project's client ID and secret in
-// PURITY_GOOGLE_CLIENT_ID and PURITY_GOOGLE_CLIENT_SECRET when building; without them the app
-// simply doesn't offer Google.
+// and a Mac can't build them.
+//
+// Reminders through Google need the project's client ID and secret built in. It asks for them, or
+// takes them from PURITY_GOOGLE_CLIENT_ID and PURITY_GOOGLE_CLIENT_SECRET, and pressing Enter at
+// the ID builds without Google, as does a console it can't ask in. The repo is public, so they must
+// never be committed: they reach the build only through its environment, never its command line,
+// no build server outlives it holding them, and its working files, which hold them in plain text,
+// stay in out/<version>/.stage and are deleted afterwards. A build stopped part way leaves them
+// there until the next one.
 
 using System.ComponentModel;
 using System.Diagnostics;
@@ -31,10 +37,13 @@ if (platforms.FirstOrDefault(el => !known.Contains(el)) is { } unknown)
 	return 2;
 }
 
+(string Id, string Secret)? google = null;
 try
 {
-	Reset(stage);
 	Console.WriteLine($"Purity {version}");
+	google = Google();
+	Console.WriteLine(google != null ? "With Google reminders" : "Without Google reminders, since no client ID was given");
+	Reset(stage);
 	foreach (var platform in platforms)
 	{
 		switch (platform)
@@ -78,7 +87,7 @@ try
 		}
 	}
 
-	Console.WriteLine($"Ready in {Path.GetRelativePath(root, output)}");
+	Console.WriteLine($"Ready in {Path.GetRelativePath(root, output)}, " + (google != null ? "with Google reminders" : "without Google reminders"));
 	return 0;
 }
 catch (BuildException e)
@@ -93,13 +102,85 @@ finally
 }
 
 
+// The working files go in the stage rather than the project's obj folder, since with Google they
+// hold its ID and secret in plain text. Without Google both are taken out of the build's
+// environment, so a secret set on its own can't slip in.
 string Publish(string rid, string folder)
 {
-	Run("dotnet", ["publish", project, "-c", "Release", "-r", rid, "--self-contained", "-p:DebugType=none", "-nologo", "-v", "quiet", "-o", folder]);
+	var build = Path.Combine(stage, "build");
+	Run("dotnet", ["publish", project, "-c", "Release", "-r", rid, "--self-contained", "-p:DebugType=none", "--artifacts-path", build,
+		"--disable-build-servers", "-nologo", "-v", "quiet", "-o", folder],
+		new Dictionary<string, string?> { ["PURITY_GOOGLE_CLIENT_ID"] = google?.Id, ["PURITY_GOOGLE_CLIENT_SECRET"] = google?.Secret });
 	foreach (var symbols in Directory.EnumerateFiles(folder, "*.pdb", SearchOption.AllDirectories))
 		File.Delete(symbols);										// such as those SkiaSharp ships for Windows
+
+	// The app offers Google only when the build took the ID, and a build that didn't would look like a broken app
+	if (google is { } given)
+	{
+		var id = Encoding.UTF8.GetBytes(given.Id);
+		var took = Directory.EnumerateFiles(build, "Purity.dll", SearchOption.AllDirectories)
+			.Where(el => el.Contains(rid, StringComparison.OrdinalIgnoreCase))
+			.Any(el => File.ReadAllBytes(el).AsSpan().IndexOf(id) >= 0);
+		if (!took)
+			throw new BuildException($"The build for {rid} didn't take Google's client ID.");
+	}
 	return folder;
 }
+
+// Google's client ID and secret, or null to build without them
+static (string Id, string Secret)? Google()
+{
+	if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PURITY_GOOGLE_CLIENT_ID")))
+	{
+		if (Console.IsInputRedirected)
+			return null;
+		Console.WriteLine("Google reminders need the project's client ID and secret, on the Desktop client under Google Auth Platform > Clients.");
+	}
+	var id = Ask("PURITY_GOOGLE_CLIENT_ID", "Client ID (Enter to build without Google)", hidden: false);
+	if (id.Length == 0)
+		return null;
+	if (!id.EndsWith(".apps.googleusercontent.com", StringComparison.Ordinal) || !Plain(id))
+		throw new BuildException("That isn't a client ID: one ends in .apps.googleusercontent.com.");
+	var secret = Ask("PURITY_GOOGLE_CLIENT_SECRET", "Client secret (not shown as you type or paste)", hidden: true);
+	if (secret.Length == 0 || !Plain(secret))
+		throw new BuildException("That isn't a client secret. A Desktop client has one, usually starting with GOCSPX-.");
+	return (id, secret);
+}
+
+// Takes the value from the environment if it's there, or asks. A hidden answer isn't echoed, so
+// it never shows on a screen or in a terminal's scrollback.
+static string Ask(string variable, string question, bool hidden)
+{
+	if (Environment.GetEnvironmentVariable(variable) is { Length: > 0 } given)
+	{
+		Console.WriteLine($"{question.Split(" (")[0]}: taken from {variable}");
+		return given.Trim();
+	}
+
+	Console.Write(question + ": ");
+	if (Console.IsInputRedirected)
+	{
+		var read = (Console.ReadLine() ?? string.Empty).Trim();
+		Console.WriteLine();			// nothing typed, so nothing ended the line
+		return read;
+	}
+	if (!hidden)
+		return (Console.ReadLine() ?? string.Empty).Trim();
+
+	var typed = new StringBuilder();
+	for (var key = Console.ReadKey(intercept: true); key.Key != ConsoleKey.Enter; key = Console.ReadKey(intercept: true))
+	{
+		if (key.Key == ConsoleKey.Backspace)
+			typed.Length = Math.Max(0, typed.Length - 1);
+		else if (!char.IsControl(key.KeyChar))
+			typed.Append(key.KeyChar);
+	}
+	Console.WriteLine(typed.Length > 0 ? $"{typed.Length} characters" : string.Empty);
+	return typed.ToString().Trim();
+}
+
+// Google's IDs and secrets use only these, and anything else could upset the build or a shell
+static bool Plain(string value) => Regex.IsMatch(value, "^[A-Za-z0-9._-]+$");
 
 void Keep(string built, string name)
 {
@@ -144,12 +225,19 @@ static void Reset(string folder)
 /// <summary>A Windows path as WSL sees it: C:\x becomes /mnt/c/x</summary>
 static string Wsl(string path) => $"/mnt/{char.ToLowerInvariant(path[0])}{path[2..].Replace('\\', '/')}";
 
-/// <summary>Runs a program quietly, showing what it said only when it fails</summary>
-static void Run(string program, IEnumerable<string> arguments)
+/// <summary>Runs a program quietly, showing what it said only when it fails. A null value takes that variable out of its environment.</summary>
+static void Run(string program, IEnumerable<string> arguments, IReadOnlyDictionary<string, string?>? environment = null)
 {
 	var start = new ProcessStartInfo(program) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
 	foreach (var argument in arguments)
 		start.ArgumentList.Add(argument);
+	foreach (var (name, value) in environment ?? new Dictionary<string, string?>())
+	{
+		if (value == null)
+			start.Environment.Remove(name);
+		else
+			start.Environment[name] = value;
+	}
 
 	using var process = Process.Start(start)!;
 	var said = process.StandardOutput.ReadToEndAsync();
