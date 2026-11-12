@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Purity.Reminders\Purity.Reminders.csproj" />
     <ProjectReference Include="..\Purity.GoogleStandIn\Purity.GoogleStandIn.csproj" />
+    <ProjectReference Include="..\Purity.CalDavStandIn\Purity.CalDavStandIn.csproj" />
   </ItemGroup>
 
 </Project>

@@ -68,6 +68,12 @@ namespace Purity.Desktop
 		/// <summary>The ID of Purity's calendar in the connected Google account, or null when there's none yet</summary>
 		public string? GoogleCalendarId { get; set; }
 
+		/// <summary>The address of Purity's calendar in the connected iCloud account, or null when there's none yet</summary>
+		public string? ICloudCalendar { get; set; }
+
+		/// <summary>The address of Purity's calendar on the connected CalDAV server, or null when there's none yet</summary>
+		public string? CalDavCalendar { get; set; }
+
 		/// <summary>Where the main window was when it last closed, or null before it ever closed with a data file chosen</summary>
 		public WindowPlacement? Window { get; set; }
 

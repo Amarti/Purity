@@ -27,10 +27,11 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | Fixes | On a busy computer, Purity's own save could be taken for a change made elsewhere, as CI caught once on Linux. Harmless, since reloading found the same history, but now it can't happen | 2.4.2 |
 | ✅ | Building | `dotnet run tools/build-apps.cs` builds every platform from any console, with only the .NET SDK: no git or Git Bash, so a downloaded copy of the code builds too. On Windows the Linux packages still need WSL. It asks for Google's client ID and secret, as the retired Google kit did, and Enter builds without Google. They reach the build only through its environment, and its working files, which hold them in plain text, are deleted afterwards. The Monterey and Google check kits are retired, and can be brought back from history | 2.4.2 |
 | ✅ | First start | Starts in the computer's own language: Hebrew when Windows shows Hebrew, macOS has Hebrew first under Language & Region, or Linux's language is Hebrew, and English otherwise. The dates go with the language on every system, Hebrew with Hebrew and Gregorian with English, whatever calendar the computer itself shows. Only until the settings are saved: after that the saved choice always wins. CI tries asking each system, but no Hebrew computer has been tried by hand yet | 2.4.3 |
+| 🔨 | Reminders | iCloud and other CalDAV calendars, such as Fastmail or Nextcloud, chosen in the Reminders window. iCloud takes the Apple Account and an app-specific password, other servers their address too; the password is kept in the system's secure store and goes only to that server, over https. One shared "Purity" calendar, found by its tag on every computer, with the shared choices in its description, as with Google. "Remove all history" removes every connected calendar. Tested against a CalDAV stand-in on this computer, not yet against real iCloud, and the new window parts still need your look | 2.4.3 |
 
 ## Next, on the desktop
 
-- ⬜ Reminders through iCloud and other CalDAV calendars.
+- ⬜ Check iCloud reminders against a real iCloud account: connecting, the calendar on the iPhone and Mac, an alert, a second computer and removing everything.
 - ⬜ Check the app on the latest macOS on Apple Silicon (the MacBook Neo). Monterey is checked on Intel only.
 
 ## Calculations: rules version 2
@@ -52,7 +53,7 @@ every change that finishes, starts, drops or blocks a stage.
 - ⏳ The rav's answers.
 - ⏳ Before the iPhone: the Apple Developer Program, and a Mac that runs current Xcode, which Monterey can't.
 - ⏳ Signing and notarizing the Mac app, which needs the Apple Developer Program too.
-- ⏳ Before iCloud reminders: an Apple Account with no family calendars, and its app-specific password, entered by you.
+- ⏳ To check iCloud reminders: an Apple Account with no family calendars, and an app-specific password for it, typed by you in the Reminders window.
 
 ## Only if needed
 

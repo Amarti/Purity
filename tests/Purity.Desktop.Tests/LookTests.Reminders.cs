@@ -1,6 +1,9 @@
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Threading;
+using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Purity.Core;
 using Purity.Desktop.Localization;
@@ -42,7 +45,7 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(new object?[] { "Google", "iCloud", UiText.English.RemindersOther, UiText.English.RemindersFile }, places.Select(el => el.Content));
 			Assert.All(places.Take(3), el => Assert.False(el.IsEnabled));
 			Assert.Equal(UiText.English.RemindersGoogleNotInBuild, ToolTip.GetTip(places[0]));
-			Assert.All(places.Skip(1).Take(2), el => Assert.Equal(UiText.English.RemindersLater, ToolTip.GetTip(el)));
+			Assert.Equal(new object?[] { UiText.English.RemindersICloudTip, UiText.English.RemindersCalDavTip }, places.Skip(1).Take(2).Select(ToolTip.GetTip));
 			Assert.True(places[3].IsEnabled);
 			Assert.True(places[3].IsChecked);
 			window.Close();
@@ -52,7 +55,7 @@ namespace Purity.Desktop.Tests
 		public Task ChoosingGoogleSwapsTheFilePartForTheConnectionPart() => Ui.Run(() =>
 		{
 			var (window, reminders) = ShowReminders(new MemoryConnection { IsConnected = false });
-			var google = window.FindControl<StackPanel>("GooglePanel")!;
+			var google = window.FindControl<StackPanel>("ServicePanel")!;
 			Assert.False(google.IsVisible);
 			Assert.True(PlacesOf(window)[0].IsEnabled);
 
@@ -62,6 +65,91 @@ namespace Purity.Desktop.Tests
 			Assert.True(google.IsVisible);
 			Assert.True(window.FindControl<Button>("ConnectButton")!.IsVisible);
 			Assert.DoesNotContain(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersSave && el.IsEffectivelyVisible);
+			window.Close();
+		});
+
+		[Fact]
+		public Task ChoosingICloudAsksForTheAppleAccountAndAnAppSpecificPassword() => Ui.Run(() =>
+		{
+			var (window, reminders) = ShowReminders(new MemoryConnection { IsConnected = false, TakesPassword = true }, ReminderPlace.ICloud);
+			var fields = window.FindControl<StackPanel>("SignInFields")!;
+			var connect = window.FindControl<Button>("ConnectButton")!;
+			Assert.True(PlacesOf(window)[1].IsEnabled);
+
+			reminders.IsICloud = true;
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.True(fields.IsVisible);
+			var links = LinksIn(window);
+			Assert.Equal(new[] { "https://account.apple.com/", "https://support.apple.com/en-il/102654" }, links.Select(el => el.NavigateUri?.AbsoluteUri));
+			Assert.Equal(new[] { "Apple Account manager", "this page" }, links.Select(AutomationProperties.GetName));
+			Assert.All(links, el => Assert.True(el.IsEffectivelyVisible));
+			var intro = window.FindControl<LinkText>("ServiceIntro")!;
+			Assert.Single(intro.TextLayout.TextLines.Select(el => Math.Round(el.Height, 1)).Distinct());	// a line with a link is no taller than the rest
+			var labels = fields.GetVisualDescendants().OfType<TextBlock>().Where(el => el.IsEffectivelyVisible && el.FindAncestorOfType<TextBox>() == null).Select(el => el.Text).ToArray();
+			Assert.Contains(UiText.English.RemindersAppleAccount, labels);
+			Assert.Contains(UiText.English.RemindersAppSpecificPassword, labels);
+			Assert.DoesNotContain(UiText.English.RemindersServer, labels);		// iCloud's address is known
+			Assert.Equal('•', window.FindControl<TextBox>("PasswordBox")!.PasswordChar);
+			Assert.Equal(UiText.English.RemindersConnectICloud, connect.Content);
+			Assert.False(connect.IsEnabled);
+
+			reminders.SignInUser = "someone@example.com";
+			reminders.SignInPassword = "abcd-efgh-ijkl-mnop";
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.True(connect.IsEnabled);
+			window.Close();
+		});
+
+		[Fact]
+		public Task ABracketWithNoLinkForItStaysPlainText() => Ui.Run(() =>
+		{
+			var text = new LinkText { Marked = "Go to [one] or [two].", Links = new[] { new Uri("https://example.org/") } };
+
+			Assert.Equal("https://example.org/", Assert.Single(text.GetLogicalDescendants().OfType<HyperlinkButton>()).NavigateUri?.AbsoluteUri);
+			Assert.Equal(new[] { "Go to ", " or ", "two", "." }, text.Inlines!.OfType<Avalonia.Controls.Documents.Run>().Select(el => el.Text));
+		});
+
+		[Fact]
+		public Task ChoosingOtherAsksForTheServerToo() => Ui.Run(() =>
+		{
+			var (window, reminders) = ShowReminders(new MemoryConnection { IsConnected = false, TakesPassword = true }, ReminderPlace.CalDav);
+
+			reminders.IsCalDav = true;
+			reminders.SignInUser = "someone";
+			reminders.SignInPassword = "made up";
+			Dispatcher.UIThread.RunJobs();
+
+			var fields = window.FindControl<StackPanel>("SignInFields")!;
+			var labels = fields.GetVisualDescendants().OfType<TextBlock>().Where(el => el.IsEffectivelyVisible && el.FindAncestorOfType<TextBox>() == null).Select(el => el.Text).ToArray();
+			Assert.Equal(new[] { UiText.English.RemindersServer, UiText.English.RemindersUserName, UiText.English.RemindersPassword }, labels);
+			Assert.False(window.FindControl<Button>("ConnectButton")!.IsEnabled);	// not without the server
+			Assert.Empty(LinksIn(window));												// Apple's links are for iCloud alone
+			Assert.Equal(UiText.English.RemindersCalDavIntro, window.FindControl<LinkText>("ServiceIntro")!.Inlines?.Text);
+
+			reminders.SignInServer = "dav.example.org";
+			Dispatcher.UIThread.RunJobs();
+			Assert.True(window.FindControl<Button>("ConnectButton")!.IsEnabled);
+			window.Close();
+		});
+
+		[Fact]
+		public Task EnterInThePasswordConnectsRatherThanClosing() => Ui.Run(() =>
+		{
+			var connection = new MemoryConnection { IsConnected = false, TakesPassword = true };
+			var (window, reminders) = ShowReminders(connection, ReminderPlace.ICloud);
+			reminders.IsICloud = true;
+			reminders.SignInUser = "someone@example.com";
+			reminders.SignInPassword = "abcd-efgh-ijkl-mnop";
+			Dispatcher.UIThread.RunJobs();
+
+			window.FindControl<TextBox>("PasswordBox")!.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter });
+			Dispatcher.UIThread.RunJobs();
+
+			Assert.Equal("someone@example.com", connection.SignIn?.User);
+			Assert.True(window.IsVisible);
+			Assert.False(window.FindControl<StackPanel>("SignInFields")!.IsVisible);	// connected now
 			window.Close();
 		});
 
@@ -150,16 +238,22 @@ namespace Purity.Desktop.Tests
 		});
 
 
-		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null)
+		/// <param name="connection">The one service's connection, or none</param>
+		/// <param name="place">Which service it is</param>
+		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null, ReminderPlace place = ReminderPlace.Google)
 		{
 			var period = new PurityPeriod(new DateTimeOffset(2031, 2, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2031, 2, 6, 0, 0, 0, TimeSpan.Zero)) { Closed = true };
 			period.SubEvents.Add(new PurityEvent(PurityEventType.Mikveh, new DateTimeOffset(2031, 3, 2, 12, 0, 0, TimeSpan.Zero)));
-			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { period }, new EarlierClock(), null, connection);
+			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { period }, new EarlierClock(), null, connection == null ? null : ReminderConnections.Of(place, connection));
 			var window = new RemindersWindow(reminders);
 			window.Show();
 			Dispatcher.UIThread.RunJobs();
 			return (window, reminders);
 		}
+
+		/// <summary>The links in the text about the service chosen</summary>
+		private static HyperlinkButton[] LinksIn(Window window) =>
+			window.FindControl<LinkText>("ServiceIntro")!.GetLogicalDescendants().OfType<HyperlinkButton>().ToArray();
 
 		private static RadioButton[] PlacesOf(Window window) =>
 			window.GetVisualDescendants().OfType<RadioButton>().Where(el => el.GroupName == "Where").ToArray();

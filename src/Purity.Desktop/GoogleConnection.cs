@@ -15,9 +15,9 @@ namespace Purity.Desktop
 		{
 #if DEBUG
 			if (options.GoogleStandIn is { } standIn)
-				return new GoogleConnection(new GoogleClient("stand-in-client"), new GoogleEndpoints(new Uri(standIn, "o/oauth2/v2/auth"), new Uri(standIn, "token"), new Uri(standIn, "revoke"), new Uri(standIn, "calendar/v3/")), SecretStores.ForThisComputer(), settings, VisitWithoutABrowserAsync);
+				return new GoogleConnection(new GoogleClient("stand-in-client"), new GoogleEndpoints(new Uri(standIn, "o/oauth2/v2/auth"), new Uri(standIn, "token"), new Uri(standIn, "revoke"), new Uri(standIn, "calendar/v3/")), SecretStores.ForGoogle(), settings, VisitWithoutABrowserAsync);
 #endif
-			return new GoogleConnection(ClientOfThisBuild(), GoogleEndpoints.Real, SecretStores.ForThisComputer(), settings, openBrowser);
+			return new GoogleConnection(ClientOfThisBuild(), GoogleEndpoints.Real, SecretStores.ForGoogle(), settings, openBrowser);
 		}
 
 		/// <param name="client">The app's ID at Google, or null when this build has none</param>
@@ -42,12 +42,14 @@ namespace Purity.Desktop
 
 		public bool RemembersSignIn => _account?.RemembersSignIn != false;
 
+		public bool TakesPassword => false;
+
 		public ICalendarService Calendar => _calendar ?? throw new InvalidOperationException("This build has no Google connection");
 
 		public IChoiceStore Choices => _calendar ?? throw new InvalidOperationException("This build has no Google connection");
 
 
-		public async Task ConnectAsync(CancellationToken cancellation)
+		public async Task ConnectAsync(ReminderSignIn? signIn, CancellationToken cancellation)
 		{
 			if (_account != null)
 				await _account.SignInAsync(_openBrowser, Loc.T.RemindersSignInDone, cancellation);

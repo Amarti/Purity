@@ -37,6 +37,15 @@ namespace Purity.Reminders
 
 		/// <summary>The service answered, and refused</summary>
 		Refused,
+
+		/// <summary>Signing in, the user name or the password wasn't accepted</summary>
+		PasswordRefused,
+
+		/// <summary>Signing in, nothing at the address offers calendars</summary>
+		NoCalendarService,
+
+		/// <summary>The address doesn't use https, so the password would be sent in the open</summary>
+		NotSecure,
 	}
 
 

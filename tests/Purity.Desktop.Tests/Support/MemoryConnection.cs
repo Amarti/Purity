@@ -10,6 +10,7 @@ namespace Purity.Desktop.Tests
 		public bool IsAvailable { get; set; } = true;
 		public bool IsConnected { get; set; } = true;
 		public bool RemembersSignIn { get; set; } = true;
+		public bool TakesPassword { get; set; }
 		public ICalendarService Calendar => this;
 		public IChoiceStore Choices => this;
 		public SharedChoices? Stored { get; set; }
@@ -20,12 +21,16 @@ namespace Purity.Desktop.Tests
 		public int Reads { get; private set; }
 		public int Writes { get; private set; }
 
+		/// <summary>What the last sign-in was given</summary>
+		public ReminderSignIn? SignIn { get; private set; }
+
 		/// <summary>Whether signing in waits until it's given up on</summary>
 		public bool SignInHangs { get; set; }
 
 
-		public async Task ConnectAsync(CancellationToken cancellation)
+		public async Task ConnectAsync(ReminderSignIn? signIn, CancellationToken cancellation)
 		{
+			SignIn = signIn;
 			if (SignInHangs)
 				await Task.Delay(Timeout.Infinite, cancellation);
 			Fail();

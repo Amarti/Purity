@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Purity.Core\Purity.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Purity.Reminders.Tests" />
+  </ItemGroup>
+
 </Project>

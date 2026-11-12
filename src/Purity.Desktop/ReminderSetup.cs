@@ -20,6 +20,10 @@ namespace Purity.Desktop
 	{
 		File,
 		Google,
+		ICloud,
+
+		/// <summary>Another CalDAV server, given by its address</summary>
+		CalDav,
 	}
 
 

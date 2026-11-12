@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Stands in for a CalDAV server such as iCloud on this computer, for tests and for trying the
+       real window. It's never shipped. It follows the CalDAV and WebDAV rules (RFC 4791 and 4918)
+       for the calls Purity makes, so it proves the code matches those rules, not that iCloud does. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Purity.CalDavStandIn</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

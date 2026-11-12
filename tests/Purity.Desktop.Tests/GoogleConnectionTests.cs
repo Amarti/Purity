@@ -50,7 +50,7 @@ namespace Purity.Desktop.Tests
 			Assert.True(connection.IsAvailable);
 			Assert.False(connection.IsConnected);
 
-			await connection.ConnectAsync(default);
+			await connection.ConnectAsync(null, default);
 			Assert.True(connection.IsConnected);
 			Assert.True(_server.HasLiveSignIn);
 
@@ -71,7 +71,7 @@ namespace Purity.Desktop.Tests
 		public async Task ANewCalendarGetsTheUsualNameWhenNoneIsChosen()
 		{
 			var connection = Connection(new DesktopSettings());
-			await connection.ConnectAsync(default);
+			await connection.ConnectAsync(null, default);
 
 			await connection.Calendar.ListAsync(default);
 
@@ -82,11 +82,11 @@ namespace Purity.Desktop.Tests
 		public async Task ASecondComputerUsesTheSameCalendar()
 		{
 			var first = Connection(new DesktopSettings());
-			await first.ConnectAsync(default);
+			await first.ConnectAsync(null, default);
 			await first.Calendar.ListAsync(default);
 			var second = new DesktopSettings();
 			var other = Connection(second);
-			await other.ConnectAsync(default);
+			await other.ConnectAsync(null, default);
 
 			await other.Calendar.ListAsync(default);
 
@@ -98,7 +98,7 @@ namespace Purity.Desktop.Tests
 		{
 			var settings = new DesktopSettings();
 			var connection = Connection(settings);
-			await connection.ConnectAsync(default);
+			await connection.ConnectAsync(null, default);
 			await connection.Calendar.ListAsync(default);
 			_server.RevokeEverything();
 

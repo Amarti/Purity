@@ -11,11 +11,23 @@ namespace Purity.Desktop
 	/// <summary>The system's secure store on each platform, for what must not sit in a plain file</summary>
 	internal static class SecretStores
 	{
-		public static ISecretStore ForThisComputer()
+		/// <summary>The Google sign-in, under the names it has always had</summary>
+		public static ISecretStore ForGoogle() => ForThisComputer(AppPaths.GoogleSignInFile, "Purity calendar sign-in", "purity-calendar");
+
+		public static ISecretStore ForICloud() => ForThisComputer(AppPaths.ICloudSignInFile, "Purity iCloud sign-in", "purity-icloud");
+
+		/// <summary>The sign-in to another CalDAV server</summary>
+		public static ISecretStore ForCalDav() => ForThisComputer(AppPaths.CalDavSignInFile, "Purity CalDAV sign-in", "purity-caldav");
+
+
+		/// <param name="windowsFile">Where Windows keeps it, encrypted for this user</param>
+		/// <param name="name">Its name in a Mac's keychain and a Linux keyring</param>
+		/// <param name="application">Its key in a Linux keyring</param>
+		private static ISecretStore ForThisComputer(string windowsFile, string name, string application)
 		{
 			if (OperatingSystem.IsWindows())
-				return new WindowsSecretStore(AppPaths.GoogleSignInFile);
-			return OperatingSystem.IsMacOS() ? new MacSecretStore() : new LinuxSecretStore();
+				return new WindowsSecretStore(windowsFile);
+			return OperatingSystem.IsMacOS() ? new MacSecretStore(name) : new LinuxSecretStore(name, application);
 		}
 
 
@@ -101,43 +113,45 @@ namespace Purity.Desktop
 
 
 	/// <summary>The login keychain, through the tool that comes with every Mac</summary>
-	internal sealed class MacSecretStore : ISecretStore
+	internal sealed class MacSecretStore(string service) : ISecretStore
 	{
 		public string? Read()
 		{
-			var (worked, output) = SecretStores.Run(Tool, new[] { "find-generic-password", "-a", Account, "-s", Service, "-w" });
+			var (worked, output) = SecretStores.Run(Tool, new[] { "find-generic-password", "-a", Account, "-s", service, "-w" });
 			return worked && output.Length > 0 ? output : null;
 		}
 
-		/// <summary>Through the tool's own command line, so the secret never appears among a program's arguments</summary>
+		/// <summary>
+		/// Through the tool's own command line, so the secret never appears among a program's arguments.
+		/// It can't hold quotes or backslashes, and none does: Google's tokens have none, and a CalDAV
+		/// sign-in is kept in base64.
+		/// </summary>
 		public bool Write(string secret) =>
-			SecretStores.Run(Tool, new[] { "-i" }, $"add-generic-password -U -a {Account} -s \"{Service}\" -w \"{secret}\"\n").Worked;
+			SecretStores.Run(Tool, new[] { "-i" }, $"add-generic-password -U -a {Account} -s \"{service}\" -w \"{secret}\"\n").Worked;
 
-		public void Delete() => SecretStores.Run(Tool, new[] { "delete-generic-password", "-a", Account, "-s", Service });
+		public void Delete() => SecretStores.Run(Tool, new[] { "delete-generic-password", "-a", Account, "-s", service });
 
 
 		private const string Tool = "/usr/bin/security";
 		private const string Account = "purity";
-		private const string Service = "Purity calendar sign-in";
 	}
 
 
 	/// <summary>The desktop's keyring, where there is one. Without one, a sign-in lasts until the app closes.</summary>
-	internal sealed class LinuxSecretStore : ISecretStore
+	internal sealed class LinuxSecretStore(string label, string application) : ISecretStore
 	{
 		public string? Read()
 		{
-			var (worked, output) = SecretStores.Run(Tool, new[] { "lookup", "application", Application });
+			var (worked, output) = SecretStores.Run(Tool, new[] { "lookup", "application", application });
 			return worked && output.Length > 0 ? output : null;
 		}
 
 		public bool Write(string secret) =>
-			SecretStores.Run(Tool, new[] { "store", "--label=Purity calendar sign-in", "application", Application }, secret).Worked;
+			SecretStores.Run(Tool, new[] { "store", "--label=" + label, "application", application }, secret).Worked;
 
-		public void Delete() => SecretStores.Run(Tool, new[] { "clear", "application", Application });
+		public void Delete() => SecretStores.Run(Tool, new[] { "clear", "application", application });
 
 
 		private const string Tool = "secret-tool";
-		private const string Application = "purity-calendar";
 	}
 }

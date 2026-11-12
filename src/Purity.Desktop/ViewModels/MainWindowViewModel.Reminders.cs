@@ -12,12 +12,15 @@ namespace Purity.Desktop.ViewModels
 		internal Task ReminderSyncFinished { get; private set; } = Task.CompletedTask;
 
 
-		private RemindersWindowViewModel NewReminders() => new(_settings.Reminders, Ledger.Data, _clock, SaveReminders, _reminderConnection);
+		private RemindersWindowViewModel NewReminders() => new(_settings.Reminders, Ledger.Data, _clock, SaveReminders, _reminderConnections);
+
+		/// <summary>The connection to where reminders go, or null when they go to a file</summary>
+		private IReminderConnection? ReminderConnection => _settings.Reminders.Where == ReminderPlace.File ? null : _reminderConnections?.For(_settings.Reminders.Where);
 
 		private void SaveReminders(ReminderSetup setup)
 		{
 			setup.Language = Instance.ReminderLanguage;		// what the preview showed is what the calendar gets
-			setup.ChoicesUnshared = setup.Where == ReminderPlace.Google;
+			setup.ChoicesUnshared = setup.Where != ReminderPlace.File;
 			_settings.Reminders = setup;
 			try
 			{
@@ -33,7 +36,7 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>The last computer to change its language sets the language of the reminders</summary>
 		private void ShareLanguageChange()
 		{
-			if (_settings.Reminders.Where != ReminderPlace.Google)
+			if (_settings.Reminders.Where == ReminderPlace.File)
 				return;
 
 			_settings.Reminders.Language = Instance.ReminderLanguage;
@@ -48,7 +51,7 @@ namespace Purity.Desktop.ViewModels
 		/// </summary>
 		private void RequestReminderSync()
 		{
-			if (_settings.Reminders.Where != ReminderPlace.Google || _reminderConnection is not { IsConnected: true } || _session?.State != SessionState.Ready)
+			if (ReminderConnection is not { IsConnected: true } || _session?.State != SessionState.Ready)
 				return;
 
 			_reminderSyncWanted = true;
@@ -78,7 +81,7 @@ namespace Purity.Desktop.ViewModels
 
 		private async Task SyncRemindersOnceAsync()
 		{
-			if (_session?.State != SessionState.Ready || _reminderConnection is not { IsConnected: true } connection)
+			if (_session?.State != SessionState.Ready || ReminderConnection is not { IsConnected: true } connection)
 				return;
 
 			try
@@ -91,7 +94,7 @@ namespace Purity.Desktop.ViewModels
 			catch (CalendarServiceException e)
 			{
 				if (!_toldReminderProblem)
-					_dialogs.Tell(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+					_dialogs.Tell(ReminderProblems.Say(e.Problem, _settings.Reminders.Where), MessageKind.Problem);
 				_toldReminderProblem = true;				// once is enough, however often it's tried
 			}
 			catch (OperationCanceledException)

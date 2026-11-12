@@ -48,5 +48,14 @@ namespace Purity.Desktop
 
 		/// <summary>Where Windows keeps the Google sign-in, encrypted for this user. Macs and Linux use the system's own store.</summary>
 		public static string GoogleSignInFile => Path.Combine(Folder, "google.sign-in");
+
+		/// <summary>Where Windows keeps the iCloud sign-in, likewise</summary>
+		public static string ICloudSignInFile => Path.Combine(Folder, "icloud.sign-in");
+
+		/// <summary>Where Windows keeps the sign-in to another CalDAV server, likewise</summary>
+		public static string CalDavSignInFile => Path.Combine(Folder, "caldav.sign-in");
+
+		/// <summary>Every sign-in file Windows can keep</summary>
+		public static IReadOnlyList<string> SignInFiles => new[] { GoogleSignInFile, ICloudSignInFile, CalDavSignInFile };
 	}
 }

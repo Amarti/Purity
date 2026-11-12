@@ -20,14 +20,14 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="periods">The whole history</param>
 		/// <param name="clock">What time it is</param>
 		/// <param name="save">Keeps the choices, on OK</param>
-		/// <param name="connection">The connection to a calendar service, where there can be one</param>
-		public RemindersWindowViewModel(ReminderSetup setup, IReadOnlyList<PurityPeriod> periods, TimeProvider clock, Action<ReminderSetup>? save = null, IReminderConnection? connection = null)
+		/// <param name="connections">The connection to each calendar service there can be one to</param>
+		public RemindersWindowViewModel(ReminderSetup setup, IReadOnlyList<PurityPeriod> periods, TimeProvider clock, Action<ReminderSetup>? save = null, ReminderConnections? connections = null)
 		{
 			_periods = periods;
 			_clock = clock;
 			_save = save;
-			_connection = connection;
-			_where = setup.Where == ReminderPlace.Google && connection?.IsAvailable == true ? ReminderPlace.Google : ReminderPlace.File;
+			_connections = connections;
+			_where = setup.Where == ReminderPlace.File || connections?.For(setup.Where)?.IsAvailable == true ? setup.Where : ReminderPlace.File;
 			_scope = setup.Scope;
 			_wording = setup.Wording;
 			RemindMikveh = setup.Mikveh;
@@ -38,7 +38,7 @@ namespace Purity.Desktop.ViewModels
 			OtherTime = TimeChoices.Contains(setup.OtherTime) ? setup.OtherTime : ReminderSetup.DefaultOtherTime;
 			MoveOffShabbat = setup.MoveOffShabbat;
 			CalendarName = setup.CalendarName;
-			IsConnected = connection?.IsConnected == true;
+			IsConnected = Connection?.IsConnected == true;
 			_ready = true;
 			Refresh();
 		}
@@ -49,7 +49,11 @@ namespace Purity.Desktop.ViewModels
 			.Select(el => new TimeOnly(el / 2, el % 2 * 30).ToString("HH:mm", CultureInfo.InvariantCulture))
 			.ToArray();
 
-		public bool CanUseGoogle => _connection?.IsAvailable == true;
+		public bool CanUseGoogle => _connections?.For(ReminderPlace.Google)?.IsAvailable == true;
+
+		public bool CanUseICloud => _connections?.For(ReminderPlace.ICloud)?.IsAvailable == true;
+
+		public bool CanUseCalDav => _connections?.For(ReminderPlace.CalDav)?.IsAvailable == true;
 
 		public string GoogleTip => CanUseGoogle ? Loc.T.RemindersGoogleTip : Loc.T.RemindersGoogleNotInBuild;
 
@@ -73,15 +77,109 @@ namespace Purity.Desktop.ViewModels
 			}
 		}
 
+		public bool IsICloud
+		{
+			get => _where == ReminderPlace.ICloud;
+			set
+			{
+				if (value)
+					Choose(ReminderPlace.ICloud);
+			}
+		}
+
+		public bool IsCalDav
+		{
+			get => _where == ReminderPlace.CalDav;
+			set
+			{
+				if (value)
+					Choose(ReminderPlace.CalDav);
+			}
+		}
+
+		/// <summary>Whether reminders go to a calendar service, not a file</summary>
+		public bool IsService => _where != ReminderPlace.File;
+
+		/// <summary>Connected to the service chosen</summary>
 		[ObservableProperty]
-		[NotifyPropertyChangedFor(nameof(CanConnect))]
+		[NotifyPropertyChangedFor(nameof(CanConnect), nameof(ShowsSignIn))]
 		public partial bool IsConnected { get; private set; }
 
 		[ObservableProperty]
-		[NotifyPropertyChangedFor(nameof(CanConnect))]
+		[NotifyPropertyChangedFor(nameof(CanConnect), nameof(ShowsSignIn))]
 		public partial bool IsConnecting { get; private set; }
 
+		/// <summary>Whether there's a sign-in to start</summary>
 		public bool CanConnect => !IsConnected && !IsConnecting;
+
+		/// <summary>Whether the service chosen takes a user name and password, typed here</summary>
+		public bool TakesPassword => Connection?.TakesPassword == true;
+
+		public bool ShowsSignIn => TakesPassword && CanConnect;
+
+		/// <summary>The address of a CalDAV server, which iCloud and Google don't need</summary>
+		[ObservableProperty]
+		[NotifyPropertyChangedFor(nameof(HasSignIn))]
+		public partial string SignInServer { get; set; } = string.Empty;
+
+		[ObservableProperty]
+		[NotifyPropertyChangedFor(nameof(HasSignIn))]
+		public partial string SignInUser { get; set; } = string.Empty;
+
+		/// <summary>Cleared once it's used, so it's held no longer than it must be</summary>
+		[ObservableProperty]
+		[NotifyPropertyChangedFor(nameof(HasSignIn))]
+		public partial string SignInPassword { get; set; } = string.Empty;
+
+		/// <summary>Whether everything the sign-in takes has been typed</summary>
+		public bool HasSignIn => !TakesPassword || (SignInUser.Trim().Length > 0 && SignInPassword.Trim().Length > 0 && (!IsCalDav || SignInServer.Trim().Length > 0));
+
+		/// <summary>The links in <see cref="ServiceIntro"/>: for iCloud, where to make an app-specific password, and Apple's page about them</summary>
+		public IReadOnlyList<Uri> IntroLinks => IsICloud ? new[] { AppPasswordPage, AppPasswordHelp } : Array.Empty<Uri>();
+
+		public Uri AppPasswordPage { get; } = new("https://account.apple.com/");
+
+		/// <summary>Apple's page on app-specific passwords, in the language on show</summary>
+		public Uri AppPasswordHelp => new(Loc.Instance.Language == Language.Hebrew ? "https://support.apple.com/he-il/102654" : "https://support.apple.com/en-il/102654");
+
+		public string ICloudTip => Loc.T.RemindersICloudTip;
+
+		public string CalDavTip => Loc.T.RemindersCalDavTip;
+
+		/// <summary>What the service chosen does with the dates. Its parts in square brackets are links to <see cref="IntroLinks"/>.</summary>
+		public string ServiceIntro => _where switch
+		{
+			ReminderPlace.ICloud => Loc.T.RemindersICloudIntro,
+			ReminderPlace.CalDav => Loc.T.RemindersCalDavIntro,
+			_ => Loc.T.RemindersGoogleIntro,
+		};
+
+		public string ConnectText => _where switch
+		{
+			ReminderPlace.ICloud => Loc.T.RemindersConnectICloud,
+			ReminderPlace.CalDav => Loc.T.RemindersConnectCalDav,
+			_ => Loc.T.RemindersConnect,
+		};
+
+		public string ConnectingText => _where == ReminderPlace.Google ? Loc.T.RemindersConnecting : Loc.T.RemindersConnectingServer;
+
+		public string UserLabel => IsICloud ? Loc.T.RemindersAppleAccount : Loc.T.RemindersUserName;
+
+		public string PasswordLabel => IsICloud ? Loc.T.RemindersAppSpecificPassword : Loc.T.RemindersPassword;
+
+		public string DisconnectQuestion => _where switch
+		{
+			ReminderPlace.ICloud => Loc.T.RemindersDisconnectICloudQuestion,
+			ReminderPlace.CalDav => Loc.T.RemindersDisconnectCalDavQuestion,
+			_ => Loc.T.RemindersDisconnectQuestion,
+		};
+
+		public string DisconnectBody => _where switch
+		{
+			ReminderPlace.ICloud => Loc.T.RemindersDisconnectICloudBody,
+			ReminderPlace.CalDav => Loc.T.RemindersDisconnectCalDavBody,
+			_ => Loc.T.RemindersDisconnectBody,
+		};
 
 		public bool IsMikvehOnly
 		{
@@ -182,22 +280,25 @@ namespace Purity.Desktop.ViewModels
 		/// <summary>Keeps the choices, on OK</summary>
 		public void Accept() => _save?.Invoke(CurrentSetup());
 
-		/// <summary>Signs in, in the person's browser</summary>
+		/// <summary>Signs in: in the person's browser for Google, or with the user name and password typed here</summary>
 		/// <returns>What to tell the person, or null when there's nothing to say</returns>
 		public async Task<ReminderNotice?> ConnectAsync()
 		{
-			if (_connection == null || IsConnecting)
+			if (Connection is not { } connection || IsConnecting || !HasSignIn)
 				return null;
 
+			var place = _where;
 			using var waiting = _connecting = new CancellationTokenSource();
 			IsConnecting = true;
 			try
 			{
-				await _connection.ConnectAsync(waiting.Token);
-				IsConnected = _connection.IsConnected;
-				if (await _connection.Choices.ReadChoicesAsync(waiting.Token) is { } shared)
+				var signIn = connection.TakesPassword ? new ReminderSignIn(SignInServer, SignInUser, SignInPassword) : null;
+				await connection.ConnectAsync(signIn, waiting.Token);
+				SignInPassword = string.Empty;
+				IsConnected = Connection?.IsConnected == true;
+				if (await connection.Choices.ReadChoicesAsync(waiting.Token) is { } shared)
 					Show(shared);							// another computer has already set them
-				return _connection.RemembersSignIn ? null : new ReminderNotice(Loc.T.RemindersNotRemembered, MessageKind.Problem);
+				return connection.RemembersSignIn ? null : new ReminderNotice(Loc.T.RemindersNotRemembered, MessageKind.Problem);
 			}
 			catch (OperationCanceledException)
 			{
@@ -205,7 +306,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (CalendarServiceException e)
 			{
-				return new ReminderNotice(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+				return new ReminderNotice(ReminderProblems.Say(e.Problem, place), MessageKind.Problem);
 			}
 			finally
 			{
@@ -221,13 +322,13 @@ namespace Purity.Desktop.ViewModels
 		{
 			try
 			{
-				await _connection!.Calendar.AddAsync(ReminderPlanner.TestReminder(Loc.Instance.ReminderLanguage, _clock.GetLocalNow().DateTime), CancellationToken.None);
+				await Connection!.Calendar.AddAsync(ReminderPlanner.TestReminder(Loc.Instance.ReminderLanguage, _clock.GetLocalNow().DateTime), CancellationToken.None);
 				return new ReminderNotice(Loc.T.RemindersTestSent, MessageKind.Done);
 			}
 			catch (CalendarServiceException e)
 			{
-				IsConnected = _connection!.IsConnected;
-				return new ReminderNotice(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+				IsConnected = Connection!.IsConnected;
+				return new ReminderNotice(ReminderProblems.Say(e.Problem, _where), MessageKind.Problem);
 			}
 		}
 
@@ -237,13 +338,13 @@ namespace Purity.Desktop.ViewModels
 		{
 			try
 			{
-				await _connection!.DisconnectAsync(CancellationToken.None);
-				IsConnected = _connection.IsConnected;
+				await Connection!.DisconnectAsync(CancellationToken.None);
+				IsConnected = Connection.IsConnected;
 				return null;
 			}
 			catch (CalendarServiceException e)
 			{
-				return new ReminderNotice(ReminderProblems.Say(e.Problem), MessageKind.Problem);
+				return new ReminderNotice(ReminderProblems.Say(e.Problem, _where), MessageKind.Problem);
 			}
 		}
 
@@ -283,9 +384,13 @@ namespace Purity.Desktop.ViewModels
 		private void Choose(ReminderPlace where)
 		{
 			_where = where;
-			OnPropertyChanged(nameof(IsFile));
-			OnPropertyChanged(nameof(IsGoogle));
+			IsConnected = Connection?.IsConnected == true;
+			foreach (var name in new[] { nameof(IsFile), nameof(IsGoogle), nameof(IsICloud), nameof(IsCalDav), nameof(IsService), nameof(IntroLinks), nameof(TakesPassword), nameof(ShowsSignIn), nameof(HasSignIn), nameof(ServiceIntro), nameof(ConnectText), nameof(ConnectingText), nameof(UserLabel), nameof(PasswordLabel), nameof(DisconnectQuestion), nameof(DisconnectBody) })
+				OnPropertyChanged(name);
 		}
+
+		/// <summary>The connection to the service chosen, or null for a file</summary>
+		private IReminderConnection? Connection => _where == ReminderPlace.File ? null : _connections?.For(_where);
 
 		private void Choose(ReminderScope scope)
 		{
@@ -341,7 +446,7 @@ namespace Purity.Desktop.ViewModels
 		private readonly IReadOnlyList<PurityPeriod> _periods;
 		private readonly TimeProvider _clock;
 		private readonly Action<ReminderSetup>? _save;
-		private readonly IReminderConnection? _connection;
+		private readonly ReminderConnections? _connections;
 		private readonly bool _ready;
 		private ReminderPlace _where;
 		private ReminderScope _scope;

@@ -125,7 +125,7 @@ namespace Purity.Desktop.Tests
 			new DesktopSettings { DataFilePath = _dataFile, Reminders = new ReminderSetup { Where = ReminderPlace.Google } }.Save();
 			var calendar = new MemoryConnection();
 			calendar.Entries.Add(new CalendarEntry("kept", ReminderTag.Test, Today.AddDays(30), "Already there"));
-			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue, reminderConnection: _ => calendar);
+			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue, reminderConnections: _ => ReminderConnections.Of(ReminderPlace.Google, calendar));
 
 			await _viewModel.StartAsync();
 			await _viewModel.ReminderSyncFinished;
@@ -271,7 +271,7 @@ namespace Purity.Desktop.Tests
 		public void TheChoiceOfPlaceIsKeptOnOk()
 		{
 			ReminderSetup? kept = null;
-			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { DatedPeriod() }, new ClockAt(new DateTime(2031, 1, 1)), el => kept = el, new MemoryConnection());
+			var reminders = new RemindersWindowViewModel(new ReminderSetup(), new[] { DatedPeriod() }, new ClockAt(new DateTime(2031, 1, 1)), el => kept = el, ReminderConnections.Of(ReminderPlace.Google, new MemoryConnection()));
 
 			reminders.IsGoogle = true;
 			reminders.Accept();
@@ -284,15 +284,16 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(ReminderPlace.File, new ReminderSetup { WhereText = "Carrier pigeon" }.Where);
 
 
+		/// <summary>The window with Google chosen, unless the setup says otherwise</summary>
 		private RemindersWindowViewModel RemindersWith(MemoryConnection connection, ReminderSetup? setup = null) =>
-			new(setup ?? new ReminderSetup(), new[] { DatedPeriod() }, new ClockAt(new DateTime(2031, 1, 1)), null, connection);
+			new(setup ?? new ReminderSetup { Where = ReminderPlace.Google }, new[] { DatedPeriod() }, new ClockAt(new DateTime(2031, 1, 1)), null, ReminderConnections.Of(ReminderPlace.Google, connection));
 
 		private async Task<(MainWindowViewModel Window, MemoryConnection Calendar)> OpenConnectedAsync(ReminderPlace where = ReminderPlace.Google, bool connected = true)
 		{
 			WriteHistory();
 			new DesktopSettings { DataFilePath = _dataFile, Reminders = new ReminderSetup { Where = where, Scope = ReminderScope.AllDates } }.Save();
 			var calendar = new MemoryConnection { IsConnected = connected };
-			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue, reminderConnection: _ => calendar);
+			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue, reminderConnections: _ => ReminderConnections.Of(where == ReminderPlace.File ? ReminderPlace.Google : where, calendar));
 			await _viewModel.StartAsync();
 			await _viewModel.ReminderSyncFinished;
 			return (_viewModel, calendar);

@@ -29,7 +29,7 @@ namespace Purity.Desktop.Views
 			_messages = this.FindControl<MessageLayer>("Messages")!;
 			_periods.AddHandler(KeyDownEvent, OnPeriodsKeyDown, RoutingStrategies.Tunnel);
 
-			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()), reminderConnection: settings => GoogleConnection.ForThisBuild(options, settings, OpenInBrowserAsync));
+			_viewModel = new MainWindowViewModel(this, options.DataFile, TimeProvider.System, work => Dispatcher.UIThread.Post(() => _ = work()), reminderConnections: settings => Connections(options, settings));
 			DataContext = _viewModel;
 			_options = options;
 
@@ -97,6 +97,13 @@ namespace Purity.Desktop.Views
 		public void CloseApp() => Dispatcher.UIThread.Post(Close);
 
 		private async Task OpenInBrowserAsync(Uri page) => await Launcher.LaunchUriAsync(page);
+
+		private ReminderConnections Connections(StartOptions options, DesktopSettings settings) => new(new Dictionary<ReminderPlace, IReminderConnection>
+		{
+			[ReminderPlace.Google] = GoogleConnection.ForThisBuild(options, settings, OpenInBrowserAsync),
+			[ReminderPlace.ICloud] = CalDavConnection.ForICloud(settings),
+			[ReminderPlace.CalDav] = CalDavConnection.ForOther(settings),
+		});
 
 
 		/// <summary>Draws the eye to the wide button when what it does changes (E4), along with the fade between its faces in the styles</summary>

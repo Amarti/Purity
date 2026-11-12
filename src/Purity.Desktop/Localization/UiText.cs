@@ -87,7 +87,6 @@ namespace Purity.Desktop.Localization
 		public required string RemindersWhereName { get; init; }
 		public required string RemindersFile { get; init; }
 		public required string RemindersOther { get; init; }
-		public required string RemindersLater { get; init; }
 		public required string RemindersAbout { get; init; }
 		public required string RemindersAboutName { get; init; }
 		public required string RemindersMikvehOnly { get; init; }
@@ -130,6 +129,33 @@ namespace Purity.Desktop.Localization
 		public required string RemindersSignInNotFinished { get; init; }
 		public required string RemindersCalendarFailed { get; init; }
 		public required string RemindersNotRemembered { get; init; }
+		public required string RemindersICloudTip { get; init; }
+		public required string RemindersCalDavTip { get; init; }
+		/// <summary>Its parts in square brackets are links, in the order the window gives them</summary>
+		public required string RemindersICloudIntro { get; init; }
+		public required string RemindersCalDavIntro { get; init; }
+		public required string RemindersServer { get; init; }
+		public required string RemindersAppleAccount { get; init; }
+		public required string RemindersAppSpecificPassword { get; init; }
+		public required string RemindersUserName { get; init; }
+		public required string RemindersPassword { get; init; }
+		public required string RemindersConnectICloud { get; init; }
+		public required string RemindersConnectCalDav { get; init; }
+		public required string RemindersConnectingServer { get; init; }
+		public required string RemindersDisconnectICloudQuestion { get; init; }
+		public required string RemindersDisconnectICloudBody { get; init; }
+		public required string RemindersDisconnectCalDavQuestion { get; init; }
+		public required string RemindersDisconnectCalDavBody { get; init; }
+		public required string RemindersICloudNoConnection { get; init; }
+		public required string RemindersCalDavNoConnection { get; init; }
+		public required string RemindersICloudSignInNeeded { get; init; }
+		public required string RemindersCalDavSignInNeeded { get; init; }
+		public required string RemindersICloudPasswordRefused { get; init; }
+		public required string RemindersCalDavPasswordRefused { get; init; }
+		public required string RemindersNoCalendarService { get; init; }
+		public required string RemindersNotSecure { get; init; }
+		public required string RemindersICloudFailed { get; init; }
+		public required string RemindersCalDavFailed { get; init; }
 		public required string Ok { get; init; }
 		public required string Cancel { get; init; }
 		public required string ReportTitle { get; init; }
@@ -236,6 +262,8 @@ namespace Purity.Desktop.Localization
 		public required string WipeLeftTitle { get; init; }
 		public required Func<string, string> WipeLeft { get; init; }
 		public required string WipeCalendarLeft { get; init; }
+		public required string WipeICloudCalendarLeft { get; init; }
+		public required string WipeCalDavCalendarLeft { get; init; }
 		public required string ClosePurity { get; init; }
 
 		public required string MoveOntoFile { get; init; }

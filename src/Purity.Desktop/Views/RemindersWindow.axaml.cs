@@ -1,5 +1,6 @@
 using System.Text;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
@@ -51,14 +52,24 @@ namespace Purity.Desktop.Views
 
 		private async void Connect(object? sender, RoutedEventArgs e) => Say(await _viewModel.ConnectAsync());
 
+		/// <summary>Enter in a sign-in field connects, rather than pressing OK and closing the window</summary>
+		private async void ConnectOnEnter(object? sender, KeyEventArgs e)
+		{
+			if (e.Key != Key.Enter)
+				return;
+
+			e.Handled = true;
+			Say(await _viewModel.ConnectAsync());
+		}
+
 		private void CancelConnecting(object? sender, RoutedEventArgs e) => _viewModel.CancelConnecting();
 
 		private async void SendTest(object? sender, RoutedEventArgs e) => Say(await _viewModel.SendTestAsync());
 
-		/// <summary>Deletes a calendar at Google, so it asks first</summary>
+		/// <summary>Deletes a calendar at the service, so it asks first</summary>
 		private async void Disconnect(object? sender, RoutedEventArgs e)
 		{
-			var answer = await _messages.AskAsync(new Question(Loc.T.RemindersDisconnectQuestion, Loc.T.RemindersDisconnectBody), new[] { Loc.T.RemindersDisconnectConfirm, Loc.T.Cancel });
+			var answer = await _messages.AskAsync(new Question(_viewModel.DisconnectQuestion, _viewModel.DisconnectBody), new[] { Loc.T.RemindersDisconnectConfirm, Loc.T.Cancel });
 			if (answer == 0)
 				Say(await _viewModel.DisconnectAsync());
 		}

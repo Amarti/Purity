@@ -109,7 +109,7 @@ namespace Purity.Desktop.Tests
 		{
 			WriteHistory();
 			new DesktopSettings { DataFilePath = _dataFile, Appearance = Appearance.Dark, GoogleCalendarId = "made-up" }.Save();
-			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue, reminderConnection: _ => calendar);
+			_viewModel = new MainWindowViewModel(_dialogs, null, new FixedClock(), _pending.Enqueue, reminderConnections: _ => ReminderConnections.Of(ReminderPlace.Google, calendar));
 			await _viewModel.StartAsync();
 			Assert.Empty(_dialogs.Shown);
 			return _viewModel;

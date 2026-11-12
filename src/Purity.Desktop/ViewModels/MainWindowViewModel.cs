@@ -23,9 +23,9 @@ namespace Purity.Desktop.ViewModels
 		/// <param name="clock">Sets "today" for a new period</param>
 		/// <param name="runOnUiThread">Queues work on the UI thread, for notices that arrive from a file watcher</param>
 		/// <param name="selfTest">The check of this machine's date calculations, run before anything else</param>
-		/// <param name="reminderConnection">Makes this device's connection to a calendar service</param>
+		/// <param name="reminderConnections">Makes this device's connections to the calendar services</param>
 		/// <param name="computerLanguage">The language this computer is set to, which a first start takes on with its dates</param>
-		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, Func<DesktopSettings, IReminderConnection>? reminderConnection = null, Func<ComputerLanguage>? computerLanguage = null)
+		public MainWindowViewModel(IAppDialogs dialogs, string? dataFileOverride, TimeProvider clock, Action<Func<Task>> runOnUiThread, Func<SelfTestResult>? selfTest = null, Func<DesktopSettings, ReminderConnections>? reminderConnections = null, Func<ComputerLanguage>? computerLanguage = null)
 		{
 			_dialogs = dialogs;
 			_dataFileOverride = dataFileOverride == null ? null : Path.GetFullPath(dataFileOverride, AppPaths.StartFolder);
@@ -41,7 +41,7 @@ namespace Purity.Desktop.ViewModels
 				_settings.Language = computer.Language;
 				_settings.Calendar = computer.Calendar;
 			}
-			_reminderConnection = reminderConnection?.Invoke(_settings);
+			_reminderConnections = reminderConnections?.Invoke(_settings);
 			Loc.Instance.Use(_settings.Language);
 			Loc.Instance.UseCalendar(_settings.Calendar, _settings.HebrewDatesInEnglish);
 		}
@@ -597,7 +597,7 @@ namespace Purity.Desktop.ViewModels
 		private readonly Action<Func<Task>> _runOnUiThread;
 		private readonly Func<SelfTestResult> _selfTest;
 		private readonly DesktopSettings _settings;
-		private readonly IReminderConnection? _reminderConnection;
+		private readonly ReminderConnections? _reminderConnections;
 		private string? _dataFileOverride;
 		private FileDataStore? _store;
 		private LocalVault? _vault;

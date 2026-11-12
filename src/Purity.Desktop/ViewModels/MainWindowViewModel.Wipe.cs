@@ -31,8 +31,9 @@ namespace Purity.Desktop.ViewModels
 
 			_reminderCancel.Cancel();
 			var left = new List<string>();
-			if (_reminderConnection is { IsAvailable: true, IsConnected: true })
-				await RemoveCalendarAsync(left);
+			foreach (var (place, connection) in _reminderConnections?.All ?? Enumerable.Empty<KeyValuePair<ReminderPlace, IReminderConnection>>())
+				if (connection is { IsAvailable: true, IsConnected: true })
+					await RemoveCalendarAsync(connection, place, left);
 
 			CloseDataFile();							// stops watching the file and leaves nothing to save
 			_dataFileOverride = null;
@@ -48,8 +49,11 @@ namespace Purity.Desktop.ViewModels
 			foreach (var copy in copies)
 				Remove(copy, left);
 			RemoveFolder(AppPaths.VaultsFolder, left);
-			Remove(AppPaths.GoogleSignInFile, left);			// signed out already; this catches one a build without Google left behind
-			Remove(AppPaths.GoogleSignInFile + ".tmp", left);
+			foreach (var file in AppPaths.SignInFiles)		// signed out already; this catches one a build without Google left behind
+			{
+				Remove(file, left);
+				Remove(file + ".tmp", left);
+			}
 
 			var done = left.Count == 0 ? new Question(T.WipedTitle, T.Wiped) : new Question(T.WipeLeftTitle, T.WipeLeft(Bullets(left)));
 			await _dialogs.AskAsync(done, T.ClosePurity);
@@ -58,11 +62,8 @@ namespace Purity.Desktop.ViewModels
 
 
 		/// <summary>The calendar holds the dates too. Without a connection it stays, but the sign-in is forgotten all the same.</summary>
-		private async Task RemoveCalendarAsync(List<string> left)
+		private static async Task RemoveCalendarAsync(IReminderConnection connection, ReminderPlace place, List<string> left)
 		{
-			if (_reminderConnection is not { } connection)
-				return;
-
 			try
 			{
 				await connection.DisconnectAsync(CancellationToken.None);
@@ -70,7 +71,12 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is CalendarServiceException or HttpRequestException or OperationCanceledException)
 			{
-				left.Add(T.WipeCalendarLeft);
+				left.Add(place switch
+				{
+					ReminderPlace.ICloud => T.WipeICloudCalendarLeft,
+					ReminderPlace.CalDav => T.WipeCalDavCalendarLeft,
+					_ => T.WipeCalendarLeft,
+				});
 			}
 
 			try
@@ -79,7 +85,7 @@ namespace Purity.Desktop.ViewModels
 			}
 			catch (Exception e) when (e is HttpRequestException or OperationCanceledException)
 			{
-				// forgotten here already; only telling Google failed
+				// forgotten here already; only telling the service failed
 			}
 		}
 
@@ -88,6 +94,8 @@ namespace Purity.Desktop.ViewModels
 		{
 			_settings.DataFilePath = string.Empty;
 			_settings.GoogleCalendarId = null;
+			_settings.ICloudCalendar = null;
+			_settings.CalDavCalendar = null;
 			try
 			{
 				_settings.Save();
