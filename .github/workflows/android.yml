@@ -1,0 +1,43 @@
+name: Android app
+
+# Builds the Android app in Release, as a phone gets it, so a change to the shared UI that breaks it
+# shows here. It runs no phone or emulator: the shared phone and tablet layouts are tested with the
+# desktop's tests. Nothing is uploaded, and the build is signed with a key made for the run.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DOTNET_NOLOGO: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: microsoft
+          java-version: 21
+
+      # The runner has the Android SDK already; .NET needs its Android workload
+      - name: Install the Android workload
+        run: dotnet workload install android
+
+      # The Android platform the app builds against, if the runner's SDK hasn't got it yet
+      - name: Install what the build needs from the Android SDK
+        run: dotnet build src/Purity.Android/Purity.Android.csproj -t:InstallAndroidDependencies -p:AndroidSdkDirectory="$ANDROID_HOME" -p:AcceptAndroidSDKLicenses=True
+
+      - name: Build
+        run: dotnet build src/Purity.Android/Purity.Android.csproj -c Release -p:AndroidSdkDirectory="$ANDROID_HOME"

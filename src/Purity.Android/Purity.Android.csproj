@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The Android app for phones and tablets: its start, its activity, the phone's secure store, and
+    its icon. Everything else is in Purity.UI, which the desktop app shares. Phones stay upright and
+    get the compact layout; tablets turn either way and get the desktop's. The history is a file the
+    person picks in Android's picker, and reminders go to Google or another CalDAV server.
+  -->
+  <Import Project="..\Version.props" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Purity.Android</RootNamespace>
+    <AssemblyName>Purity.Android</AssemblyName>
+    <ApplicationTitle>Purity</ApplicationTitle>
+    <ApplicationId>io.github.amarti.purity</ApplicationId>
+    <ApplicationDisplayVersion>$(Version)</ApplicationDisplayVersion>
+    <!-- Android needs a number that only grows: 2.4.4 is 20404 -->
+    <ApplicationVersion>$([MSBuild]::Add($([MSBuild]::Add($([MSBuild]::Multiply($([System.Version]::Parse('$(Version)').Major), 10000)), $([MSBuild]::Multiply($([System.Version]::Parse('$(Version)').Minor), 100)))), $([System.Version]::Parse('$(Version)').Build)))</ApplicationVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <!-- As on the desktop: no machine setting can change a date's text -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The same version as Purity.UI's Avalonia -->
+    <PackageReference Include="Avalonia.Android" Version="12.1.5" />
+    <!-- Android's own Google sign-in, for reminders in Google Calendar -->
+    <PackageReference Include="Xamarin.GooglePlayServices.Auth" Version="122.0.0" />
+    <!-- Brought in by both of those at versions that don't agree; this one fits both -->
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.11.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Purity.UI\Purity.UI.csproj" />
+  </ItemGroup>
+
+</Project>

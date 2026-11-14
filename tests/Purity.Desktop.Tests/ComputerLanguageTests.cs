@@ -1,4 +1,4 @@
-using Purity.Desktop.Localization;
+using Purity.UI.Localization;
 using Xunit;
 
 

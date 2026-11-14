@@ -30,10 +30,30 @@ namespace Purity.Reminders.Google
 
 
 	/// <summary>
+	/// What a Google calendar needs from a sign-in: a token for each call, and a way to send it. A
+	/// computer signs in in the browser, with <see cref="GoogleAccount"/>; Android with its own
+	/// authorization, which hands out tokens itself.
+	/// </summary>
+	public interface IGoogleSignIn
+	{
+		GoogleEndpoints Endpoints { get; }
+
+		/// <summary>A token that's still good, renewed when it isn't</summary>
+		Task<string> AccessTokenAsync(CancellationToken cancellation);
+
+		/// <summary>Google turned the token down, so the next call gets a new one</summary>
+		void ForgetAccessToken();
+
+		/// <summary>Sends a call, and reports not reaching the service the same way everywhere</summary>
+		Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellation);
+	}
+
+
+	/// <summary>
 	/// The sign-in to one Google account. The person signs in on Google's own page in their browser,
 	/// so the app only ever holds a token, and it can only write to calendars the app itself made.
 	/// </summary>
-	public sealed class GoogleAccount(HttpClient http, GoogleClient client, GoogleEndpoints endpoints, ISecretStore secrets, TimeProvider clock)
+	public sealed class GoogleAccount(HttpClient http, GoogleClient client, GoogleEndpoints endpoints, ISecretStore secrets, TimeProvider clock) : IGoogleSignIn
 	{
 		/// <summary>
 		/// The only permissions asked for: calendars this app made, and the list of calendars, which
@@ -146,7 +166,7 @@ namespace Purity.Reminders.Google
 		}
 
 		/// <summary>Sends a call, and reports not reaching the service the same way everywhere</summary>
-		internal async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellation)
+		public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellation)
 		{
 			try
 			{

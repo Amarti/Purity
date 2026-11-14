@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only what isn't in the code's attributes. The internet is for reminders, which go to Google or a CalDAV
+  server; the history itself goes only where the person picks it in Android's picker.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application />
+</manifest>

@@ -5,7 +5,7 @@
 //   dotnet run tools/build-apps.cs                        # all three
 //   dotnet run tools/build-apps.cs -- windows mac         # or any of: windows mac linux
 //
-// Writes out/<version>/. The version comes from <Version> in src/Purity.Desktop/Purity.Desktop.csproj.
+// Writes out/<version>/. The version comes from <Version> in src/Version.props.
 // The Linux packages are made by dpkg-deb, which only Linux has: on Windows that step runs in WSL,
 // and a Mac can't build them.
 //
@@ -25,7 +25,7 @@ using System.Text.RegularExpressions;
 
 var root = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ThisFile())!, ".."));
 var project = Path.Combine(root, "src", "Purity.Desktop", "Purity.Desktop.csproj");
-var version = Regex.Match(File.ReadAllText(project), "<Version>(.*?)</Version>").Groups[1].Value;
+var version = Regex.Match(File.ReadAllText(Path.Combine(root, "src", "Version.props")), "<Version>(.*?)</Version>").Groups[1].Value;
 var output = Path.Combine(root, "out", version);
 var stage = Path.Combine(output, ".stage");
 

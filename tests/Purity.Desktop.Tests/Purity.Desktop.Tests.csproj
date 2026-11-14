@@ -26,4 +26,12 @@
     <ProjectReference Include="..\Purity.CalDavStandIn\Purity.CalDavStandIn.csproj" />
   </ItemGroup>
 
+  <!-- What the desktop app shares with the Android app, which is most of it -->
+  <ItemGroup>
+    <Using Include="Purity.UI" />
+    <Using Include="Purity.UI.Localization" />
+    <Using Include="Purity.UI.ViewModels" />
+    <Using Include="Purity.UI.Views" />
+  </ItemGroup>
+
 </Project>

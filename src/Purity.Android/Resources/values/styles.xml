@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Purity draws everything itself, so Android's theme only gives the window its background and keeps its own bars out of the way -->
+<resources>
+    <style name="Purity.Theme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/purity_background</item>
+    </style>
+</resources>

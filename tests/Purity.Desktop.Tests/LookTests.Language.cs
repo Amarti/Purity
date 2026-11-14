@@ -4,8 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -101,11 +101,11 @@ namespace Purity.Desktop.Tests
 		private static RadioButton Flag(Window settings, string name) =>
 			settings.GetVisualDescendants().OfType<RadioButton>().Single(el => AutomationProperties.GetName(el) == name);
 
-		private static async Task<(SettingsWindow Settings, Task Closed)> OpenSettingsAsync(MainWindow window)
+		private static async Task<(DialogWindow Settings, Task Closed)> OpenSettingsAsync(MainWindow window)
 		{
 			var closed = ((MainWindowViewModel)window.DataContext!).OpenSettingsCommand.ExecuteAsync(null);
 			await Ui.WaitUntil(() => window.OwnedWindows.Count > 0);
-			var settings = (SettingsWindow)window.OwnedWindows[0];
+			var settings = (DialogWindow)window.OwnedWindows[0];
 			await Ui.WaitUntil(() => settings.GetVisualDescendants().OfType<RadioButton>().Any(el => el.Bounds.Width > 0));
 			return (settings, closed);
 		}

@@ -1,0 +1,12 @@
+<Project>
+
+  <!--
+    The one place the app's version is set. The desktop app, the Android app and the shared UI all
+    import this file, and the window title, the Mac bundle, the Linux package and the Android
+    package all take the version from here.
+  -->
+  <PropertyGroup>
+    <Version>2.4.4</Version>
+  </PropertyGroup>
+
+</Project>

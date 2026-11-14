@@ -65,8 +65,8 @@ namespace Purity.Desktop.Tests
 
 			var window = new MainWindow(new StartOptions(dataFile));
 			window.Show();
-			var viewModel = (ViewModels.MainWindowViewModel)window.DataContext!;
-			var periods = window.FindControl<ListBox>("Periods")!;
+			var viewModel = (MainWindowViewModel)window.DataContext!;
+			var periods = window.FindNamed<ListBox>("Periods")!;
 			await Ui.WaitUntil(() => viewModel.Periods.Count > 0 && periods.GetVisualDescendants().OfType<DateField>().Any());
 			foreach (var period in viewModel.Periods)
 				period.IsFolded = false;

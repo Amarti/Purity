@@ -8,7 +8,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Input;
 using Purity.Core;
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -140,7 +140,7 @@ namespace Purity.Desktop.Tests
 		public Task ThePeriodsKeepTheirWidthAndStayInTheMiddleOfAWiderWindow() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();
-			var periods = window.FindControl<ListBox>("Periods")!;
+			var periods = window.FindNamed<ListBox>("Periods")!;
 			double Left() => periods.TranslatePoint(default, window)!.Value.X;
 			void Resize(double width)
 			{
@@ -212,7 +212,7 @@ namespace Purity.Desktop.Tests
 		public Task TheSettingsOfferTheSystemsChoiceLightAndDark() => Ui.Run(() =>
 		{
 			var settings = new SettingsWindowViewModel("pureData.json", null, appearance: Appearance.Dark);
-			var window = new SettingsWindow(settings);
+			var window = DialogWindow.For(new SettingsView(settings));
 			window.Show();
 			var parts = AppearancePartsOf(window);
 
@@ -337,7 +337,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var periods = window.FindControl<ListBox>("Periods")!;
+			var periods = window.FindNamed<ListBox>("Periods")!;
 			var (first, second) = (viewModel.Periods[0], viewModel.Periods[1]);
 			second.IsFolded = false;
 			await Ui.WaitUntil(() => SwitchCount(window, second) == 2);
@@ -420,8 +420,8 @@ namespace Purity.Desktop.Tests
 			App.Apply(Appearance.Light);
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var periods = window.FindControl<ListBox>("Periods")!;
-			var strip = window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip"));
+			var periods = window.FindNamed<ListBox>("Periods")!;
+			var strip = window.FindNamed<EventChip>("NextStrip")!;
 			var type = strip.GetVisualDescendants().OfType<TextBlock>().First(el => el.Text == viewModel.NextEvent!.TypeRepr);
 
 			Assert.True(strip.IsVisible);
@@ -452,8 +452,8 @@ namespace Purity.Desktop.Tests
 		public Task TheNextStripsDateLinesUpWithTheDatesInTheList() => Ui.Run(async () =>
 		{
 			var window = await OpenPeriodsAsync();
-			var periods = window.FindControl<ListBox>("Periods")!;
-			var strip = window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip"));
+			var periods = window.FindNamed<ListBox>("Periods")!;
+			var strip = window.FindNamed<EventChip>("NextStrip")!;
 			var cells = ((Grid)strip.Child!).Children;
 			var row = periods.GetVisualDescendants().OfType<StackPanel>().First(el => el.Classes.Contains("EventLine"));
 			var texts = row.Children.OfType<TextBlock>().ToArray();
@@ -476,7 +476,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var strip = window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip"));
+			var strip = window.FindNamed<EventChip>("NextStrip")!;
 			Assert.True(strip.IsVisible);
 
 			viewModel.AddPeriodCommand.Execute(null);
@@ -502,7 +502,7 @@ namespace Purity.Desktop.Tests
 			await Ui.WaitUntil(() => Lines().Any());
 
 			Assert.All(Lines(), el => Assert.Equal(0.4, el.Opacity));
-			Assert.False(window.GetVisualDescendants().OfType<EventChip>().Single(el => el.Classes.Contains("Strip")).IsVisible);
+			Assert.False(window.FindNamed<EventChip>("NextStrip")!.IsVisible);
 			Assert.All(window.GetVisualDescendants().OfType<Grid>().Where(el => el.Classes.Contains("TodayLine")), el => Assert.False(el.IsVisible));
 
 			window.Close();
@@ -514,7 +514,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var periods = window.FindControl<ListBox>("Periods")!;
+			var periods = window.FindNamed<ListBox>("Periods")!;
 			var count = periods.ItemCount;
 			viewModel.AddPeriodCommand.Execute(null);
 			var open = viewModel.Periods[0];
@@ -561,7 +561,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var periods = window.FindControl<ListBox>("Periods")!;
+			var periods = window.FindNamed<ListBox>("Periods")!;
 			double Top(Visual visual) => visual.TranslatePoint(default, window)!.Value.Y;
 
 			var buttons = TopButtons(window);

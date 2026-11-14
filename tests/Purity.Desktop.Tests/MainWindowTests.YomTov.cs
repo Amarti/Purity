@@ -1,5 +1,5 @@
 using Purity.Core;
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Purity.Reminders;
 using Xunit;
 

@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using Purity.Desktop.Localization;
+using Purity.UI.Localization;
 using Xunit;
 
 

@@ -1,6 +1,6 @@
 using System.Reflection;
 using Avalonia.Threading;
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 

@@ -2,8 +2,8 @@ using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -20,7 +20,7 @@ namespace Purity.Desktop.Tests
 			var period = ((MainWindowViewModel)window.DataContext!).Periods[0];
 			Assert.True(period.IsClosed);
 			var field = window.GetVisualDescendants().OfType<DateField>().Single(el => el.DataContext == period && AutomationProperties.GetName(el) == UiText.English.To);
-			var layer = window.FindControl<MessageLayer>("Messages")!;
+			var layer = window.FindNamed<MessageLayer>("Messages")!;
 			var (shown, day) = (field.Text, field.SelectedDay!.Value);
 
 			field.SetCurrentValue(DateField.SelectedDayProperty, day.AddDays(2));		// as picking a day in its month does
@@ -48,7 +48,7 @@ namespace Purity.Desktop.Tests
 			var period = ((MainWindowViewModel)window.DataContext!).Periods[0];
 			var (_, end) = SwitchesOf(window, period);
 			var (day, night) = Halves(end);
-			var layer = window.FindControl<MessageLayer>("Messages")!;
+			var layer = window.FindNamed<MessageLayer>("Messages")!;
 
 			Press(night, window);
 			Assert.True(layer.IsAsking);
@@ -67,6 +67,6 @@ namespace Purity.Desktop.Tests
 
 
 		/// <summary>Says Change to the question a closed period's new date brings up, in the language on show</summary>
-		private static void ConfirmChange(Window window) => AnswerWith(Loc.T.Change, window.FindControl<MessageLayer>("Messages")!);
+		private static void ConfirmChange(Window window) => AnswerWith(Loc.T.Change, window.FindNamed<MessageLayer>("Messages")!);
 	}
 }

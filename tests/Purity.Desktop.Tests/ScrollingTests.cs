@@ -8,7 +8,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Purity.Core;
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -235,7 +235,7 @@ namespace Purity.Desktop.Tests
 			var window = new MainWindow(new StartOptions(dataFile));
 			window.Show();
 			var viewModel = (MainWindowViewModel)window.DataContext!;
-			var periods = window.FindControl<ListBox>("Periods")!;
+			var periods = window.FindNamed<ListBox>("Periods")!;
 			await Ui.WaitUntil(() => viewModel.Periods.Count == periodCount && periods.GetVisualDescendants().OfType<DateField>().Any());
 			if (!folded)
 				foreach (var period in viewModel.Periods)

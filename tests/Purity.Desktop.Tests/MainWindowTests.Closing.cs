@@ -1,6 +1,6 @@
 using System.Text;
 using Purity.Core;
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Xunit;
 
 
@@ -129,7 +129,7 @@ namespace Purity.Desktop.Tests
 
 			await window.AddOrClosePeriodCommand.ExecuteAsync(null);
 
-			Assert.Contains(Localization.UiText.English.OddBeforeNewest(window.Periods[0].BeginText), Assert.Single(_dialogs.Shown));
+			Assert.Contains(UiText.English.OddBeforeNewest(window.Periods[0].BeginText), Assert.Single(_dialogs.Shown));
 			Assert.True(open.IsClosed);
 			Assert.False(window.HasOpenPeriod);
 		}

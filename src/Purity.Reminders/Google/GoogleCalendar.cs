@@ -24,7 +24,7 @@ namespace Purity.Reminders.Google
 		/// <param name="calendarName">The name a new calendar gets</param>
 		/// <param name="zone">The local time zone, which turns a local time into a moment</param>
 		/// <param name="wait">Waits before trying again</param>
-		public GoogleCalendar(GoogleAccount account, Func<string?> getCalendarId, Action<string?> setCalendarId, Func<string> calendarName, TimeZoneInfo zone, Func<TimeSpan, CancellationToken, Task>? wait = null)
+		public GoogleCalendar(IGoogleSignIn account, Func<string?> getCalendarId, Action<string?> setCalendarId, Func<string> calendarName, TimeZoneInfo zone, Func<TimeSpan, CancellationToken, Task>? wait = null)
 		{
 			_account = account;
 			_getCalendarId = getCalendarId;
@@ -271,7 +271,7 @@ namespace Purity.Reminders.Google
 		private const int Retries = 3;
 		private static readonly TimeSpan Length = TimeSpan.FromMinutes(15);
 
-		private readonly GoogleAccount _account;
+		private readonly IGoogleSignIn _account;
 		private readonly Func<string?> _getCalendarId;
 		private readonly Action<string?> _setCalendarId;
 		private readonly Func<string> _calendarName;

@@ -97,7 +97,7 @@ namespace Purity.Desktop.Tests
 
 
 		/// <summary>Opens the history and accepts one more period, which keeps the version before it as a backup</summary>
-		private async Task<ViewModels.MainWindowViewModel> OpenWithOneChangeAsync()
+		private async Task<MainWindowViewModel> OpenWithOneChangeAsync()
 		{
 			WriteHistory();
 			var window = await OpenAsync();

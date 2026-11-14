@@ -1,0 +1,414 @@
+<!--
+  Controls drawn the way WPF draws them on Windows 10 and 11 (its Aero2 theme), with the same sizes,
+  so the app matches the WPF app it replaces. Everything else comes from the Simple theme.
+  Changes the owner approved for 2.2.0: rounded corners and lighter buttons (T6), and colors from
+  Palette.axaml, so they have a dark version too (T7). For 2.2.1: the Day | Night switch (T3b).
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:views="using:Purity.UI.Views" xmlns:loc="using:Purity.UI.Localization">
+
+    <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundBrush}"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  RecognizesAccessKey="True"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonHoverBorderBrush}"/>
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonPressedBorderBrush}"/>
+        </Style>
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
+
+        <!-- The button that confirms a window: filled, so it stands out from the ones beside it -->
+        <Style Selector="^.Confirm">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.Confirm /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="^.Confirm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Confirm:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ConfirmPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ConfirmPressedBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Confirm:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
+
+        <!-- A button that removes something for good: filled red, so it's never pressed by mistake for an ordinary one -->
+        <Style Selector="^.Danger">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.Danger /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="^.Danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerPressedBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^.Danger:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForegroundBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
+        <Setter Property="Background" Value="{DynamicResource CheckBoxBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}"/>
+        <Setter Property="Padding" Value="4,-1,0,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,*" Background="Transparent">
+                    <Border Name="box" Width="13" Height="13" Margin="1" CornerRadius="3"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <Path Name="mark" Margin="1" Stretch="Uniform" Fill="{DynamicResource CheckBoxMarkBrush}" IsVisible="False"
+                              Data="F1 M 9.97498,1.22334L 4.6983,9.09834L 4.52164,9.09834L 0,5.19331L 1.27664,3.52165L 4.255,6.08833L 8.33331,1.52588e-005L 9.97498,1.22334 Z"/>
+                    </Border>
+                    <ContentPresenter Name="PART_ContentPresenter" Grid.Column="1"
+                                      Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      RecognizesAccessKey="True"/>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:checked /template/ Path#mark">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^:pointerover /template/ Border#box">
+            <Setter Property="Background" Value="{DynamicResource CheckBoxHoverBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxHoverBorderBrush}"/>
+        </Style>
+        <Style Selector="^:pressed /template/ Border#box">
+            <Setter Property="Background" Value="{DynamicResource CheckBoxPressedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxPressedBorderBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type ListBoxItem}" TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="4,1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="{TemplateBinding CornerRadius}"
+                                  Padding="{TemplateBinding Padding}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#1F26A0DA"/>
+            <Setter Property="BorderBrush" Value="#A826A0DA"/>
+        </Style>
+        <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ItemSelectedBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ItemSelectedBorderBrush}"/>
+        </Style>
+        <Style Selector="^:selected:focus-within /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#3D26A0DA"/>
+            <Setter Property="BorderBrush" Value="#FF26A0DA"/>
+        </Style>
+    </ControlTheme>
+
+    <!-- A period in the list (T6): its own gap above and below, so the highlight under the pointer hugs the rounded card, equally on every side -->
+    <ControlTheme x:Key="PeriodItemTheme" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+    </ControlTheme>
+
+    <!-- A button that is only its content: a folded period's line, and the arrow that folds one (T2) -->
+    <ControlTheme x:Key="PlainButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Background="{TemplateBinding Background}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- One half of a switch: Day | Night (T3b), or the language in Settings -->
+    <ControlTheme x:Key="SwitchHalfTheme" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource SwitchOffForegroundBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <!-- The plain panel makes the whole half pressable, its rounded outer corners included -->
+                <Panel Background="Transparent">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Background="{TemplateBinding Background}"
+                                      CornerRadius="{TemplateBinding CornerRadius}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalContentAlignment="Center"
+                                      VerticalContentAlignment="Center"/>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}"/>
+        </Style>
+        <Style Selector="^:checked">
+            <Setter Property="Background" Value="{DynamicResource SwitchOnBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SwitchOnForegroundBrush}"/>
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type views:DayNightSwitch}" TargetType="views:DayNightSwitch">
+        <Setter Property="BorderBrush" Value="{DynamicResource SwitchBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Width" Value="126"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid ColumnDefinitions="*,*">
+                        <RadioButton Name="PART_Day" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4"
+                                     ToolTip.Tip="{Binding Text.AfterDawn, Source={x:Static loc:Loc.Instance}}" AutomationProperties.Name="{Binding Text.Day, Source={x:Static loc:Loc.Instance}}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDawnIconDrawingImage}"/>
+                                <TextBlock Text="{Binding Text.Day, Source={x:Static loc:Loc.Instance}}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Name="PART_Night" Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0"
+                                     ToolTip.Tip="{Binding Text.AfterDusk, Source={x:Static loc:Loc.Instance}}" AutomationProperties.Name="{Binding Text.Night, Source={x:Static loc:Loc.Instance}}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Image Height="15" Width="15" VerticalAlignment="Center" Source="{DynamicResource AfterDuskIconDrawingImage}"/>
+                                <TextBlock Text="{Binding Text.Night, Source={x:Static loc:Loc.Instance}}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- The small calendar page showing 15, on the date field -->
+    <ControlTemplate x:Key="CalendarGlyphTemplate">
+                                    <Grid Width="17" Height="17" Background="Transparent">
+                                        <Border Background="{DynamicResource CalendarGlyphPageBrush}" BorderBrush="{DynamicResource CalendarGlyphBorderBrush}" BorderThickness="1">
+                                            <Grid RowDefinitions="4,*">
+                                                <Border Background="{DynamicResource CalendarGlyphTopBrush}"/>
+                                                <Ellipse Width="2" Height="2" Fill="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Row="1" Text="15" FontSize="9" Foreground="{DynamicResource CalendarGlyphTextBrush}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </ControlTemplate>
+
+    <!-- WPF's date field: a text box and a small calendar page showing 15 -->
+    <!-- The month grid of a date field, in either calendar -->
+    <ControlTheme x:Key="MonthArrowTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Background="{TemplateBinding Background}" Content="{TemplateBinding Content}"
+                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource HighlightBrush}"/>
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.3"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="MonthDayButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel Background="Transparent">
+                    <Rectangle Name="TodayBackground" Fill="{DynamicResource HighlightBrush}" IsVisible="False"/>
+                    <Rectangle Name="SelectedBackground" Fill="{TemplateBinding Background}" Opacity="0.75" IsVisible="False"/>
+                    <Rectangle Name="Background" Fill="{TemplateBinding Background}" Opacity="0.5" IsVisible="False"/>
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                                      FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Rectangle Name="FocusVisual" Stroke="{DynamicResource HighlightBrush}" StrokeThickness="1" IsHitTestVisible="False" IsVisible="False"/>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ Rectangle#Background">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^:focus-visible /template/ Rectangle#FocusVisual">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Selected /template/ Rectangle#SelectedBackground">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Today /template/ Rectangle#TodayBackground">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="^.Today /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeControlLowBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type views:MonthView}" TargetType="views:MonthView">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Margin="0,2" Background="{DynamicResource ThemeBackgroundBrush}" BorderBrush="{DynamicResource ThemeBorderHighBrush}"
+                        BorderThickness="{DynamicResource ThemeBorderThickness}">
+                    <Grid Margin="2" RowDefinitions="Auto,Auto">
+                        <Border Height="22" Background="{DynamicResource ThemeAccentBrush2}">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                <Button Name="PART_PreviousYear" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M7,0 L1,5 L7,10 Z M13,0 L7,5 L13,10 Z"/>
+                                </Button>
+                                <Button Name="PART_Previous" Grid.Column="1" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M6,0 L0,5 L6,10 Z"/>
+                                </Button>
+                                <TextBlock Name="PART_Title" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="Bold"/>
+                                <Button Name="PART_Next" Grid.Column="3" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z"/>
+                                </Button>
+                                <Button Name="PART_NextYear" Grid.Column="4" Theme="{StaticResource MonthArrowTheme}">
+                                    <Path Fill="{Binding $parent[Button].Foreground}" Data="M0,0 L6,5 L0,10 Z M6,0 L12,5 L6,10 Z"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <Grid Name="PART_Days" Grid.Row="1" Margin="6,0,6,6" ColumnDefinitions="28,28,28,28,28,28,28" RowDefinitions="Auto,20,20,20,20,20,20">
+                            <Grid.Styles>
+                                <!-- Only the weekday row: a looser selector would reach the dates inside the day buttons too -->
+                                <Style Selector="TextBlock.Weekday">
+                                    <Setter Property="Margin" Value="0,4"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="FontSize" Value="9.5"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                            </Grid.Styles>
+                            <!-- The weekday row sits on a band, so its letters can't be taken for the first week's dates -->
+                            <Border Grid.ColumnSpan="7" Margin="-6,0" Background="{DynamicResource SwitchOnBackgroundBrush}"/>
+                            <TextBlock Classes="Weekday" Grid.Column="0"/>
+                            <TextBlock Classes="Weekday" Grid.Column="1"/>
+                            <TextBlock Classes="Weekday" Grid.Column="2"/>
+                            <TextBlock Classes="Weekday" Grid.Column="3"/>
+                            <TextBlock Classes="Weekday" Grid.Column="4"/>
+                            <TextBlock Classes="Weekday" Grid.Column="5"/>
+                            <TextBlock Classes="Weekday" Grid.Column="6"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <!-- A date: the whole of the field opens the month grid -->
+    <ControlTheme x:Key="{x:Type views:DateField}" TargetType="views:DateField">
+        <Setter Property="Background" Value="{DynamicResource FieldBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DateFieldBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="4,0,2,0"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Panel>
+                        <Button Name="PART_Button" Theme="{StaticResource PlainButtonTheme}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Margin="{TemplateBinding Padding}" VerticalAlignment="Center" Text="{TemplateBinding Text}"/>
+                                <ContentControl Grid.Column="1" Margin="2,0" VerticalAlignment="Center" Template="{StaticResource CalendarGlyphTemplate}"/>
+                            </Grid>
+                        </Button>
+                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}" IsLightDismissEnabled="True">
+                            <views:MonthView Name="PART_Month"/>
+                        </Popup>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+
+</ResourceDictionary>

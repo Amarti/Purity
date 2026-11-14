@@ -7,8 +7,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 

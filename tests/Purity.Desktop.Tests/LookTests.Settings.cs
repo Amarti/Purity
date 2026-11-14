@@ -3,8 +3,8 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -57,7 +57,7 @@ namespace Purity.Desktop.Tests
 		{
 			var window = await OpenPeriodsAsync();
 			var (settings, closed) = await OpenSettingsAsync(window);
-			var layer = settings.FindControl<MessageLayer>("Messages")!;
+			var layer = settings.FindNamed<MessageLayer>("Messages")!;
 
 			layer.Tell("The report couldn't be written", MessageKind.Problem);
 			Dispatcher.UIThread.RunJobs();

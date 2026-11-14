@@ -38,18 +38,21 @@ namespace Purity.Desktop.Tests
 		});
 
 		/// <summary>
-		/// The version is set in the project file alone. The packaging templates carry a placeholder
-		/// the build fills in, so no second copy can fall behind.
+		/// The version is set in src/Version.props alone, which every app imports. The packaging
+		/// templates carry a placeholder the build fills in, so no second copy can fall behind.
 		/// </summary>
 		[Fact]
-		public void TheVersionIsSetOnlyInTheProjectFile()
+		public void TheVersionIsSetOnlyInVersionProps()
 		{
 			var desktop = FindSource("src/Purity.Desktop");
 			if (desktop == null)
 				Assert.Skip("The source isn't here, as in the platform check kit");
 
-			var project = File.ReadAllText(Path.Combine(desktop, "Purity.Desktop.csproj"));
-			Assert.Equal(AppVersion.Number, Regex.Match(project, "<Version>(.*?)</Version>").Groups[1].Value);
+			var source = Path.GetDirectoryName(desktop)!;
+			var props = File.ReadAllText(Path.Combine(source, "Version.props"));
+			Assert.Equal(AppVersion.Number, Regex.Match(props, "<Version>(.*?)</Version>").Groups[1].Value);
+			foreach (var project in Directory.EnumerateFiles(source, "*.csproj", SearchOption.AllDirectories))
+				Assert.DoesNotContain("<Version>", File.ReadAllText(project));
 			foreach (var template in new[] { "Packaging/macOS/Info.plist", "Packaging/linux/control" })
 			{
 				var text = File.ReadAllText(Path.Combine(desktop, template));

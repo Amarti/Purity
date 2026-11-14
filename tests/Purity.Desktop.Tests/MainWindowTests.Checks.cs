@@ -1,7 +1,7 @@
 using System.Text;
 using Purity.Core;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Xunit;
 
 

@@ -49,7 +49,7 @@ if [ "${1:-}" = --deb ]; then
 	exit
 fi
 
-version=$(tr -d '\r' < "$root/src/Purity.Desktop/Purity.Desktop.csproj" | sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' | head -1)
+version=$(tr -d '\r' < "$root/src/Version.props" | sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' | head -1)
 out="$root/out/$version"
 if [ $# -gt 0 ]; then rids=("$@"); else rids=(linux-x64 linux-arm64); fi
 mkdir -p "$out"

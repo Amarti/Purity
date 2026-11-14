@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using Purity.Desktop.Localization;
+using Purity.UI.Localization;
 
 
 namespace Purity.Desktop.Tests

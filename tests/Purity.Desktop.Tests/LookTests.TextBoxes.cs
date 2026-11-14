@@ -5,8 +5,8 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -58,10 +58,11 @@ namespace Purity.Desktop.Tests
 		{
 			Loc.Instance.Use(Language.Hebrew);
 			var settings = new SettingsWindowViewModel("/Users/someone/Dropbox/pureData.json", null);
-			var window = new SettingsWindow(settings);
+			var window = DialogWindow.For(new SettingsView(settings));
 			window.Show();
 			Drawn();
-			var box = window.GetVisualDescendants().OfType<TextBox>().Single(el => el.Text == settings.DataFilePath);
+			var box = window.FindNamed<TextBox>("DataFileBox")!;
+			Assert.Equal(settings.DataFilePath, box.Text);
 
 			Assert.Equal(FlowDirection.RightToLeft, window.FlowDirection);
 			Assert.Equal(FlowDirection.LeftToRight, box.FlowDirection);

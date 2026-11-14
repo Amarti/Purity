@@ -7,8 +7,8 @@ using Avalonia.Threading;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Purity.Core;
-using Purity.Desktop.Localization;
-using Purity.Desktop.ViewModels;
+using Purity.UI.Localization;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
@@ -28,7 +28,7 @@ namespace Purity.Desktop.Tests
 			Press(open, settings);
 			await Ui.WaitUntil(() => settings.OwnedWindows.Count > 0);
 
-			var reminders = Assert.IsType<RemindersWindow>(settings.OwnedWindows[0]);
+			var reminders = Assert.IsType<DialogWindow>(settings.OwnedWindows[0]);
 			Assert.Equal(UiText.English.RemindersTitle, reminders.Title);
 			Assert.True(settings.IsVisible);
 			reminders.Close();
@@ -56,7 +56,7 @@ namespace Purity.Desktop.Tests
 		public Task ChoosingGoogleSwapsTheFilePartForTheConnectionPart() => Ui.Run(() =>
 		{
 			var (window, reminders) = ShowReminders(new MemoryConnection { IsConnected = false });
-			var google = window.FindControl<StackPanel>("ServicePanel")!;
+			var google = window.FindNamed<StackPanel>("ServicePanel")!;
 			Assert.False(google.IsVisible);
 			Assert.True(PlacesOf(window)[0].IsEnabled);
 
@@ -64,7 +64,7 @@ namespace Purity.Desktop.Tests
 			Dispatcher.UIThread.RunJobs();
 
 			Assert.True(google.IsVisible);
-			Assert.True(window.FindControl<Button>("ConnectButton")!.IsVisible);
+			Assert.True(window.FindNamed<Button>("ConnectButton")!.IsVisible);
 			Assert.DoesNotContain(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersSave && el.IsEffectivelyVisible);
 			window.Close();
 		});
@@ -73,8 +73,8 @@ namespace Purity.Desktop.Tests
 		public Task ChoosingICloudAsksForTheAppleAccountAndAnAppSpecificPassword() => Ui.Run(() =>
 		{
 			var (window, reminders) = ShowReminders(new MemoryConnection { IsConnected = false, TakesPassword = true }, ReminderPlace.ICloud);
-			var fields = window.FindControl<StackPanel>("SignInFields")!;
-			var connect = window.FindControl<Button>("ConnectButton")!;
+			var fields = window.FindNamed<StackPanel>("SignInFields")!;
+			var connect = window.FindNamed<Button>("ConnectButton")!;
 			Assert.True(PlacesOf(window)[1].IsEnabled);
 
 			reminders.IsICloud = true;
@@ -85,13 +85,13 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(new[] { "https://account.apple.com/", "https://support.apple.com/en-il/102654" }, links.Select(el => el.NavigateUri?.AbsoluteUri));
 			Assert.Equal(new[] { "Apple Account manager", "this page" }, links.Select(AutomationProperties.GetName));
 			Assert.All(links, el => Assert.True(el.IsEffectivelyVisible));
-			var intro = window.FindControl<LinkText>("ServiceIntro")!;
+			var intro = window.FindNamed<LinkText>("ServiceIntro")!;
 			Assert.Single(intro.TextLayout.TextLines.Select(el => Math.Round(el.Height, 1)).Distinct());	// a line with a link is no taller than the rest
 			var labels = fields.GetVisualDescendants().OfType<TextBlock>().Where(el => el.IsEffectivelyVisible && el.FindAncestorOfType<TextBox>() == null).Select(el => el.Text).ToArray();
 			Assert.Contains(UiText.English.RemindersAppleAccount, labels);
 			Assert.Contains(UiText.English.RemindersAppSpecificPassword, labels);
 			Assert.DoesNotContain(UiText.English.RemindersServer, labels);		// iCloud's address is known
-			Assert.Equal('•', window.FindControl<TextBox>("PasswordBox")!.PasswordChar);
+			Assert.Equal('•', window.FindNamed<TextBox>("PasswordBox")!.PasswordChar);
 			Assert.Equal(UiText.English.RemindersConnectICloud, connect.Content);
 			Assert.False(connect.IsEnabled);
 
@@ -148,16 +148,16 @@ namespace Purity.Desktop.Tests
 			reminders.SignInPassword = "made up";
 			Dispatcher.UIThread.RunJobs();
 
-			var fields = window.FindControl<StackPanel>("SignInFields")!;
+			var fields = window.FindNamed<StackPanel>("SignInFields")!;
 			var labels = fields.GetVisualDescendants().OfType<TextBlock>().Where(el => el.IsEffectivelyVisible && el.FindAncestorOfType<TextBox>() == null).Select(el => el.Text).ToArray();
 			Assert.Equal(new[] { UiText.English.RemindersServer, UiText.English.RemindersUserName, UiText.English.RemindersPassword }, labels);
-			Assert.False(window.FindControl<Button>("ConnectButton")!.IsEnabled);	// not without the server
+			Assert.False(window.FindNamed<Button>("ConnectButton")!.IsEnabled);	// not without the server
 			Assert.Empty(LinksIn(window));												// Apple's links are for iCloud alone
-			Assert.Equal(UiText.English.RemindersCalDavIntro, window.FindControl<LinkText>("ServiceIntro")!.Inlines?.Text);
+			Assert.Equal(UiText.English.RemindersCalDavIntro, window.FindNamed<LinkText>("ServiceIntro")!.Inlines?.Text);
 
 			reminders.SignInServer = "dav.example.org";
 			Dispatcher.UIThread.RunJobs();
-			Assert.True(window.FindControl<Button>("ConnectButton")!.IsEnabled);
+			Assert.True(window.FindNamed<Button>("ConnectButton")!.IsEnabled);
 			window.Close();
 		});
 
@@ -171,12 +171,12 @@ namespace Purity.Desktop.Tests
 			reminders.SignInPassword = "abcd-efgh-ijkl-mnop";
 			Dispatcher.UIThread.RunJobs();
 
-			window.FindControl<TextBox>("PasswordBox")!.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter });
+			window.FindNamed<TextBox>("PasswordBox")!.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter });
 			Dispatcher.UIThread.RunJobs();
 
 			Assert.Equal("someone@example.com", connection.SignIn?.User);
 			Assert.True(window.IsVisible);
-			Assert.False(window.FindControl<StackPanel>("SignInFields")!.IsVisible);	// connected now
+			Assert.False(window.FindNamed<StackPanel>("SignInFields")!.IsVisible);	// connected now
 			window.Close();
 		});
 
@@ -187,7 +187,7 @@ namespace Purity.Desktop.Tests
 			reminders.IsGoogle = true;
 			Dispatcher.UIThread.RunJobs();
 
-			Assert.False(window.FindControl<Button>("ConnectButton")!.IsVisible);
+			Assert.False(window.FindNamed<Button>("ConnectButton")!.IsVisible);
 			Assert.Contains(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersSendTest && el.IsEffectivelyVisible);
 			Assert.Contains(window.GetVisualDescendants().OfType<Button>(), el => el.Content as string == UiText.English.RemindersDisconnect && el.IsEffectivelyVisible);
 			window.Close();
@@ -197,7 +197,7 @@ namespace Purity.Desktop.Tests
 		public Task TheKindsAppearOnlyWhenChoosing() => Ui.Run(() =>
 		{
 			var (window, reminders) = ShowReminders();
-			var kinds = window.FindControl<Grid>("Kinds")!;
+			var kinds = window.FindNamed<Grid>("Kinds")!;
 			Assert.False(kinds.IsVisible);
 
 			reminders.IsChosen = true;
@@ -212,11 +212,11 @@ namespace Purity.Desktop.Tests
 		public Task MoreOpensAndClosesAndTheWindowFits() => Ui.Run(() =>
 		{
 			var (window, _) = ShowReminders();
-			var more = window.FindControl<StackPanel>("More")!;
+			var more = window.FindNamed<StackPanel>("More")!;
 			var before = window.Bounds.Height;
 			Assert.False(more.IsVisible);
 
-			Press(window.FindControl<Button>("MoreButton")!, window);
+			Press(window.FindNamed<Button>("MoreButton")!, window);
 			window.UpdateLayout();
 			Dispatcher.UIThread.RunJobs();
 
@@ -233,11 +233,11 @@ namespace Purity.Desktop.Tests
 		{
 			Loc.Instance.Use(language);
 			var (window, reminders) = ShowReminders();
-			Press(window.FindControl<Button>("MoreButton")!, window);
+			Press(window.FindNamed<Button>("MoreButton")!, window);
 			window.UpdateLayout();
 			Dispatcher.UIThread.RunJobs();
 
-			var days = window.FindControl<Grid>("YomTovDays")!;
+			var days = window.FindNamed<Grid>("YomTovDays")!;
 			var choices = days.GetVisualDescendants().OfType<RadioButton>().ToArray();
 			Assert.Equal(new[] { Loc.T.RemindersInIsrael, Loc.T.RemindersOutsideIsrael }, choices.Select(el => el.Content));
 			Assert.True(reminders.IsOutsideIsrael);							// the test clock is on UTC
@@ -245,7 +245,7 @@ namespace Purity.Desktop.Tests
 			Assert.True(days.IsEffectivelyEnabled);
 
 			// The move's label, longer since Yom Tov joined it, is shown whole on its line
-			var label = window.FindControl<StackPanel>("More")!.GetVisualDescendants().OfType<CheckBox>().Single()
+			var label = window.FindNamed<StackPanel>("More")!.GetVisualDescendants().OfType<CheckBox>().Single()
 				.GetVisualDescendants().OfType<TextBlock>().Single(el => el.Text == Loc.T.RemindersMoveOffShabbat);
 			Assert.True(label.TextLayout.Width <= label.Bounds.Width + 0.5, $"The label needs {label.TextLayout.Width:0} but has {label.Bounds.Width:0}");
 			Assert.True(label.TranslatePoint(new Point(label.Bounds.Width, 0), window)!.Value.X <= window.Bounds.Width);
@@ -262,12 +262,12 @@ namespace Purity.Desktop.Tests
 		{
 			var (window, reminders) = ShowReminders();
 
-			Assert.Contains(window.FindControl<ItemsControl>("PreviewList")!.GetVisualDescendants().OfType<TextBlock>(), el => el.Text == "Appointment today");
+			Assert.Contains(window.FindNamed<ItemsControl>("PreviewList")!.GetVisualDescendants().OfType<TextBlock>(), el => el.Text == "Appointment today");
 
 			reminders.IsDetailed = true;
 			Dispatcher.UIThread.RunJobs();
 
-			Assert.Contains(window.FindControl<ItemsControl>("PreviewList")!.GetVisualDescendants().OfType<TextBlock>(), el => el.Text == "Mikveh today");
+			Assert.Contains(window.FindNamed<ItemsControl>("PreviewList")!.GetVisualDescendants().OfType<TextBlock>(), el => el.Text == "Mikveh today");
 			window.Close();
 		});
 
@@ -280,7 +280,7 @@ namespace Purity.Desktop.Tests
 
 			Assert.Equal(Avalonia.Media.FlowDirection.RightToLeft, window.FlowDirection);
 			Assert.Equal(UiText.Hebrew.RemindersTitle, window.Title);
-			Assert.Contains(window.FindControl<ItemsControl>("PreviewList")!.GetVisualDescendants().OfType<TextBlock>(), el => el.Text == "תור הערב");
+			Assert.Contains(window.FindNamed<ItemsControl>("PreviewList")!.GetVisualDescendants().OfType<TextBlock>(), el => el.Text == "תור הערב");
 			window.Close();
 			return Task.CompletedTask;
 		});
@@ -313,7 +313,7 @@ namespace Purity.Desktop.Tests
 			await reminders.DisconnectAsync();
 			Dispatcher.UIThread.RunJobs();
 
-			var intro = window.FindControl<LinkText>("ServiceIntro")!;
+			var intro = window.FindNamed<LinkText>("ServiceIntro")!;
 			Assert.True(intro.IsEffectivelyVisible);
 			Assert.True(intro.Bounds.Height > 0);
 			var links = LinksIn(window);
@@ -326,13 +326,13 @@ namespace Purity.Desktop.Tests
 		/// <param name="connection">The one service's connection, or none</param>
 		/// <param name="place">Which service it is</param>
 		/// <param name="chosen">Whether the service is already where reminders go, as after a restart</param>
-		private static (RemindersWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null, ReminderPlace place = ReminderPlace.Google, bool chosen = false)
+		private static (DialogWindow Window, RemindersWindowViewModel Reminders) ShowReminders(IReminderConnection? connection = null, ReminderPlace place = ReminderPlace.Google, bool chosen = false)
 		{
 			var period = new PurityPeriod(new DateTimeOffset(2031, 2, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2031, 2, 6, 0, 0, 0, TimeSpan.Zero)) { Closed = true };
 			period.SubEvents.Add(new PurityEvent(PurityEventType.Mikveh, new DateTimeOffset(2031, 3, 2, 12, 0, 0, TimeSpan.Zero)));
 			var setup = new ReminderSetup { Where = chosen ? place : ReminderPlace.File };
 			var reminders = new RemindersWindowViewModel(setup, new[] { period }, new EarlierClock(), null, connection == null ? null : ReminderConnections.Of(place, connection));
-			var window = new RemindersWindow(reminders);
+			var window = DialogWindow.For(new RemindersView(reminders));
 			window.Show();
 			Dispatcher.UIThread.RunJobs();
 			return (window, reminders);
@@ -340,7 +340,7 @@ namespace Purity.Desktop.Tests
 
 		/// <summary>The links in the text about the service chosen</summary>
 		private static HyperlinkButton[] LinksIn(Window window) =>
-			window.FindControl<LinkText>("ServiceIntro")!.GetLogicalDescendants().OfType<HyperlinkButton>().ToArray();
+			window.FindNamed<LinkText>("ServiceIntro")!.GetLogicalDescendants().OfType<HyperlinkButton>().ToArray();
 
 		private static RadioButton[] PlacesOf(Window window) =>
 			window.GetVisualDescendants().OfType<RadioButton>().Where(el => el.GroupName == "Where").ToArray();

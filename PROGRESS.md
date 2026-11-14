@@ -5,7 +5,7 @@ every change that finishes, starts, drops or blocks a stage.
 
 ✅ done · 🔨 built, not released yet · ⬜ to do · ⏳ waiting on you · ✖️ dropped
 
-**Now:** version 2.4.4, on `master`. Reminders around Yom Tov are built and wait for your check; otherwise the desktop is done, and next are the rav's answers and the phones.
+**Now:** version 2.4.4. On `master`, reminders around Yom Tov are built and wait for your check; otherwise the desktop is done. On the `android` branch, the Android app is built and waits for a first run on your phone.
 
 ## Done
 
@@ -43,7 +43,7 @@ every change that finishes, starts, drops or blocks a stage.
 
 - ⬜ iPhone: the app, the history through the Files picker, then reminders through the phone's calendar and notifications.
 - ⬜ Apple Watch: a viewer of what the phone shows.
-- ⬜ Android: the app, the history in Dropbox or Google Drive, reminders through the phone's calendar.
+- 🔨 Android, on the `android` branch: the app for phones and tablets, sharing the desktop's views and view models, now in `src/Purity.UI`. Phones get the compact layout approved as sketched on 2026-11-14 and stay upright; tablets get the desktop's layout in either direction, with Settings and Reminders as sheets. The history is a file picked in Android's picker, such as one in Google Drive, read again whenever Purity comes back to the front. Reminders go to Google, through Android's own sign-in, or another CalDAV server; no calendar file and no iCloud on Android. "The same as the system" shows a phone or a tablet, and the launcher icon follows Android's themed icons. Builds and passes the shared tests at a phone's and a tablet's size; not yet run on a phone.
 
 ## Waiting on you
 
@@ -51,6 +51,7 @@ every change that finishes, starts, drops or blocks a stage.
 - ⏳ The rav's answers.
 - ⏳ Before the iPhone: the Apple Developer Program, and a Mac that runs current Xcode, which Monterey can't.
 - ⏳ Signing and notarizing the Mac app, which needs the Apple Developer Program too.
+- ⏳ For Android: a first run on your phone, with USB or wireless debugging on, and for Google reminders an Android client in the Google project with the package name and the signing key's SHA-1, as the README says.
 
 ## Only if needed
 

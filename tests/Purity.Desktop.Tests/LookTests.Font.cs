@@ -16,7 +16,7 @@ namespace Purity.Desktop.Tests
 		[InlineData("Heebo-Bold.ttf")]
 		[InlineData("OFL.txt")]
 		public Task TheFontTravelsWithTheApp(string file) => Ui.Run(() =>
-			Assert.True(AssetLoader.Exists(new Uri($"avares://Purity/Assets/Fonts/{file}")), $"{file} isn't built in"));
+			Assert.True(AssetLoader.Exists(new Uri($"avares://Purity.UI/Assets/Fonts/{file}")), $"{file} isn't built in"));
 
 		[Fact]
 		public Task WindowsUseHeebo() => BackToEnglishAfter(async () =>

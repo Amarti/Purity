@@ -1,4 +1,4 @@
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Xunit;
 
 

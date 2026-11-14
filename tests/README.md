@@ -6,7 +6,7 @@ These tests hold the engine to the dates the old production engine gave, which a
 |---|---|
 | `Purity.Parity` | Checks `src/Purity.Core` against approved files, hand-written edge cases and the real history |
 | `Purity.Storage.Tests` | Proves saving and merging can't lose the history, by making each failure happen on purpose |
-| `Purity.Desktop.Tests` | The desktop app's behavior through its view models: what it saves, what it asks, and that it never writes over a file it couldn't read |
+| `Purity.Desktop.Tests` | The desktop app's behavior through its view models: what it saves, what it asks, and that it never writes over a file it couldn't read. The Android app shares these views and view models, so its phone and tablet layouts and its history kept in a picked document are tested here too, on Avalonia's invisible screen at a phone's and a tablet's size |
 
 For screenshots or a side-by-side run of the apps, `dotnet run tools/make-sample-data.cs -- <file>` writes a made-up history. Point a test run at it with `--data <file>`, and set `PURITY_APP_DATA` to a scratch folder so the app's own settings and local copies stay out of the real ones.
 

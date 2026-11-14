@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Purity.Desktop.ViewModels;
+using Purity.UI.ViewModels;
 using Purity.Desktop.Views;
 using Xunit;
 
