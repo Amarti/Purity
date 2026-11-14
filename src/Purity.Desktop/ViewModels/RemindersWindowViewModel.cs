@@ -37,6 +37,7 @@ namespace Purity.Desktop.ViewModels
 			MikvehTime = TimeChoices.Contains(setup.MikvehTime) ? setup.MikvehTime : ReminderSetup.DefaultMikvehTime;
 			OtherTime = TimeChoices.Contains(setup.OtherTime) ? setup.OtherTime : ReminderSetup.DefaultOtherTime;
 			MoveOffShabbat = setup.MoveOffShabbat;
+			_inIsrael = setup.InIsrael ?? YomTov.IsIsraelZone(clock.LocalTimeZone);
 			CalendarName = setup.CalendarName;
 			IsConnected = Connection?.IsConnected == true;
 			_ready = true;
@@ -252,6 +253,28 @@ namespace Purity.Desktop.ViewModels
 		[ObservableProperty]
 		public partial bool MoveOffShabbat { get; set; }
 
+		/// <summary>One day of Yom Tov, as in Israel. Shown from the computer's time zone until it's chosen.</summary>
+		public bool IsInIsrael
+		{
+			get => _inIsrael;
+			set
+			{
+				if (value)
+					ChooseYomTov(true);
+			}
+		}
+
+		/// <summary>Two days of Yom Tov, as kept outside Israel</summary>
+		public bool IsOutsideIsrael
+		{
+			get => !_inIsrael;
+			set
+			{
+				if (value)
+					ChooseYomTov(false);
+			}
+		}
+
 		[ObservableProperty]
 		public partial string CalendarName { get; set; } = string.Empty;
 
@@ -373,6 +396,10 @@ namespace Purity.Desktop.ViewModels
 			MikvehTime = TimeChoices.Contains(setup.MikvehTime) ? setup.MikvehTime : ReminderSetup.DefaultMikvehTime;
 			OtherTime = TimeChoices.Contains(setup.OtherTime) ? setup.OtherTime : ReminderSetup.DefaultOtherTime;
 			MoveOffShabbat = setup.MoveOffShabbat;
+			if (shared.InIsrael is { } inIsrael)				// an earlier version didn't share it, so what's shown stays
+				_inIsrael = inIsrael;
+			OnPropertyChanged(nameof(IsInIsrael));
+			OnPropertyChanged(nameof(IsOutsideIsrael));
 			OnPropertyChanged(nameof(IsMikvehOnly));
 			OnPropertyChanged(nameof(IsAllDates));
 			OnPropertyChanged(nameof(IsChosen));
@@ -401,6 +428,14 @@ namespace Purity.Desktop.ViewModels
 			Refresh();
 		}
 
+		private void ChooseYomTov(bool inIsrael)
+		{
+			_inIsrael = inIsrael;
+			OnPropertyChanged(nameof(IsInIsrael));
+			OnPropertyChanged(nameof(IsOutsideIsrael));
+			Refresh();
+		}
+
 		private void Choose(ReminderWording wording)
 		{
 			_wording = wording;
@@ -423,7 +458,7 @@ namespace Purity.Desktop.ViewModels
 		}
 
 		private IReadOnlyList<Reminder> Planned() =>
-			ReminderPlanner.Plan(_periods, CurrentSetup().ToOptions(Loc.Instance.ReminderLanguage), _clock.GetLocalNow().DateTime);
+			ReminderPlanner.Plan(_periods, CurrentSetup().ToOptions(Loc.Instance.ReminderLanguage, _clock.LocalTimeZone), _clock.GetLocalNow().DateTime);
 
 		private ReminderSetup CurrentSetup() => new()
 		{
@@ -437,6 +472,7 @@ namespace Purity.Desktop.ViewModels
 			MikvehTime = MikvehTime,
 			OtherTime = OtherTime,
 			MoveOffShabbat = MoveOffShabbat,
+			InIsrael = _inIsrael,							// chosen now, even if only by the time zone
 			CalendarName = CalendarName.Trim(),
 		};
 
@@ -451,6 +487,7 @@ namespace Purity.Desktop.ViewModels
 		private ReminderPlace _where;
 		private ReminderScope _scope;
 		private ReminderWording _wording;
+		private bool _inIsrael;
 		private CancellationTokenSource? _connecting;
 	}
 }

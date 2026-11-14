@@ -241,11 +241,12 @@ namespace Purity.Desktop.Tests
 		private static DateTimeOffset Stamp(DateTime date, bool night) => new(date.AddHours(night ? 12 : 0), TimeSpan.Zero);
 
 
-		private sealed class ClockAt(DateTime now) : TimeProvider
+		/// <param name="zone">The computer's time zone, UTC unless given</param>
+		private sealed class ClockAt(DateTime now, TimeZoneInfo? zone = null) : TimeProvider
 		{
 			public override DateTimeOffset GetUtcNow() => new(now, TimeSpan.Zero);
 
-			public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
+			public override TimeZoneInfo LocalTimeZone => zone ?? TimeZoneInfo.Utc;
 		}
 	}
 }

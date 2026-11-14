@@ -13,16 +13,23 @@ namespace Purity.Reminders
 	/// The choices every device shares, kept with the calendar itself so that they travel with it.
 	/// Written as a short code with no words in it, since a calendar's description can be seen.
 	/// </summary>
-	public sealed record SharedChoices(IReadOnlySet<PurityEventType> Kinds, ReminderWording Wording, TimeOnly MikvehTime, TimeOnly OtherTime, bool MoveOffShabbat, ReminderLanguage Language)
+	/// <param name="InIsrael">
+	/// One day of Yom Tov, as in Israel, or two. Null when an earlier version wrote the choices,
+	/// which didn't share this, so each computer keeps its own until the next OK.
+	/// </param>
+	public sealed record SharedChoices(IReadOnlySet<PurityEventType> Kinds, ReminderWording Wording, TimeOnly MikvehTime, TimeOnly OtherTime, bool MoveOffShabbat, ReminderLanguage Language, bool? InIsrael = null)
 	{
-		/// <summary>The code, as it follows the tag in the calendar's description</summary>
-		public string Format() => string.Join(' ',
+		/// <summary>The code, as it follows the tag in the calendar's description. Yom Tov's days come last, as the earlier versions skip what follows.</summary>
+		public string Format() => string.Join(' ', new[]
+		{
 			Kinds.Count == 0 ? NoKinds : string.Concat(Kinds.Select(el => (int)el).Order()),
 			Wording == ReminderWording.Discreet ? Discreet : Detailed,
 			MikvehTime.ToString(TimeFormat, CultureInfo.InvariantCulture),
 			OtherTime.ToString(TimeFormat, CultureInfo.InvariantCulture),
 			MoveOffShabbat ? "1" : "0",
-			Language == ReminderLanguage.Hebrew ? "he" : "en");
+			Language == ReminderLanguage.Hebrew ? "he" : "en",
+			InIsrael switch { true => OneDay, false => TwoDays, null => null },
+		}.OfType<string>());
 
 		/// <summary>Reads the choices from a calendar's description, or gives null when there are none it can understand</summary>
 		public static SharedChoices? Parse(string? description)
@@ -47,7 +54,9 @@ namespace Purity.Reminders
 			if (!TimeOnly.TryParseExact(parts[4], TimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var other))
 				return null;
 
-			return new SharedChoices(kinds, parts[2] == Discreet ? ReminderWording.Discreet : ReminderWording.Detailed, mikveh, other, parts[5] == "1", parts[6] == "he" ? ReminderLanguage.Hebrew : ReminderLanguage.English);
+			// Missing from what an earlier version wrote. Anything else there is left for whoever understands it.
+			var inIsrael = parts.Length > PartCount ? parts[PartCount] switch { OneDay => true, TwoDays => false, _ => (bool?)null } : null;
+			return new SharedChoices(kinds, parts[2] == Discreet ? ReminderWording.Discreet : ReminderWording.Detailed, mikveh, other, parts[5] == "1", parts[6] == "he" ? ReminderLanguage.Hebrew : ReminderLanguage.English, inIsrael);
 		}
 
 
@@ -55,7 +64,9 @@ namespace Purity.Reminders
 		private const string NoKinds = "-";
 		private const string Discreet = "d";
 		private const string Detailed = "f";
-		private const int PartCount = 7;					// the tag and six choices; anything a later version adds comes after
+		private const string OneDay = "y1";
+		private const string TwoDays = "y2";
+		private const int PartCount = 7;					// the tag and the six choices every version writes; anything added comes after
 	}
 
 

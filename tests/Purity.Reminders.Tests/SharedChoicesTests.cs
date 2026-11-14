@@ -45,6 +45,27 @@ namespace Purity.Reminders.Tests
 			Assert.Equal(Choices().Format(), SharedChoices.Parse(Line(Choices()) + " x9 more")!.Format());
 
 		[Theory]
+		[InlineData(true, "1234 d 0800 1700 1 he y1")]
+		[InlineData(false, "1234 d 0800 1700 1 he y2")]
+		public void YomTovsDaysComeLastAndComeBack(bool inIsrael, string code)
+		{
+			var choices = Choices() with { InIsrael = inIsrael };
+
+			Assert.Equal(code, choices.Format());
+			Assert.Equal(inIsrael, SharedChoices.Parse(Line(choices))!.InIsrael);
+			Assert.Equal(inIsrael, SharedChoices.Parse(Line(choices) + " x9 more")!.InIsrael);		// and whatever comes later is still skipped
+		}
+
+		[Fact]
+		public void AnEarlierVersionsChoicesSayNothingOfYomTov()
+		{
+			var read = SharedChoices.Parse(ReminderTag.NotesLine(ReminderTag.Calendar) + " 1234 d 0800 1700 1 he");
+
+			Assert.Null(read!.InIsrael);
+			Assert.True(read.MoveOffShabbat);
+		}
+
+		[Theory]
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData("a note someone wrote")]

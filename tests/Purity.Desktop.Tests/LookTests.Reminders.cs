@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -223,6 +224,37 @@ namespace Purity.Desktop.Tests
 			Assert.True(window.Bounds.Height > before, "The window should grow to fit");
 			Assert.Equal(2, more.GetVisualDescendants().OfType<ComboBox>().Count());
 			window.Close();
+		});
+
+		[Theory]
+		[InlineData(Language.English)]
+		[InlineData(Language.Hebrew)]
+		public Task YomTovsDaysAreUnderMoreAndRestWithTheShabbatMove(Language language) => BackToEnglishAfter(() =>
+		{
+			Loc.Instance.Use(language);
+			var (window, reminders) = ShowReminders();
+			Press(window.FindControl<Button>("MoreButton")!, window);
+			window.UpdateLayout();
+			Dispatcher.UIThread.RunJobs();
+
+			var days = window.FindControl<Grid>("YomTovDays")!;
+			var choices = days.GetVisualDescendants().OfType<RadioButton>().ToArray();
+			Assert.Equal(new[] { Loc.T.RemindersInIsrael, Loc.T.RemindersOutsideIsrael }, choices.Select(el => el.Content));
+			Assert.True(reminders.IsOutsideIsrael);							// the test clock is on UTC
+			Assert.Equal(true, choices[1].IsChecked);
+			Assert.True(days.IsEffectivelyEnabled);
+
+			// The move's label, longer since Yom Tov joined it, is shown whole on its line
+			var label = window.FindControl<StackPanel>("More")!.GetVisualDescendants().OfType<CheckBox>().Single()
+				.GetVisualDescendants().OfType<TextBlock>().Single(el => el.Text == Loc.T.RemindersMoveOffShabbat);
+			Assert.True(label.TextLayout.Width <= label.Bounds.Width + 0.5, $"The label needs {label.TextLayout.Width:0} but has {label.Bounds.Width:0}");
+			Assert.True(label.TranslatePoint(new Point(label.Bounds.Width, 0), window)!.Value.X <= window.Bounds.Width);
+
+			reminders.MoveOffShabbat = false;
+			Dispatcher.UIThread.RunJobs();
+			Assert.False(days.IsEffectivelyEnabled);
+			window.Close();
+			return Task.CompletedTask;
 		});
 
 		[Fact]

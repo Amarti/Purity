@@ -101,6 +101,17 @@
                           AutomationProperties.Name="{Binding Text.RemindersOtherTime, Source={x:Static loc:Loc.Instance}}"/>
             </Grid>
             <CheckBox IsChecked="{Binding MoveOffShabbat}" Content="{Binding Text.RemindersMoveOffShabbat, Source={x:Static loc:Loc.Instance}}"/>
+            <!-- Which days of Yom Tov move alerts, so it means nothing while they aren't moved -->
+            <Grid x:Name="YomTovDays" ColumnDefinitions="120,*" IsEnabled="{Binding MoveOffShabbat}">
+                <TextBlock VerticalAlignment="Center" Text="{Binding Text.RemindersYomTov, Source={x:Static loc:Loc.Instance}}"/>
+                <Border Grid.Column="1" Height="23" BorderThickness="1" CornerRadius="5" BorderBrush="{DynamicResource SwitchBorderBrush}"
+                        AutomationProperties.Name="{Binding Text.RemindersYomTovName, Source={x:Static loc:Loc.Instance}}">
+                    <Grid ColumnDefinitions="*,*">
+                        <RadioButton Theme="{StaticResource SwitchHalfTheme}" CornerRadius="4,0,0,4" GroupName="YomTov" IsChecked="{Binding IsInIsrael}" Content="{Binding Text.RemindersInIsrael, Source={x:Static loc:Loc.Instance}}"/>
+                        <RadioButton Grid.Column="1" Theme="{StaticResource SwitchHalfTheme}" CornerRadius="0,4,4,0" GroupName="YomTov" IsChecked="{Binding IsOutsideIsrael}" Content="{Binding Text.RemindersOutsideIsrael, Source={x:Static loc:Loc.Instance}}"/>
+                    </Grid>
+                </Border>
+            </Grid>
             <Grid ColumnDefinitions="120,*">
                 <TextBlock VerticalAlignment="Center" Text="{Binding Text.RemindersCalendarName, Source={x:Static loc:Loc.Instance}}"/>
                 <TextBox Grid.Column="1" Height="23" Text="{Binding CalendarName}" PlaceholderText="{x:Static desktop:ReminderSetup.DefaultCalendarName}"/>

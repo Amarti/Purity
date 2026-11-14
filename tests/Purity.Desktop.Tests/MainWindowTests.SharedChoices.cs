@@ -15,7 +15,7 @@ namespace Purity.Desktop.Tests
 		{
 			var (_, calendar) = await OpenConnectedAsync();
 
-			Assert.Equal("1234 d 0800 1700 1 en", calendar.Stored!.Format());
+			Assert.Equal("1234 d 0800 1700 1 en y2", calendar.Stored!.Format());
 		}
 
 		[Fact]
@@ -71,7 +71,7 @@ namespace Purity.Desktop.Tests
 			await window.OpenSettingsCommand.ExecuteAsync(null);
 			await window.ReminderSyncFinished;
 
-			Assert.Equal("1234 f 0800 1600 1 en", calendar.Stored!.Format());
+			Assert.Equal("1234 f 0800 1600 1 en y2", calendar.Stored!.Format());
 			Assert.False(DesktopSettings.Load().Reminders.ChoicesUnshared);
 		}
 

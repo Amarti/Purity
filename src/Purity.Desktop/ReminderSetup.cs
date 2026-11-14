@@ -78,6 +78,9 @@ namespace Purity.Desktop
 		public string OtherTime { get; set; } = DefaultOtherTime;
 		public bool MoveOffShabbat { get; set; } = true;
 
+		/// <summary>One day of Yom Tov, as in Israel, or two. Until it's chosen, the computer's time zone decides.</summary>
+		public bool? InIsrael { get; set; }
+
 		/// <summary>The calendar's name, or empty for the usual one</summary>
 		public string CalendarName { get; set; } = string.Empty;
 
@@ -98,7 +101,9 @@ namespace Purity.Desktop
 
 
 		/// <summary>These choices as the planner takes them</summary>
-		public ReminderOptions ToOptions(ReminderLanguage language) => new()
+		/// <param name="language">The language on show, when no computer has set one yet</param>
+		/// <param name="zone">The computer's time zone, which decides Yom Tov's days until they're chosen</param>
+		public ReminderOptions ToOptions(ReminderLanguage language, TimeZoneInfo zone) => new()
 		{
 			Kinds = ChosenKinds(),
 			Language = Language ?? language,
@@ -106,15 +111,17 @@ namespace Purity.Desktop
 			MikvehTime = TimeOf(MikvehTime, DefaultMikvehTime),
 			OtherTime = TimeOf(OtherTime, DefaultOtherTime),
 			MoveOffShabbat = MoveOffShabbat,
+			InIsrael = InIsrael ?? YomTov.IsIsraelZone(zone),
 		};
 
 
 		/// <summary>These choices as every computer shares them</summary>
 		/// <param name="language">The language on show, when no computer has set one yet</param>
-		public SharedChoices ToShared(ReminderLanguage language)
+		/// <param name="zone">The computer's time zone, which decides Yom Tov's days until they're chosen</param>
+		public SharedChoices ToShared(ReminderLanguage language, TimeZoneInfo zone)
 		{
-			var options = ToOptions(language);
-			return new SharedChoices(options.Kinds, options.Wording, options.MikvehTime, options.OtherTime, options.MoveOffShabbat, options.Language);
+			var options = ToOptions(language, zone);
+			return new SharedChoices(options.Kinds, options.Wording, options.MikvehTime, options.OtherTime, options.MoveOffShabbat, options.Language, options.InIsrael);
 		}
 
 		/// <summary>Takes up the choices the calendar holds. Where reminders go and the calendar's name stay this computer's own.</summary>
@@ -133,6 +140,8 @@ namespace Purity.Desktop
 			OtherTime = shared.OtherTime.ToString("HH:mm", CultureInfo.InvariantCulture);
 			MoveOffShabbat = shared.MoveOffShabbat;
 			Language = shared.Language;
+			if (shared.InIsrael is { } inIsrael)		// an earlier version's choices leave this computer's own
+				InIsrael = inIsrael;
 		}
 
 

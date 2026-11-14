@@ -5,7 +5,7 @@ every change that finishes, starts, drops or blocks a stage.
 
 ✅ done · 🔨 built, not released yet · ⬜ to do · ⏳ waiting on you · ✖️ dropped
 
-**Now:** version 2.4.3, on `master`. The desktop is done; next are the rav's answers and the phones.
+**Now:** version 2.4.4, on `master`. Reminders around Yom Tov are built and wait for your check; otherwise the desktop is done, and next are the rav's answers and the phones.
 
 ## Done
 
@@ -30,10 +30,7 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | Reminders | iCloud and other CalDAV calendars, such as Fastmail or Nextcloud, chosen in the Reminders window. iCloud takes the Apple Account and an app-specific password, other servers their address too; the password is kept in the system's secure store and goes only to that server, over https. One shared "Purity" calendar, found by its tag on every computer, with the shared choices in its description, as with Google. "Remove all history" removes every connected calendar. Tested against a CalDAV stand-in, and checked by you against real iCloud on an Apple Silicon Mac. That check found a crash on opening the Reminders window after a restart: the intro's links, hidden while connected, were laid out mid-drawing. Now hidden text holds its links as plain words, and the fix was rechecked on that Mac | 2.4.3 |
 | ✅ | Desktop | Checked on the latest macOS on Apple Silicon, a MacBook Neo, as well as Monterey on Intel | 2.4.3 |
 | ✅ | Fixes | Notices that the history changed elsewhere now go straight to the window's own UI thread. Asked for from the file watcher's thread, Avalonia could make that thread the UI one, which CI caught once on Linux as the next window test started. In the app the UI thread is already set, so only the tests could hit it | 2.4.3 |
-
-## Next, on the desktop
-
-- ✅ Nothing left. Everything planned for the desktop is done as of 2.4.3, apart from what waits on you below: publishing the Google project, and signing and notarizing the Mac app.
+| 🔨 | Reminders | Alerts move off Yom Tov as they do off Shabbat, under the same switch: one that would fire from noon on the eve until the last day of rest ends fires at 08:00 on the eve, and where Yom Tov and Shabbat run together, on the eve of the first. Yom Tov is the days work is forbidden: Rosh Hashana, Yom Kippur, the first day of Sukkot, Shemini Atzeret, the first and seventh days of Pesach, and Shavuot. A new choice under More, In Israel or Outside Israel, adds the second days; it starts from the computer's time zone and is shared like the other choices. A reminder moved to an earlier day names its night by the weekday, as approved: "Mikveh Wednesday night", "מקווה בליל חמישי". Tested here, not yet seen in the app | 2.4.4 |
 
 ## Calculations: rules version 2
 

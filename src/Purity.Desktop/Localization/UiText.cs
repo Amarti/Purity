@@ -103,6 +103,10 @@ namespace Purity.Desktop.Localization
 		public required string RemindersMikvehTime { get; init; }
 		public required string RemindersOtherTime { get; init; }
 		public required string RemindersMoveOffShabbat { get; init; }
+		public required string RemindersYomTov { get; init; }
+		public required string RemindersYomTovName { get; init; }
+		public required string RemindersInIsrael { get; init; }
+		public required string RemindersOutsideIsrael { get; init; }
 		public required string RemindersCalendarName { get; init; }
 		public required string RemindersNotice { get; init; }
 		public required string RemindersSave { get; init; }

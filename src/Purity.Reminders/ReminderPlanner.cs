@@ -51,42 +51,51 @@ namespace Purity.Reminders
 			var words = ReminderWords.For(options.Language);
 			var date = DateTime.SpecifyKind(item.Stamp.UtcDateTime.Date, DateTimeKind.Unspecified);		// a date on the local clock, not a moment in UTC
 			var other = options.OtherTime.ToTimeSpan();
+			Func<DateTime, DateTime> moved = options.MoveOffShabbat ? el => OffRestDays(el, options.InIsrael) : el => el;
 			DateTime moment;
 			string when;
 			if (item.IsFullDay)								// it begins on the evening before its date
 			{
 				var evening = date.AddDays(-1);
-				moment = evening + other;
-				when = words.FullDayFrom(evening.DayOfWeek);
+				moment = moved(evening + other);
+				when = words.FullDayFrom(evening.DayOfWeek, moment.Date < evening);
 			}
 			else if (PurityEvent.IsDateAfterDusk(item.Stamp))
 			{
 				var mikveh = item.Type == PurityEventType.Mikveh;
-				moment = date + (mikveh ? options.MikvehTime.ToTimeSpan() : other);
-				when = words.Night(date.DayOfWeek, mikveh);
+				moment = moved(date + (mikveh ? options.MikvehTime.ToTimeSpan() : other));
+				when = words.Night(date.DayOfWeek, mikveh, moment.Date < date);
 			}
 			else											// a daytime begins before any hour on its own date would help
 			{
-				moment = date.AddDays(-1) + other;
+				moment = moved(date.AddDays(-1) + other);
 				when = words.Daylight(date.DayOfWeek);
 			}
 
-			if (options.MoveOffShabbat)
-				moment = OffShabbat(moment);
 			return new Reminder(ReminderTag.Of(period, item), moment, words.Title(item.Type, options.Wording, when), item.Type);
 		}
 
-		/// <summary>A reminder from Friday afternoon through Saturday would go unseen, so it fires on Friday morning</summary>
-		private static DateTime OffShabbat(DateTime moment) => moment.DayOfWeek switch
+		/// <summary>
+		/// A reminder from the afternoon before Shabbat or Yom Tov until its last day ends would go
+		/// unseen, so it fires on the morning before. Where Yom Tov and Shabbat follow one another,
+		/// that's the morning before the first of them.
+		/// </summary>
+		private static DateTime OffRestDays(DateTime moment, bool inIsrael)
 		{
-			DayOfWeek.Friday when moment.Hour >= FridayAfternoon => moment.Date.AddHours(FridayMorning),
-			DayOfWeek.Saturday => moment.Date.AddDays(-1).AddHours(FridayMorning),
-			_ => moment,
-		};
+			var day = moment.Date;
+			if (YomTov.IsRestDay(day, inIsrael))
+			{
+				var first = day;
+				while (YomTov.IsRestDay(first.AddDays(-1), inIsrael))
+					first = first.AddDays(-1);
+				return first.AddDays(-1).AddHours(EveMorning);
+			}
+			return moment.Hour >= EveAfternoon && YomTov.IsRestDay(day.AddDays(1), inIsrael) ? day.AddHours(EveMorning) : moment;
+		}
 
 
 		private const int TestDelayMinutes = 2;
-		private const int FridayAfternoon = 12;
-		private const int FridayMorning = 8;
+		private const int EveAfternoon = 12;
+		private const int EveMorning = 8;
 	}
 }

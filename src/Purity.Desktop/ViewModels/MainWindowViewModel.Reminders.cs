@@ -87,7 +87,7 @@ namespace Purity.Desktop.ViewModels
 			try
 			{
 				await ShareChoicesAsync(connection);
-				var wanted = ReminderPlanner.PlanAll(Ledger.Data, _settings.Reminders.ToOptions(Instance.ReminderLanguage));
+				var wanted = ReminderPlanner.PlanAll(Ledger.Data, _settings.Reminders.ToOptions(Instance.ReminderLanguage, _clock.LocalTimeZone));
 				await CalendarSync.ApplyAsync(wanted, _clock.GetLocalNow().DateTime, connection.Calendar, _reminderCancel.Token);
 				_toldReminderProblem = false;
 			}
@@ -110,10 +110,13 @@ namespace Purity.Desktop.ViewModels
 		private async Task ShareChoicesAsync(IReminderConnection connection)
 		{
 			var mine = _settings.Reminders;
+			var zone = _clock.LocalTimeZone;
 			var shared = mine.ChoicesUnshared ? null : await connection.Choices.ReadChoicesAsync(_reminderCancel.Token);
 			if (shared != null)
 			{
-				if (shared.Format() != mine.ToShared(Instance.ReminderLanguage).Format())
+				// An earlier version's choices leave out Yom Tov's days, and so leave this computer's own
+				var own = mine.ToShared(Instance.ReminderLanguage, zone);
+				if ((shared with { InIsrael = shared.InIsrael ?? own.InIsrael }).Format() != own.Format())
 				{
 					mine.Adopt(shared);
 					KeepSettingsQuietly();
@@ -121,7 +124,7 @@ namespace Purity.Desktop.ViewModels
 				return;
 			}
 
-			await connection.Choices.WriteChoicesAsync(mine.ToShared(Instance.ReminderLanguage), _reminderCancel.Token);
+			await connection.Choices.WriteChoicesAsync(mine.ToShared(Instance.ReminderLanguage, zone), _reminderCancel.Token);
 			if (mine.ChoicesUnshared)
 			{
 				mine.ChoicesUnshared = false;

@@ -33,8 +33,11 @@ namespace Purity.Reminders
 		/// <summary>When every other reminder fires, on the day it's due</summary>
 		public TimeOnly OtherTime { get; init; } = new(17, 0);
 
-		/// <summary>Whether a reminder that would fire around Shabbat fires on Friday morning instead</summary>
+		/// <summary>Whether a reminder that would fire around Shabbat or Yom Tov fires on the morning before instead</summary>
 		public bool MoveOffShabbat { get; init; } = true;
+
+		/// <summary>Whether Yom Tov is kept for one day, as in Israel, rather than two</summary>
+		public bool InIsrael { get; init; } = true;
 	}
 
 
