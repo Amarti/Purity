@@ -67,6 +67,29 @@ namespace Purity.Desktop.Tests
 			window.Close();
 		});
 
+		/// <summary>
+		/// Approved for 2.5.0: two arrows on one circle, each the other turned half way round, with
+		/// the heads standing at the icon's left and right edges
+		/// </summary>
+		[Fact]
+		public Task RefreshIsTwoArrowsWithTheirHeadsAtTheSides() => Themed(() =>
+		{
+			var arrows = Icon("RefreshIconDrawingGroup").Children.OfType<GeometryDrawing>().Select(el => el.Geometry!.Bounds).ToArray();
+			Assert.Equal(2, arrows.Length);
+			var (first, second) = (arrows[0], arrows[1]);
+
+			Assert.Equal(24 - first.Right, second.Left, 0.01);			// turned half way round about the middle
+			Assert.Equal(24 - first.Left, second.Right, 0.01);
+			Assert.Equal(24 - first.Bottom, second.Top, 0.01);
+			Assert.Equal(24 - first.Top, second.Bottom, 0.01);
+
+			var whole = first.Union(second);
+			Assert.Equal(whole.Right, first.Right);						// one head at the right edge, the other at the left
+			Assert.Equal(whole.Left, second.Left);
+			Assert.Equal(12, whole.Center.X, 0.01);
+			Assert.InRange(whole.Width, 23, 24);
+		});
+
 		[Fact]
 		public Task APeriodIsRoundedBlueOnceAcceptedAndRedWhileOpen() => Themed(() =>
 		{
