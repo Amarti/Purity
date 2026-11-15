@@ -141,7 +141,8 @@ namespace Purity.Desktop.Tests
 			Assert.True(name.IsVisible);
 			Assert.Equal("pureData.json", name.Text);
 			Assert.Equal(32, name.Bounds.Height);
-			Assert.All(view.GetVisualDescendants().OfType<Button>().Where(el => el.Content is string { Length: > 3 } && el is not Avalonia.Controls.Primitives.ToggleButton), el => Assert.Equal(40, el.Bounds.Height));
+			Assert.False(view.FindNamed<Button>("ReportButton")!.IsVisible);								// a periods report is for a computer
+			Assert.All(view.GetVisualDescendants().OfType<Button>().Where(el => el.IsEffectivelyVisible && el.Content is string { Length: > 3 } && el is not Avalonia.Controls.Primitives.ToggleButton), el => Assert.Equal(40, el.Bounds.Height));
 			Assert.Equal(32, view.GetVisualDescendants().OfType<Button>().Single(el => el.Content is "...").Bounds.Height);			// beside its field, at the field's height
 		});
 

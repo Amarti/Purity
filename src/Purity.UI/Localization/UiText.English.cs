@@ -84,7 +84,7 @@ namespace Purity.UI.Localization
 			RemindersMore = "More",
 			RemindersMikvehTime = "Mikveh alert:",
 			RemindersOtherTime = "Other alerts:",
-			RemindersMoveOffShabbat = "Move alerts off Shabbat and Yom Tov to the morning before, at 08:00",
+			RemindersMoveOffShabbat = "Move alerts off Shabbat and Yom Tov\nto the morning before, at 08:00",
 			RemindersYomTov = "Yom Tov days",
 			RemindersYomTovName = "Which days of Yom Tov are kept",
 			RemindersInIsrael = "In Israel",

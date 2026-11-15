@@ -16,7 +16,11 @@ namespace Purity.UI.Views
 			foreach (var control in root.GetLogicalDescendants().OfType<Control>().Prepend(root))
 			{
 				if (control.Height == MouseField)
+				{
 					control.Height = FingerField;
+					if (control is TextBox box)
+						box.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center;		// text at the top suits only the desktop's one-line height
+				}
 				else if (control is Button && control.Height == MouseButton)
 					control.Height = FingerButton;
 

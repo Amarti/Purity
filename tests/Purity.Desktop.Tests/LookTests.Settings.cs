@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Media;
@@ -25,6 +26,25 @@ namespace Purity.Desktop.Tests
 			Assert.All(parts, el => Assert.IsType<Image>(el.Content));
 			Assert.All(parts, el => Assert.Empty(el.GetVisualDescendants().OfType<TextBlock>()));
 			Assert.Equal(new object?[] { UiText.English.SameAsSystem, UiText.English.Light, UiText.English.Dark }, parts.Select(el => ToolTip.GetTip(el)));
+
+			settings.Close(false);
+			await closed;
+			window.Close();
+		});
+
+		/// <summary>Approved for 2.5.0: the data file a little apart from Reminders above it, with the window taller to make room</summary>
+		[Fact]
+		public Task TheDataFileStandsApartFromReminders() => BackToEnglishAfter(async () =>
+		{
+			var window = await OpenPeriodsAsync();
+			var (settings, closed) = await OpenSettingsAsync(window);
+			var reminders = settings.GetVisualDescendants().OfType<Button>().Single(el => el.Content as string == UiText.English.RemindersOpen);
+			var dataFile = settings.FindNamed<TextBox>("DataFileBox")!;
+
+			var gap = dataFile.TranslatePoint(new Point(0, 0), settings)!.Value.Y - reminders.TranslatePoint(new Point(0, reminders.Bounds.Height), settings)!.Value.Y;
+			Assert.Equal(25, gap, 0.5);							// 11 before 2.5.0
+			Assert.Equal(473, settings.Height);
+			Assert.True(settings.FindNamed<Button>("ReportButton")!.IsVisible);		// a computer keeps the report
 
 			settings.Close(false);
 			await closed;

@@ -86,7 +86,7 @@ namespace Purity.UI.Localization
 			RemindersMore = "עוד",
 			RemindersMikvehTime = "התראה למקווה:",
 			RemindersOtherTime = "התראות אחרות:",
-			RemindersMoveOffShabbat = "העברת התראות משבת ומחג לבוקר שלפניהם, בשעה 08:00",
+			RemindersMoveOffShabbat = "העברת התראות משבת ומחג\nלבוקר שלפניהם, בשעה 08:00",
 			RemindersYomTov = "ימים טובים",
 			RemindersYomTovName = "אילו ימים טובים נשמרים",
 			RemindersInIsrael = "בארץ",

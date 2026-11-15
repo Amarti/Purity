@@ -244,9 +244,10 @@ namespace Purity.Desktop.Tests
 			Assert.Equal(true, choices[1].IsChecked);
 			Assert.True(days.IsEffectivelyEnabled);
 
-			// The move's label, longer since Yom Tov joined it, is shown whole on its line
+			// The move's label, longer since Yom Tov joined it, is on two lines since 2.5.0, each shown whole
 			var label = window.FindNamed<StackPanel>("More")!.GetVisualDescendants().OfType<CheckBox>().Single()
 				.GetVisualDescendants().OfType<TextBlock>().Single(el => el.Text == Loc.T.RemindersMoveOffShabbat);
+			Assert.Equal(2, label.TextLayout.TextLines.Count);
 			Assert.True(label.TextLayout.Width <= label.Bounds.Width + 0.5, $"The label needs {label.TextLayout.Width:0} but has {label.Bounds.Width:0}");
 			Assert.True(label.TranslatePoint(new Point(label.Bounds.Width, 0), window)!.Value.X <= window.Bounds.Width);
 
@@ -255,6 +256,39 @@ namespace Purity.Desktop.Tests
 			Assert.False(days.IsEffectivelyEnabled);
 			window.Close();
 			return Task.CompletedTask;
+		});
+
+		/// <summary>Approved for 2.5.0: all dates first, then mikveh only, then choosing</summary>
+		[Fact]
+		public Task WhatToBeRemindedOfRunsAllDatesMikvehOnlyChoose() => Ui.Run(() =>
+		{
+			var (window, reminders) = ShowReminders();
+			var choices = window.GetVisualDescendants().OfType<RadioButton>().Where(el => el.GroupName == "About").ToArray();
+
+			Assert.Equal(new object?[] { UiText.English.RemindersAllDates, UiText.English.RemindersMikvehOnly, UiText.English.RemindersChosen }, choices.Select(el => el.Content));
+			Assert.Equal(new CornerRadius(4, 0, 0, 4), choices[0].CornerRadius);
+			Assert.Equal(new CornerRadius(0, 4, 4, 0), choices[2].CornerRadius);
+			Press(choices[0], window);
+			Assert.True(reminders.IsAllDates);
+			Press(choices[1], window);
+			Assert.True(reminders.IsMikvehOnly);
+			window.Close();
+		});
+
+		/// <summary>The calendar's usual name, shown in its empty field, sits in the middle of it rather than at the top</summary>
+		[Fact]
+		public Task TheCalendarsUsualNameSitsInTheMiddleOfItsField() => Ui.Run(() =>
+		{
+			var (window, _) = ShowReminders();
+			Press(window.FindNamed<Button>("MoreButton")!, window);
+			window.UpdateLayout();
+			Dispatcher.UIThread.RunJobs();
+
+			var field = window.FindNamed<StackPanel>("More")!.GetVisualDescendants().OfType<TextBox>().Single(el => el.PlaceholderText == ReminderSetup.DefaultCalendarName);
+			var name = field.GetVisualDescendants().OfType<TextBlock>().Single(el => el.Text == ReminderSetup.DefaultCalendarName && el.IsEffectivelyVisible);
+			var middle = name.TranslatePoint(new Point(0, name.Bounds.Height / 2), field)!.Value.Y;
+			Assert.Equal(field.Bounds.Height / 2, middle, 1.0);
+			window.Close();
 		});
 
 		[Fact]

@@ -6,7 +6,7 @@
     package all take the version from here.
   -->
   <PropertyGroup>
-    <Version>2.4.4</Version>
+    <Version>2.5.0</Version>
   </PropertyGroup>
 
 </Project>

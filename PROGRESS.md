@@ -5,7 +5,7 @@ every change that finishes, starts, drops or blocks a stage.
 
 ✅ done · 🔨 built, not released yet · ⬜ to do · ⏳ waiting on you · ✖️ dropped
 
-**Now:** version 2.4.4. On `master`, reminders around Yom Tov are built and wait for your check; otherwise the desktop is done. On the `android` branch, the Android app is built and waits for a first run on your phone.
+**Now:** version 2.5.0, on the `android` branch, where the Android app is built and waits for a first run on your phone, beside the 2.5.0 touches to Settings and Reminders. On `master`, 2.4.4's reminders around Yom Tov wait for your check; otherwise the desktop is done.
 
 ## Done
 
@@ -31,6 +31,7 @@ every change that finishes, starts, drops or blocks a stage.
 | ✅ | Desktop | Checked on the latest macOS on Apple Silicon, a MacBook Neo, as well as Monterey on Intel | 2.4.3 |
 | ✅ | Fixes | Notices that the history changed elsewhere now go straight to the window's own UI thread. Asked for from the file watcher's thread, Avalonia could make that thread the UI one, which CI caught once on Linux as the next window test started. In the app the UI thread is already set, so only the tests could hit it | 2.4.3 |
 | 🔨 | Reminders | Alerts move off Yom Tov as they do off Shabbat, under the same switch: one that would fire from noon on the eve until the last day of rest ends fires at 08:00 on the eve, and where Yom Tov and Shabbat run together, on the eve of the first. Yom Tov is the days work is forbidden: Rosh Hashana, Yom Kippur, the first day of Sukkot, Shemini Atzeret, the first and seventh days of Pesach, and Shavuot. A new choice under More, In Israel or Outside Israel, adds the second days; it starts from the computer's time zone and is shared like the other choices. A reminder moved to an earlier day names its night by the weekday, as approved: "Mikveh Wednesday night", "מקווה בליל חמישי". Tested here, not yet seen in the app | 2.4.4 |
+| 🔨 | Look | On the desktop and Android alike: in Settings, the data file stands a little apart from Reminders above it, the window 14 pixels taller for it. In Reminders, the choices run All dates, Mikveh only, Choose; the Shabbat and Yom Tov switch is on two lines; and the calendar's usual name sits in the middle of its empty field. On Android, Settings has no periods report, and text sits in the middle of the taller fields. Tested here, not yet seen in either app | 2.5.0 |
 
 ## Calculations: rules version 2
 

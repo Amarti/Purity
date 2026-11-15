@@ -22,11 +22,12 @@ namespace Purity.UI.Views
 			InitializeComponent();
 			DataContext = _viewModel = viewModel;
 			DesktopWidth = 384;
-			DesktopHeight = 459;
+			DesktopHeight = 473;						// 459 until 2.5.0 put room above the data file
 			if (AppPlatform.IsMobile)
 			{
 				DataFileBox.IsVisible = false;					// a document has no path to type, only a name to show
 				DataFileNameBox.IsVisible = true;
+				ReportButton.IsVisible = false;			// a periods report is for a computer, approved on 2026-11-14
 			}
 			if (AppPlatform.IsPhone)
 				FingerSizes.Apply(this);
